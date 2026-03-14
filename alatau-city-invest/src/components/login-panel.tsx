@@ -36,7 +36,9 @@ export function LoginPanel({ callbackUrl }: { callbackUrl?: string }) {
       wait: "Please wait...",
       signIn: "Sign in",
       create: "Create account",
-      demo: "Demo credentials after seeding: admin@alatau.city / Admin#2026",
+      demo:
+        "Demo logins: admin@alatau.city / Admin#2026, investor@alatau.city / Investor#2026, owner@alatau.city / Owner#2026",
+      loadRoleError: "Could not detect role after login. Opening investor cabinet.",
     },
     RU: {
       invalid: "Неверные данные для входа.",
@@ -53,7 +55,9 @@ export function LoginPanel({ callbackUrl }: { callbackUrl?: string }) {
       wait: "Подождите...",
       signIn: "Войти",
       create: "Создать аккаунт",
-      demo: "Демо-доступ: admin@alatau.city / Admin#2026",
+      demo:
+        "Демо-доступ: admin@alatau.city / Admin#2026, investor@alatau.city / Investor#2026, owner@alatau.city / Owner#2026",
+      loadRoleError: "Не удалось определить роль после входа. Открываем кабинет инвестора.",
     },
     KZ: {
       invalid: "Кіру деректері қате.",
@@ -70,11 +74,31 @@ export function LoginPanel({ callbackUrl }: { callbackUrl?: string }) {
       wait: "Күте тұрыңыз...",
       signIn: "Кіру",
       create: "Аккаунт ашу",
-      demo: "Демо кіру: admin@alatau.city / Admin#2026",
+      demo:
+        "Демо кіру: admin@alatau.city / Admin#2026, investor@alatau.city / Investor#2026, owner@alatau.city / Owner#2026",
+      loadRoleError: "Кіруден кейін рөл анықталмады. Инвестор кабинетіне өту орындалады.",
     },
   });
 
   const target = useMemo(() => callbackUrl || "/cabinet/investor", [callbackUrl]);
+
+  const resolveRoleRedirect = async () => {
+    if (callbackUrl) return callbackUrl;
+
+    const sessionRes = await fetch("/api/auth/session", { cache: "no-store" });
+    if (!sessionRes.ok) {
+      return "/cabinet/investor";
+    }
+
+    const sessionData = (await sessionRes.json()) as {
+      user?: { role?: "ADMIN" | "MODERATOR" | "OWNER" | "INVESTOR" };
+    };
+
+    const role = sessionData.user?.role;
+    if (role === "ADMIN" || role === "MODERATOR") return "/admin";
+    if (role === "OWNER") return "/cabinet/owner";
+    return "/cabinet/investor";
+  };
 
   const handleLogin = async (event: FormEvent) => {
     event.preventDefault();
@@ -95,7 +119,12 @@ export function LoginPanel({ callbackUrl }: { callbackUrl?: string }) {
       return;
     }
 
-    window.location.href = result.url || target;
+    const roleRedirect = await resolveRoleRedirect().catch(() => {
+      window.alert(t.loadRoleError);
+      return "/cabinet/investor";
+    });
+
+    window.location.href = roleRedirect || result.url || target;
   };
 
   const handleRegister = async (event: FormEvent) => {
@@ -211,3 +240,4 @@ export function LoginPanel({ callbackUrl }: { callbackUrl?: string }) {
     </section>
   );
 }
+

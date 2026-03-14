@@ -19,6 +19,7 @@ const uiText: Record<
     owner: string;
     projects: string;
     admin: string;
+    moderator: string;
     signOut: string;
     login: string;
     footerDescription: string;
@@ -44,6 +45,7 @@ const uiText: Record<
     owner: "Owner",
     projects: "Projects",
     admin: "Admin",
+    moderator: "Moderator",
     signOut: "Sign out",
     login: "Login",
     footerDescription: "Premium digital platform for land investment in Alatau City.",
@@ -68,6 +70,7 @@ const uiText: Record<
     owner: "Владелец",
     projects: "Проекты",
     admin: "Админ",
+    moderator: "Модератор",
     signOut: "Выйти",
     login: "Войти",
     footerDescription: "Премиальная цифровая платформа инвестиций в земельные участки Alatau City.",
@@ -92,6 +95,7 @@ const uiText: Record<
     owner: "Жер иесі",
     projects: "Жобалар",
     admin: "Әкімші",
+    moderator: "Модератор",
     signOut: "Шығу",
     login: "Кіру",
     footerDescription: "Alatau City жер учаскелеріне инвестициялауға арналған премиум цифрлық платформа.",
@@ -125,6 +129,16 @@ export function SiteShell({ children }: { children: ReactNode }) {
 
   const t = useMemo(() => uiText[lang], [lang]);
   const role = session?.user?.role;
+  const roleLabel =
+    role === "ADMIN"
+      ? t.admin
+      : role === "MODERATOR"
+        ? t.moderator
+        : role === "OWNER"
+          ? t.owner
+          : role === "INVESTOR"
+            ? t.investor
+            : role;
 
   return (
     <>
@@ -165,14 +179,21 @@ export function SiteShell({ children }: { children: ReactNode }) {
 
             {status === "authenticated" ? (
               <>
-                <span className="badge">{role}</span>
-                <Link href="/cabinet/investor" className="btn btn-ghost">
-                  {t.investor}
-                </Link>
-                <Link href="/cabinet/projects" className="btn btn-ghost">
-                  {t.projects}
-                </Link>
-                {(role === "OWNER" || role === "ADMIN") && (
+                <span className="badge">{roleLabel}</span>
+
+                {role === "INVESTOR" ? (
+                  <Link href="/cabinet/investor" className="btn btn-ghost">
+                    {t.investor}
+                  </Link>
+                ) : null}
+
+                {(role === "INVESTOR" || role === "OWNER") && (
+                  <Link href="/cabinet/projects" className="btn btn-ghost">
+                    {t.projects}
+                  </Link>
+                )}
+
+                {role === "OWNER" && (
                   <Link href="/cabinet/owner" className="btn btn-ghost">
                     {t.owner}
                   </Link>
@@ -218,3 +239,4 @@ export function SiteShell({ children }: { children: ReactNode }) {
     </>
   );
 }
+
