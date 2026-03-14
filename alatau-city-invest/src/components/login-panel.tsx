@@ -13,6 +13,7 @@ type RegisterResponse = {
     required?: boolean;
     sent?: boolean;
     provider?: "resend" | "console";
+    error?: string | null;
     expiresAt?: string;
     previewUrl?: string | null;
   };
@@ -23,6 +24,7 @@ type ResendResponse = {
   error?: string;
   sent?: boolean;
   alreadyVerified?: boolean;
+  deliveryError?: string | null;
   previewUrl?: string | null;
 };
 
@@ -60,6 +62,8 @@ export function LoginPanel({
           regSuccess: "Registration successful. Check your email to confirm your account.",
           regSuccessPreview:
             "Registration successful. Email provider is not configured, use preview link below.",
+          regNoEmail:
+            "Registration completed, but verification email was not sent. Contact support.",
           verifySuccess: "Email confirmed. You can now sign in.",
           verifyInvalid: "Verification link is invalid.",
           verifyExpired:
@@ -72,6 +76,8 @@ export function LoginPanel({
             "Email provider is not configured, use the preview verification link below.",
           resendAlreadyVerified: "This email is already verified. You can sign in.",
           resendFailed: "Could not resend verification email.",
+          resendNoEmail:
+            "Could not send verification email. Check mail settings in Vercel and Resend.",
           login: "Login",
           register: "Register",
           name: "Name",
@@ -96,6 +102,8 @@ export function LoginPanel({
           regSuccess: "Registration successful. Check your email to confirm your account.",
           regSuccessPreview:
             "Registration successful. Email provider is not configured, use preview link below.",
+          regNoEmail:
+            "Registration completed, but verification email was not sent. Contact support.",
           verifySuccess: "Email confirmed. You can now sign in.",
           verifyInvalid: "Verification link is invalid.",
           verifyExpired:
@@ -108,6 +116,8 @@ export function LoginPanel({
             "Email provider is not configured, use the preview verification link below.",
           resendAlreadyVerified: "This email is already verified. You can sign in.",
           resendFailed: "Could not resend verification email.",
+          resendNoEmail:
+            "Could not send verification email. Check mail settings in Vercel and Resend.",
           login: "Login",
           register: "Register",
           name: "Name",
@@ -132,6 +142,8 @@ export function LoginPanel({
           regSuccess: "Registration successful. Check your email to confirm your account.",
           regSuccessPreview:
             "Registration successful. Email provider is not configured, use preview link below.",
+          regNoEmail:
+            "Registration completed, but verification email was not sent. Contact support.",
           verifySuccess: "Email confirmed. You can now sign in.",
           verifyInvalid: "Verification link is invalid.",
           verifyExpired:
@@ -144,6 +156,8 @@ export function LoginPanel({
             "Email provider is not configured, use the preview verification link below.",
           resendAlreadyVerified: "This email is already verified. You can sign in.",
           resendFailed: "Could not resend verification email.",
+          resendNoEmail:
+            "Could not send verification email. Check mail settings in Vercel and Resend.",
           login: "Login",
           register: "Register",
           name: "Name",
@@ -272,7 +286,11 @@ export function LoginPanel({
       return;
     }
 
-    setMessage(t.regSuccess);
+    const reason =
+      process.env.NODE_ENV !== "production" && payload?.verification?.error
+        ? ` (${payload.verification.error})`
+        : "";
+    setMessage(`${t.regNoEmail}${reason}`);
   };
 
   const handleResend = async () => {
@@ -317,7 +335,11 @@ export function LoginPanel({
       return;
     }
 
-    setMessage(t.resendSuccess);
+    const reason =
+      process.env.NODE_ENV !== "production" && payload?.deliveryError
+        ? ` (${payload.deliveryError})`
+        : "";
+    setMessage(`${t.resendNoEmail}${reason}`);
   };
 
   const displayMessage = message ?? verificationMessage;

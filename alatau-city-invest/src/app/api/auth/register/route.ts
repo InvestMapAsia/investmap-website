@@ -78,6 +78,7 @@ export async function POST(request: NextRequest) {
         email: user.email,
         provider: emailResult.provider,
         sent: emailResult.sent,
+        error: emailResult.error ?? null,
         expiresAt: verification.expiresAt.toISOString(),
       },
     });
@@ -89,6 +90,7 @@ export async function POST(request: NextRequest) {
           required: true,
           sent: emailResult.sent,
           provider: emailResult.provider,
+          error: emailResult.error ?? null,
           expiresAt: verification.expiresAt.toISOString(),
           previewUrl:
             !emailResult.sent && allowPreviewLink ? verification.verificationUrl : null,
@@ -161,6 +163,7 @@ export async function POST(request: NextRequest) {
       email: user.email,
       provider: emailResult.provider,
       sent: emailResult.sent,
+      error: emailResult.error ?? null,
       expiresAt: verification.expiresAt.toISOString(),
     },
   });
@@ -172,6 +175,7 @@ export async function POST(request: NextRequest) {
         required: true,
         sent: emailResult.sent,
         provider: emailResult.provider,
+        error: emailResult.error ?? null,
         expiresAt: verification.expiresAt.toISOString(),
         previewUrl:
           !emailResult.sent && allowPreviewLink ? verification.verificationUrl : null,
