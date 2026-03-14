@@ -1,0 +1,79 @@
+﻿<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Alatau City Invest - Карточка участка</title>
+  <link rel="stylesheet" href="assets/css/style.css" />
+</head>
+<body data-page="plot">
+  <div data-component="header"></div>
+
+  <main class="page">
+    <div class="container">
+      <section class="split">
+        <article class="card">
+          <p class="muted" id="plotSubtitle"></p>
+          <h1 style="margin:6px 0 10px" id="plotTitle">Карточка участка</h1>
+          <div id="plotBadges" style="display:flex;gap:8px;flex-wrap:wrap"></div>
+          <div class="section" id="plotMetrics"></div>
+
+          <div class="plot-actions" style="margin-top:14px">
+            <a class="btn btn-accent" id="plotInvestBtn" href="invest.html">Инвестировать</a>
+            <a class="btn btn-ghost" href="ai-assistant.html">AI-анализ</a>
+            <a class="btn btn-ghost" href="catalog.html">Вернуться в каталог</a>
+          </div>
+        </article>
+
+        <aside class="card">
+          <h3 class="card-title">AI-анализ рисков</h3>
+          <p id="aiRiskScore" class="muted">Выполняется анализ...</p>
+          <div class="notice" style="margin-top:12px">
+            AI-оценка является вспомогательной. Финальное решение должно приниматься после юридического и финансового due diligence.
+          </div>
+        </aside>
+      </section>
+
+      <section class="section card">
+        <div class="tabs">
+          <button class="tab-btn active" data-tab="legal">Юридический блок</button>
+          <button class="tab-btn" data-tab="invest">Инвест-анализ</button>
+          <button class="tab-btn" data-tab="roadmap">Инфраструктура</button>
+        </div>
+
+        <div class="tab-pane active" data-tab="legal">
+          <h3 class="card-title">Документы участка</h3>
+          <ul id="plotDocs"></ul>
+          <p class="muted">Дата последней проверки документов отображается в админ-панели и карточке лота.</p>
+        </div>
+
+        <div class="tab-pane" data-tab="invest">
+          <h3 class="card-title">Сценарии доходности</h3>
+          <div class="metric-line"><span class="muted">Консервативный сценарий</span><strong>11% годовых</strong></div>
+          <div class="metric-line"><span class="muted">Базовый сценарий</span><strong>15% годовых</strong></div>
+          <div class="metric-line"><span class="muted">Оптимистичный сценарий</span><strong>22% годовых</strong></div>
+          <p class="muted">Модель строится на прогнозе инфраструктурных этапов, рыночной ликвидности и юридического статуса.</p>
+        </div>
+
+        <div class="tab-pane" data-tab="roadmap">
+          <h3 class="card-title">Дорожная карта развития зоны</h3>
+          <ul id="plotTimeline"></ul>
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="section-title">
+          <h2>Похожие участки</h2>
+          <p>Рекомендации по совпадению назначения и инвестиционного профиля.</p>
+        </div>
+        <div class="grid grid-3" id="similarPlots"></div>
+      </section>
+    </div>
+  </main>
+
+  <div data-component="footer"></div>
+
+  <script src="assets/js/data.js"></script>
+  <script src="assets/js/app.js"></script>
+</body>
+</html>

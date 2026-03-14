@@ -1,0 +1,71 @@
+﻿<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Alatau City Invest - Кабинет владельца</title>
+  <link rel="stylesheet" href="assets/css/style.css" />
+</head>
+<body data-page="owner">
+  <div data-component="header"></div>
+
+  <main class="page">
+    <div class="container">
+      <div class="section-title">
+        <h2>Кабинет владельца земли</h2>
+        <p>Self-service размещение, управление карточками, лиды, аналитика и тарифы.</p>
+      </div>
+
+      <section class="split">
+        <div class="card">
+          <h3 class="card-title">Статус аккаунта</h3>
+          <div class="metric-line"><span class="muted">Верификация владельца</span><strong>Подтвержден</strong></div>
+          <div class="metric-line"><span class="muted">Тариф размещения</span><strong id="ownerPlanBadge">Тариф не подключен</strong></div>
+          <div class="metric-line"><span class="muted">Средний SLA модерации</span><strong>24-72 ч</strong></div>
+          <div class="notice" id="ownerQualityHint" style="margin-top:12px"></div>
+          <div class="plot-actions" style="margin-top:12px">
+            <a class="btn btn-primary" href="add-plot.html">Добавить участок</a>
+            <a class="btn btn-ghost" href="pricing.html">Выбрать тариф</a>
+          </div>
+        </div>
+
+        <div class="card">
+          <h3 class="card-title">Лиды и коммуникации</h3>
+          <div class="metric-line"><span class="muted">Новые обращения за 7 дней</span><strong>14</strong></div>
+          <div class="metric-line"><span class="muted">Конверсия в диалог</span><strong>42%</strong></div>
+          <div class="metric-line"><span class="muted">Конверсия в сделку</span><strong>9%</strong></div>
+          <p class="muted">Детальная аналитика по просмотрам, CTR и причинам отказа доступна в админке и в отчете владельца.</p>
+        </div>
+      </section>
+
+      <section class="section card">
+        <div class="section-title">
+          <h2>Мои участки</h2>
+          <p>Статусы модерации и публикации, просмотры, лиды и быстрые действия.</p>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Название</th>
+                <th>Цена</th>
+                <th>Статус</th>
+                <th>Просмотры</th>
+                <th>Лиды</th>
+                <th>Действие</th>
+              </tr>
+            </thead>
+            <tbody id="ownerPlotsBody"></tbody>
+          </table>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <div data-component="footer"></div>
+
+  <script src="assets/js/data.js"></script>
+  <script src="assets/js/app.js"></script>
+</body>
+</html>

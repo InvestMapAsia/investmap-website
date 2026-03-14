@@ -1,0 +1,111 @@
+﻿<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Alatau City Invest - Размещение участка</title>
+  <link rel="stylesheet" href="assets/css/style.css" />
+</head>
+<body data-page="add-plot">
+  <div data-component="header"></div>
+
+  <main class="page">
+    <div class="container" style="max-width:980px">
+      <div class="section-title">
+        <h2>Самостоятельное размещение участка</h2>
+        <p>Мастер self-service: параметры лота, юридические документы, тариф и отправка на модерацию.</p>
+      </div>
+
+      <section class="card">
+        <div class="metric-line">
+          <span class="muted">Качество карточки</span>
+          <strong><span id="qualityScore">0</span>/100</strong>
+        </div>
+
+        <form id="ownerAddForm" style="margin-top:14px">
+          <div class="form-grid">
+            <div class="form-field">
+              <label for="title">Название участка</label>
+              <input id="title" name="title" required />
+            </div>
+            <div class="form-field">
+              <label for="cadastral">Кадастровый номер</label>
+              <input id="cadastral" name="cadastral" required />
+            </div>
+            <div class="form-field">
+              <label for="district">Район/кластер</label>
+              <input id="district" name="district" required />
+            </div>
+            <div class="form-field">
+              <label for="purpose">Назначение участка</label>
+              <select id="purpose" name="purpose" required>
+                <option value="Коммерция">Коммерция</option>
+                <option value="Жилая застройка">Жилая застройка</option>
+                <option value="Логистика">Логистика</option>
+                <option value="Промышленность">Промышленность</option>
+                <option value="Смешанное">Смешанное</option>
+              </select>
+            </div>
+            <div class="form-field">
+              <label for="area">Площадь (га)</label>
+              <input id="area" name="area" type="number" step="0.1" required />
+            </div>
+            <div class="form-field">
+              <label for="price">Цена (USD)</label>
+              <input id="price" name="price" type="number" min="10000" required />
+            </div>
+            <div class="form-field">
+              <label for="roi">Ожидаемый ROI (%)</label>
+              <input id="roi" name="roi" type="number" step="0.1" />
+            </div>
+            <div class="form-field">
+              <label for="irr">Ожидаемый IRR (%)</label>
+              <input id="irr" name="irr" type="number" step="0.1" />
+            </div>
+            <div class="form-field">
+              <label for="distance">Расстояние до центра (км)</label>
+              <input id="distance" name="distance" type="number" step="0.1" />
+            </div>
+            <div class="form-field">
+              <label for="legalOwner">Тип владельца</label>
+              <select id="legalOwner" name="legalOwner" required>
+                <option value="Физ. лицо">Физическое лицо</option>
+                <option value="Юр. лицо">Юридическое лицо</option>
+                <option value="ГЧП">ГЧП</option>
+              </select>
+            </div>
+            <div class="form-field">
+              <label for="hasUtilities">Коммуникации подтверждены?</label>
+              <select id="hasUtilities" name="hasUtilities">
+                <option value="yes">Да</option>
+                <option value="no">Нет</option>
+              </select>
+            </div>
+            <div class="form-field">
+              <label for="documents">Документы</label>
+              <input id="documents" name="documents" type="file" />
+            </div>
+            <div class="form-field" style="grid-column:1/-1">
+              <label for="description">Описание участка</label>
+              <textarea id="description" name="description" placeholder="Опишите преимущества, инфраструктуру, условия сделки"></textarea>
+            </div>
+          </div>
+
+          <div class="plot-actions" style="margin-top:14px">
+            <button type="button" class="btn btn-ghost" id="ownerSaveDraft">Сохранить черновик</button>
+            <a class="btn btn-ghost" href="pricing.html">Выбрать тариф</a>
+            <button type="submit" class="btn btn-primary">Отправить на модерацию</button>
+          </div>
+        </form>
+      </section>
+
+      <section class="section card hidden" id="ownerAddResult"></section>
+    </div>
+  </main>
+
+  <div data-component="footer"></div>
+
+  <script src="assets/js/data.js"></script>
+  <script src="assets/js/app.js"></script>
+</body>
+</html>

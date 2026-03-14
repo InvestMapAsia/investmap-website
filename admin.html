@@ -1,0 +1,65 @@
+﻿<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Alatau City Invest - Административная панель</title>
+  <link rel="stylesheet" href="assets/css/style.css" />
+</head>
+<body data-page="admin">
+  <div data-component="header"></div>
+
+  <main class="page">
+    <div class="container">
+      <div class="section-title">
+        <h2>Административная панель</h2>
+        <p>Модерация лотов, контроль рисков, статусы заявок и журнал операционных KPI.</p>
+      </div>
+
+      <section class="grid grid-4" id="adminKpi"></section>
+
+      <section class="section card">
+        <div class="section-title">
+          <h2>Очередь модерации</h2>
+          <p>Self-service лоты доступны для изменения статуса. Базовые demo-лоты только для чтения.</p>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Участок</th>
+                <th>Владелец</th>
+                <th>Юр. уровень</th>
+                <th>Статус</th>
+                <th>Обновлено</th>
+                <th>Новый статус</th>
+                <th>Действие</th>
+              </tr>
+            </thead>
+            <tbody id="adminQueueBody"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="section split">
+        <article class="card">
+          <h3 class="card-title">Операционные SLA</h3>
+          <div class="metric-line"><span class="muted">Первичный ответ по заявке</span><strong>до 2 часов</strong></div>
+          <div class="metric-line"><span class="muted">Проверка KYC/AML</span><strong>до 24 часов</strong></div>
+          <div class="metric-line"><span class="muted">Юридическая модерация</span><strong>24-72 часа</strong></div>
+        </article>
+        <article class="card">
+          <h3 class="card-title">Антифрод индикаторы</h3>
+          <p class="muted">Проверка дублей кадастровых номеров, аномалий по цене, подозрительных паттернов заявок и несоответствий документов.</p>
+        </article>
+      </section>
+    </div>
+  </main>
+
+  <div data-component="footer"></div>
+
+  <script src="assets/js/data.js"></script>
+  <script src="assets/js/app.js"></script>
+</body>
+</html>

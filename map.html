@@ -1,0 +1,77 @@
+﻿<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Alatau City Invest - Интерактивная карта</title>
+  <link rel="stylesheet" href="assets/css/style.css" />
+</head>
+<body data-page="map">
+  <div data-component="header"></div>
+
+  <main class="page">
+    <div class="container">
+      <div class="section-title">
+        <h2>Интерактивная карта участков</h2>
+        <p>Фильтруйте объекты по цене, риску, юридическому статусу и назначению.</p>
+      </div>
+
+      <section class="map-layout">
+        <aside class="map-panel">
+          <h3 class="card-title">Фильтры карты</h3>
+          <div class="form-field">
+            <label for="mapPurpose">Назначение</label>
+            <select id="mapPurpose"></select>
+          </div>
+          <div class="form-field">
+            <label for="mapPrice">Диапазон цены</label>
+            <select id="mapPrice"></select>
+          </div>
+          <div class="form-field">
+            <label for="mapStatus">Статус лота</label>
+            <select id="mapStatus">
+              <option value="all">Любой статус</option>
+              <option value="available">Доступен</option>
+              <option value="reserved">Забронирован</option>
+              <option value="deal">В сделке</option>
+              <option value="moderation">На модерации</option>
+              <option value="sold">Продан</option>
+              <option value="legal_issue">Юр. ограничение</option>
+            </select>
+          </div>
+          <div class="form-field">
+            <label for="mapRisk">Риск-профиль</label>
+            <select id="mapRisk">
+              <option value="all">Любой риск</option>
+              <option value="low">Низкий</option>
+              <option value="medium">Средний</option>
+              <option value="high">Высокий</option>
+            </select>
+          </div>
+          <div class="notice" style="margin-top:10px">
+            Цвет маркера соответствует статусу лота. Выберите точку на карте, чтобы открыть превью.
+          </div>
+        </aside>
+
+        <section class="map-content">
+          <div class="map-board" id="mapBoard"></div>
+          <div class="map-legend" id="mapLegend"></div>
+          <div class="list-panel" id="mapList"></div>
+        </section>
+      </section>
+
+      <section class="section">
+        <div class="card" id="mapPreview">
+          <h3 class="card-title">Превью участка</h3>
+          <p class="muted">Выберите маркер на карте или объект из списка слева.</p>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <div data-component="footer"></div>
+
+  <script src="assets/js/data.js"></script>
+  <script src="assets/js/app.js"></script>
+</body>
+</html>

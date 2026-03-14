@@ -1,0 +1,58 @@
+﻿<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Alatau City Invest - Кабинет инвестора</title>
+  <link rel="stylesheet" href="assets/css/style.css" />
+</head>
+<body data-page="investor">
+  <div data-component="header"></div>
+
+  <main class="page">
+    <div class="container">
+      <div class="section-title">
+        <h2>Личный кабинет инвестора</h2>
+        <p>Портфель, трекинг заявок, избранное и история инвестиционных действий.</p>
+      </div>
+
+      <section class="grid grid-4" id="investorKpi"></section>
+
+      <section class="section card">
+        <div class="section-title">
+          <h2>История заявок</h2>
+          <p>Каждая заявка хранит полный путь статусов: от отправки до завершения сделки.</p>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Участок</th>
+                <th>Тип инвестора</th>
+                <th>Сумма</th>
+                <th>Статус</th>
+                <th>Дата</th>
+              </tr>
+            </thead>
+            <tbody id="appTableBody"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="section-title">
+          <h2>Избранные участки</h2>
+          <p>Управляйте подборкой и быстро переходите к сравнению и заявке.</p>
+        </div>
+        <div class="grid grid-3" id="favoriteGrid"></div>
+      </section>
+    </div>
+  </main>
+
+  <div data-component="footer"></div>
+
+  <script src="assets/js/data.js"></script>
+  <script src="assets/js/app.js"></script>
+</body>
+</html>

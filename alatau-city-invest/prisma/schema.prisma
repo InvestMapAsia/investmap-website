@@ -1,0 +1,213 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  INVESTOR
+  OWNER
+  MODERATOR
+  ADMIN
+}
+
+enum PlotStatus {
+  available
+  reserved
+  deal
+  moderation
+  sold
+  legal_issue
+}
+
+enum LegalGrade {
+  a_plus
+  a
+  b
+  c
+}
+
+enum PlotSource {
+  platform
+  owner
+}
+
+enum ApplicationStatus {
+  draft
+  submitted
+  kyc_aml
+  legal_review
+  approved
+  rejected
+}
+
+enum InvestorType {
+  individual
+  company
+  fund
+}
+
+model User {
+  id           String        @id @default(cuid())
+  name         String?
+  email        String        @unique
+  passwordHash String?
+  role         Role          @default(INVESTOR)
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+
+  accounts     Account[]
+  sessions     Session[]
+  applications Application[]
+  ownerPlots   Plot[]        @relation("OwnerPlots")
+  favorites    Favorite[]
+  ownerPlans   OwnerPlan[]
+  notifications Notification[]
+  auditLogs     AuditLog[]   @relation("AuditActor")
+}
+
+model Plot {
+  id               String      @id
+  slug             String      @unique
+  title            String
+  district         String
+  purpose          String
+  area             Float
+  price            Int
+  currency         String      @default("USD")
+  roi              Float
+  irr              Float
+  riskScore        Int
+  legalGrade       LegalGrade
+  status           PlotStatus
+  x                Int
+  y                Int
+  distanceCenterKm Float
+  utilities        Json
+  tags             Json
+  ownerType        String
+  updatedAt        DateTime    @updatedAt
+  docs             Json
+  timeline         Json
+  source           PlotSource  @default(platform)
+  createdAt        DateTime    @default(now())
+
+  ownerId      String?
+  owner        User?          @relation("OwnerPlots", fields: [ownerId], references: [id])
+  applications Application[]
+  favorites    Favorite[]
+}
+
+model Application {
+  id            String            @id @default(cuid())
+  createdAt     DateTime          @default(now())
+  updatedAt     DateTime          @updatedAt
+  status        ApplicationStatus @default(submitted)
+  reviewNote    String?
+  plotId        String
+  investorName  String
+  investorType  InvestorType
+  amount        Int
+  phone         String
+  email         String
+  sourceOfFunds String
+
+  userId String?
+  user   User? @relation(fields: [userId], references: [id])
+  plot   Plot  @relation(fields: [plotId], references: [id])
+}
+
+model Notification {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  readAt    DateTime?
+  title     String
+  message   String
+  type      String
+  emailHtml String?
+  metadata  Json?
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, createdAt(sort: Desc)])
+}
+
+model AuditLog {
+  id         String   @id @default(cuid())
+  createdAt  DateTime @default(now())
+  action     String
+  entityType String
+  entityId   String?
+  details    Json?
+  actorRole  Role?
+
+  actorUserId String?
+  actor       User? @relation("AuditActor", fields: [actorUserId], references: [id], onDelete: SetNull)
+
+  @@index([createdAt(sort: Desc)])
+  @@index([entityType, entityId])
+}
+
+model Favorite {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  userId    String
+  plotId    String
+
+  user User @relation(fields: [userId], references: [id])
+  plot Plot @relation(fields: [plotId], references: [id])
+
+  @@unique([userId, plotId])
+}
+
+model OwnerPlan {
+  id          String   @id @default(cuid())
+  userId      String
+  planId      String
+  planName    String
+  priceUsd    Int
+  activeUntil DateTime
+  createdAt   DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id])
+}
+
+model Account {
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([provider, providerAccountId])
+}
+
+model Session {
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([sessionToken])
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@id([identifier, token])
+}

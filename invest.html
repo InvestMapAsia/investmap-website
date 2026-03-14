@@ -1,0 +1,104 @@
+﻿<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Alatau City Invest - Инвестиционная заявка</title>
+  <link rel="stylesheet" href="assets/css/style.css" />
+</head>
+<body data-page="invest">
+  <div data-component="header"></div>
+
+  <main class="page">
+    <div class="container" style="max-width:900px">
+      <div class="section-title">
+        <h2>Подача инвестиционной заявки</h2>
+        <p>Пошаговый сценарий: профиль инвестора, параметры сделки, подтверждение и отправка.</p>
+      </div>
+
+      <section class="card">
+        <div class="stepper">
+          <div class="step"></div>
+          <div class="step"></div>
+          <div class="step"></div>
+        </div>
+
+        <form id="investForm">
+          <div class="step-pane">
+            <h3 class="card-title">Шаг 1. Данные инвестора</h3>
+            <div class="form-grid">
+              <div class="form-field">
+                <label for="investPlot">Выбранный участок</label>
+                <select id="investPlot" required></select>
+              </div>
+              <div class="form-field">
+                <label for="investType">Тип инвестора</label>
+                <select id="investType" required>
+                  <option value="Физ. лицо">Физическое лицо</option>
+                  <option value="Юр. лицо">Юридическое лицо</option>
+                  <option value="Фонд">Фонд / институциональный инвестор</option>
+                </select>
+              </div>
+              <div class="form-field">
+                <label for="investName">ФИО / Название компании</label>
+                <input id="investName" required />
+              </div>
+              <div class="form-field">
+                <label for="investAmount">Планируемая сумма инвестирования (USD)</label>
+                <input id="investAmount" type="number" min="10000" required />
+              </div>
+            </div>
+          </div>
+
+          <div class="step-pane">
+            <h3 class="card-title">Шаг 2. Контакты и KYC/AML</h3>
+            <div class="form-grid">
+              <div class="form-field">
+                <label for="investPhone">Телефон</label>
+                <input id="investPhone" required />
+              </div>
+              <div class="form-field">
+                <label for="investEmail">Email</label>
+                <input id="investEmail" type="email" required />
+              </div>
+              <div class="form-field" style="grid-column:1/-1">
+                <label for="investSource">Источник средств</label>
+                <textarea id="investSource" placeholder="Кратко опишите происхождение инвестиционных средств" required></textarea>
+              </div>
+            </div>
+          </div>
+
+          <div class="step-pane">
+            <h3 class="card-title">Шаг 3. Подтверждение</h3>
+            <div class="checkbox-line">
+              <input id="agree1" type="checkbox" required />
+              <label for="agree1">Подтверждаю достоверность предоставленных данных и согласие на KYC/AML проверку.</label>
+            </div>
+            <div class="checkbox-line" style="margin-top:8px">
+              <input id="agree2" type="checkbox" required />
+              <label for="agree2">Согласен с юридическими условиями платформы и правилами инвестиционной сделки.</label>
+            </div>
+            <div class="notice" style="margin-top:12px">
+              После отправки заявка получает статус “На проверке”, а в кабинете инвестора доступен полный трекинг этапов.
+            </div>
+          </div>
+
+          <div class="plot-actions" style="margin-top:18px">
+            <button type="button" class="btn btn-ghost" id="saveDraft">Сохранить черновик</button>
+            <button type="button" class="btn btn-ghost hidden" id="investPrev">Назад</button>
+            <button type="button" class="btn btn-primary" id="investNext">Далее</button>
+            <button type="submit" class="btn btn-accent hidden" id="investSubmit">Подписать и отправить</button>
+          </div>
+        </form>
+      </section>
+
+      <section id="investResult" class="section card hidden"></section>
+    </div>
+  </main>
+
+  <div data-component="footer"></div>
+
+  <script src="assets/js/data.js"></script>
+  <script src="assets/js/app.js"></script>
+</body>
+</html>

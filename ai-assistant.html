@@ -1,0 +1,53 @@
+﻿<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Alatau City Invest - AI ассистент</title>
+  <link rel="stylesheet" href="assets/css/style.css" />
+</head>
+<body data-page="ai">
+  <div data-component="header"></div>
+
+  <main class="page">
+    <div class="container" style="max-width:980px">
+      <div class="section-title">
+        <h2>AI-ассистент инвестора</h2>
+        <p>Подбор участков, анализ рисков и рекомендации по стратегии инвестирования.</p>
+      </div>
+
+      <section class="split">
+        <div>
+          <div class="chat" id="aiChat"></div>
+          <div class="plot-actions" style="margin-top:10px">
+            <input id="aiInput" placeholder="Например: Покажи участки с высоким ROI и умеренным риском" style="flex:1;min-width:220px;padding:11px 12px;border:1px solid var(--border);border-radius:10px;" />
+            <button class="btn btn-primary" id="aiSend">Отправить</button>
+          </div>
+        </div>
+
+        <aside class="card">
+          <h3 class="card-title">Быстрые сценарии</h3>
+          <div class="quick-prompts">
+            <button class="btn btn-ghost" data-prompt="Покажи участки с лучшим ROI">Лучший ROI</button>
+            <button class="btn btn-ghost" data-prompt="Сравни низкорисковые участки">Низкий риск</button>
+            <button class="btn btn-ghost" data-prompt="Какие участки подходят для логистики?">Логистика</button>
+            <button class="btn btn-ghost" data-prompt="Как собственнику разместить участок?">Self-service</button>
+          </div>
+          <div class="notice" style="margin-top:14px">
+            AI даёт рекомендательные ответы. Юридические и финансовые решения требуют проверки профильными специалистами.
+          </div>
+          <div class="plot-actions" style="margin-top:14px">
+            <a class="btn btn-accent" href="catalog.html">Перейти к объектам</a>
+            <a class="btn btn-ghost" href="invest.html">Открыть заявку</a>
+          </div>
+        </aside>
+      </section>
+    </div>
+  </main>
+
+  <div data-component="footer"></div>
+
+  <script src="assets/js/data.js"></script>
+  <script src="assets/js/app.js"></script>
+</body>
+</html>

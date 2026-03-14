@@ -1,0 +1,57 @@
+﻿<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Alatau City Invest - Юридическая информация</title>
+  <link rel="stylesheet" href="assets/css/style.css" />
+</head>
+<body data-page="legal">
+  <div data-component="header"></div>
+
+  <main class="page">
+    <div class="container" style="max-width:1020px">
+      <div class="section-title">
+        <h2>Юридические документы платформы</h2>
+        <p>Прозрачные правила использования, инвестиционные риски, политика конфиденциальности и AML/KYC.</p>
+      </div>
+
+      <section class="card">
+        <h3 class="card-title">Пользовательское соглашение</h3>
+        <p class="muted">Определяет роли сторон, порядок подачи заявок, модерации и сделки на платформе.</p>
+        <h3 class="card-title" style="margin-top:14px">Политика конфиденциальности</h3>
+        <p class="muted">Регламент обработки персональных данных, сроки хранения и права пользователя.</p>
+        <h3 class="card-title" style="margin-top:14px">AML/KYC правила</h3>
+        <p class="muted">Обязательная проверка источника средств и идентификации участников сделки.</p>
+        <h3 class="card-title" style="margin-top:14px">Раскрытие инвестиционных рисков</h3>
+        <p class="muted">Инвестиции в земельные участки сопряжены с рыночными, юридическими и инфраструктурными рисками.</p>
+      </section>
+
+      <section class="section card">
+        <h3 class="card-title">Подтверждение согласий</h3>
+        <div class="checkbox-line" style="margin-top:10px">
+          <input type="checkbox" id="legal1" data-legal-check />
+          <label for="legal1">Я ознакомлен с пользовательским соглашением и принимаю его условия.</label>
+        </div>
+        <div class="checkbox-line" style="margin-top:8px">
+          <input type="checkbox" id="legal2" data-legal-check />
+          <label for="legal2">Я ознакомлен с политикой конфиденциальности и правилами AML/KYC.</label>
+        </div>
+        <div class="checkbox-line" style="margin-top:8px">
+          <input type="checkbox" id="legal3" data-legal-check />
+          <label for="legal3">Я понимаю инвестиционные риски и принимаю их в рамках своей стратегии.</label>
+        </div>
+        <div class="plot-actions" style="margin-top:12px">
+          <button class="btn btn-primary" id="legalAcceptBtn">Зафиксировать согласие</button>
+        </div>
+        <p id="legalStatus" class="muted" style="margin-top:10px"></p>
+      </section>
+    </div>
+  </main>
+
+  <div data-component="footer"></div>
+
+  <script src="assets/js/data.js"></script>
+  <script src="assets/js/app.js"></script>
+</body>
+</html>

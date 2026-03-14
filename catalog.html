@@ -1,0 +1,94 @@
+﻿<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Alatau City Invest - Каталог участков</title>
+  <link rel="stylesheet" href="assets/css/style.css" />
+</head>
+<body data-page="catalog">
+  <div data-component="header"></div>
+
+  <main class="page">
+    <div class="container">
+      <div class="section-title">
+        <h2>Каталог инвестиционных участков</h2>
+        <p>Сравнивайте лоты, добавляйте в избранное и отправляйте заявку за несколько шагов.</p>
+      </div>
+
+      <section class="card">
+        <div class="form-grid">
+          <div class="form-field">
+            <label for="catPurpose">Назначение</label>
+            <select id="catPurpose"></select>
+          </div>
+          <div class="form-field">
+            <label for="catPrice">Цена</label>
+            <select id="catPrice"></select>
+          </div>
+          <div class="form-field">
+            <label for="catStatus">Статус</label>
+            <select id="catStatus">
+              <option value="all">Любой статус</option>
+              <option value="available">Доступен</option>
+              <option value="reserved">Забронирован</option>
+              <option value="deal">В сделке</option>
+              <option value="moderation">На модерации</option>
+              <option value="sold">Продан</option>
+              <option value="legal_issue">Юр. ограничение</option>
+            </select>
+          </div>
+          <div class="form-field">
+            <label for="catRisk">Риск</label>
+            <select id="catRisk">
+              <option value="all">Любой</option>
+              <option value="low">Низкий</option>
+              <option value="medium">Средний</option>
+              <option value="high">Высокий</option>
+            </select>
+          </div>
+          <div class="form-field">
+            <label for="catSort">Сортировка</label>
+            <select id="catSort">
+              <option value="roi_desc">ROI: по убыванию</option>
+              <option value="price_asc">Цена: по возрастанию</option>
+              <option value="price_desc">Цена: по убыванию</option>
+              <option value="risk_asc">Риск: от низкого к высокому</option>
+            </select>
+          </div>
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="grid grid-3" id="catalogGrid"></div>
+      </section>
+
+      <div id="compareBar" class="compare-bar hidden">
+        <div>
+          <strong>Выбрано для сравнения:</strong>
+          <span id="compareList"></span>
+        </div>
+        <div class="plot-actions">
+          <button class="btn btn-ghost" id="compareClear">Очистить</button>
+          <button class="btn btn-accent" id="compareOpen">Открыть сравнение</button>
+        </div>
+      </div>
+
+      <section id="compareModal" class="section hidden">
+        <div class="card">
+          <div class="section-title">
+            <h2>Сравнение участков</h2>
+            <button class="btn btn-ghost" id="compareClose">Закрыть</button>
+          </div>
+          <div class="grid grid-3" id="compareModalBody"></div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <div data-component="footer"></div>
+
+  <script src="assets/js/data.js"></script>
+  <script src="assets/js/app.js"></script>
+</body>
+</html>

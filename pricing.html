@@ -1,0 +1,99 @@
+﻿<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Alatau City Invest - Тарифы размещения</title>
+  <link rel="stylesheet" href="assets/css/style.css" />
+</head>
+<body data-page="pricing">
+  <div data-component="header"></div>
+
+  <main class="page">
+    <div class="container">
+      <div class="section-title">
+        <h2>Тарифы размещения участков</h2>
+        <p>Прозрачная модель монетизации: базовое размещение, премиум продвижение и корпоративный пакет.</p>
+      </div>
+
+      <section class="grid grid-3">
+        <article class="card" data-plan="Base" data-price="89">
+          <h3 class="card-title">Base</h3>
+          <p class="muted">Для частных владельцев</p>
+          <p class="plot-price" style="margin:8px 0">89 USD / 30 дней</p>
+          <ul>
+            <li>1 активный лот</li>
+            <li>Стандартная модерация</li>
+            <li>Базовая аналитика просмотров</li>
+          </ul>
+        </article>
+
+        <article class="card" data-plan="Premium" data-price="219">
+          <h3 class="card-title">Premium</h3>
+          <p class="muted">Для повышения конверсии</p>
+          <p class="plot-price" style="margin:8px 0">219 USD / 30 дней</p>
+          <ul>
+            <li>До 5 активных лотов</li>
+            <li>Приоритет в выдаче</li>
+            <li>AI-подсказки по улучшению карточки</li>
+            <li>Расширенная аналитика лидов</li>
+          </ul>
+        </article>
+
+        <article class="card" data-plan="Corporate" data-price="590">
+          <h3 class="card-title">Corporate</h3>
+          <p class="muted">Для девелоперов и портфелей</p>
+          <p class="plot-price" style="margin:8px 0">590 USD / 30 дней</p>
+          <ul>
+            <li>До 20 активных лотов</li>
+            <li>Персональный менеджер</li>
+            <li>API-выгрузка аналитики</li>
+            <li>Приоритетная юридическая проверка</li>
+          </ul>
+        </article>
+      </section>
+
+      <section class="section card" style="max-width:760px">
+        <h3 class="card-title">Оплата тарифа</h3>
+        <p class="muted" id="selectedPlanName">Выберите тариф выше</p>
+
+        <form id="planPaymentForm" style="margin-top:12px">
+          <div class="form-grid">
+            <div class="form-field">
+              <label>Тип плательщика</label>
+              <select required>
+                <option>Физическое лицо</option>
+                <option>Юридическое лицо</option>
+              </select>
+            </div>
+            <div class="form-field">
+              <label>Email для документов</label>
+              <input type="email" required />
+            </div>
+            <div class="form-field">
+              <label>ИИН / БИН</label>
+              <input required />
+            </div>
+            <div class="form-field">
+              <label>Промокод</label>
+              <input />
+            </div>
+          </div>
+
+          <div class="plot-actions" style="margin-top:12px">
+            <button class="btn btn-primary" type="submit">Оплатить тариф</button>
+            <a class="btn btn-ghost" href="owner-cabinet.html">В кабинет владельца</a>
+          </div>
+        </form>
+      </section>
+
+      <section id="planResult" class="section card hidden"></section>
+    </div>
+  </main>
+
+  <div data-component="footer"></div>
+
+  <script src="assets/js/data.js"></script>
+  <script src="assets/js/app.js"></script>
+</body>
+</html>
