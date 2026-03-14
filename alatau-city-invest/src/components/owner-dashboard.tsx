@@ -131,6 +131,9 @@ export function OwnerDashboard() {
             <Link className="btn btn-ghost" href="/projects/submit">
               {t.addProject}
             </Link>
+            <Link className="btn btn-ghost" href="/cabinet/projects">
+              {lang === "RU" ? "Кабинет проектов" : lang === "KZ" ? "Жоба кабинеті" : "Project cabinet"}
+            </Link>
             <Link className="btn btn-ghost" href="/pricing">
               {t.pricing}
             </Link>
@@ -205,4 +208,5 @@ export function OwnerDashboard() {
     </>
   );
 }
+
 

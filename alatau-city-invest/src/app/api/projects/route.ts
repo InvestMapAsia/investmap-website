@@ -1,4 +1,4 @@
-import { BusinessProjectStatus, Prisma, Role } from "@prisma/client";
+﻿import { BusinessProjectStatus, Prisma, Role } from "@prisma/client";
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { writeAuditLog } from "@/lib/audit";
@@ -54,10 +54,15 @@ export async function GET(request: NextRequest) {
   const status =
     (searchParams.get("status") as BusinessProjectStatus | "all" | null) ?? "all";
   const search = searchParams.get("search") ?? undefined;
+  const scope = (searchParams.get("scope") as "market" | "mine" | null) ?? "market";
 
   const session = await getServerSession(authOptions);
   const userId = session?.user?.id;
   const role = (session?.user?.role as Role | undefined) ?? undefined;
+
+  if (scope === "mine" && !userId) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
 
   if (isMockMode()) {
     const rows = listMockBusinessProjects({
@@ -65,6 +70,7 @@ export async function GET(request: NextRequest) {
       role,
       status,
       search,
+      scope,
     });
 
     return NextResponse.json({ data: rows });
@@ -81,7 +87,12 @@ export async function GET(request: NextRequest) {
     ];
   }
 
-  if (role === "ADMIN" || role === "MODERATOR") {
+  if (scope === "mine" && userId) {
+    where.userId = userId;
+    if (status !== "all") {
+      where.status = status;
+    }
+  } else if (role === "ADMIN" || role === "MODERATOR") {
     if (status !== "all") {
       where.status = status;
     }
@@ -251,3 +262,4 @@ export async function POST(request: NextRequest) {
     { status: 201 }
   );
 }
+

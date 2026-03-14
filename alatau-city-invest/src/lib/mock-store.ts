@@ -277,11 +277,19 @@ export function listMockBusinessProjects(payload: {
   role?: Role;
   status?: BusinessProjectStatus | "all";
   search?: string;
+  scope?: "market" | "mine";
 }) {
   const rows = listBusinessProjects({
     status: payload.status ?? "all",
     search: payload.search,
   }) as MockBusinessProjectRecord[];
+
+  if (payload.scope === "mine") {
+    if (!payload.userId) {
+      return [];
+    }
+    return rows.filter((row) => businessProjectOwners.get(row.id) === payload.userId);
+  }
 
   if (payload.role === "ADMIN" || payload.role === "MODERATOR") {
     return rows;
@@ -455,3 +463,4 @@ export function createMockAuditLog(payload: {
 export function listMockAuditLogs(limit = 100) {
   return auditLogs.slice(0, limit);
 }
+

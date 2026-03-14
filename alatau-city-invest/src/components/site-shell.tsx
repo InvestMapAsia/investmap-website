@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import Image from "next/image";
 import Link from "next/link";
@@ -32,6 +32,7 @@ const uiText: Record<
       "/": "Home",
       "/map": "Map",
       "/catalog": "Catalog",
+      "/projects": "Projects",
       "/pricing": "Pricing",
       "/news": "News",
       "/faq": "FAQ",
@@ -49,48 +50,48 @@ const uiText: Record<
     support: "Support",
   },
   RU: {
-    brandSubtitle: "Платформа земельных инвестиций",
+    brandSubtitle: "РџР»Р°С‚С„РѕСЂРјР° Р·РµРјРµР»СЊРЅС‹С… РёРЅРІРµСЃС‚РёС†РёР№",
     nav: {
-      "/": "Главная",
-      "/map": "Карта",
-      "/catalog": "Каталог",
-      "/pricing": "Тарифы",
-      "/news": "Новости",
+      "/": "Р“Р»Р°РІРЅР°СЏ",
+      "/map": "РљР°СЂС‚Р°",
+      "/catalog": "РљР°С‚Р°Р»РѕРі",
+      "/pricing": "РўР°СЂРёС„С‹",
+      "/news": "РќРѕРІРѕСЃС‚Рё",
       "/faq": "FAQ",
-      "/contacts": "Контакты",
-      "/admin": "Админ",
+      "/contacts": "РљРѕРЅС‚Р°РєС‚С‹",
+      "/admin": "РђРґРјРёРЅ",
     },
-    investor: "Инвестор",
-    owner: "Владелец",
-    admin: "Админ",
-    signOut: "Выйти",
-    login: "Войти",
-    footerDescription: "Премиальная цифровая платформа инвестиций в земельные участки Alatau City.",
-    legal: "Правовые",
+    investor: "РРЅРІРµСЃС‚РѕСЂ",
+    owner: "Р’Р»Р°РґРµР»РµС†",
+    admin: "РђРґРјРёРЅ",
+    signOut: "Р’С‹Р№С‚Рё",
+    login: "Р’РѕР№С‚Рё",
+    footerDescription: "РџСЂРµРјРёР°Р»СЊРЅР°СЏ С†РёС„СЂРѕРІР°СЏ РїР»Р°С‚С„РѕСЂРјР° РёРЅРІРµСЃС‚РёС†РёР№ РІ Р·РµРјРµР»СЊРЅС‹Рµ СѓС‡Р°СЃС‚РєРё Alatau City.",
+    legal: "РџСЂР°РІРѕРІС‹Рµ",
     faq: "FAQ",
-    support: "Поддержка",
+    support: "РџРѕРґРґРµСЂР¶РєР°",
   },
   KZ: {
-    brandSubtitle: "Жер инвестиция платформасы",
+    brandSubtitle: "Р–РµСЂ РёРЅРІРµСЃС‚РёС†РёСЏ РїР»Р°С‚С„РѕСЂРјР°СЃС‹",
     nav: {
-      "/": "Басты бет",
-      "/map": "Карта",
-      "/catalog": "Каталог",
-      "/pricing": "Тарифтер",
-      "/news": "Жаңалықтар",
+      "/": "Р‘Р°СЃС‚С‹ Р±РµС‚",
+      "/map": "РљР°СЂС‚Р°",
+      "/catalog": "РљР°С‚Р°Р»РѕРі",
+      "/pricing": "РўР°СЂРёС„С‚РµСЂ",
+      "/news": "Р–Р°ТЈР°Р»С‹Т›С‚Р°СЂ",
       "/faq": "FAQ",
-      "/contacts": "Байланыс",
-      "/admin": "Әкімші",
+      "/contacts": "Р‘Р°Р№Р»Р°РЅС‹СЃ",
+      "/admin": "УРєС–РјС€С–",
     },
-    investor: "Инвестор",
-    owner: "Жер иесі",
-    admin: "Әкімші",
-    signOut: "Шығу",
-    login: "Кіру",
-    footerDescription: "Alatau City жер учаскелеріне инвестициялауға арналған премиум цифрлық платформа.",
-    legal: "Заң",
+    investor: "РРЅРІРµСЃС‚РѕСЂ",
+    owner: "Р–РµСЂ РёРµСЃС–",
+    admin: "УРєС–РјС€С–",
+    signOut: "РЁС‹Т“Сѓ",
+    login: "РљС–СЂСѓ",
+    footerDescription: "Alatau City Р¶РµСЂ СѓС‡Р°СЃРєРµР»РµСЂС–РЅРµ РёРЅРІРµСЃС‚РёС†РёСЏР»Р°СѓТ“Р° Р°СЂРЅР°Р»Т“Р°РЅ РїСЂРµРјРёСѓРј С†РёС„СЂР»С‹Т› РїР»Р°С‚С„РѕСЂРјР°.",
+    legal: "Р—Р°ТЈ",
     faq: "FAQ",
-    support: "Қолдау",
+    support: "ТљРѕР»РґР°Сѓ",
   },
 };
 
@@ -162,6 +163,9 @@ export function SiteShell({ children }: { children: ReactNode }) {
                 <Link href="/cabinet/investor" className="btn btn-ghost">
                   {t.investor}
                 </Link>
+                <Link href="/cabinet/projects" className="btn btn-ghost">
+                  {lang === "RU" ? "РџСЂРѕРµРєС‚С‹" : lang === "KZ" ? "Р–РѕР±Р°Р»Р°СЂ" : "Projects"}
+                </Link>
                 {(role === "OWNER" || role === "ADMIN") && (
                   <Link href="/cabinet/owner" className="btn btn-ghost">
                     {t.owner}
@@ -208,3 +212,4 @@ export function SiteShell({ children }: { children: ReactNode }) {
     </>
   );
 }
+

@@ -38,6 +38,7 @@ export function ProjectsMarketplace() {
       title: "Small business projects",
       sub: "Add and discover ordinary small projects that need investment: from idea to first traction.",
       create: "Submit a project",
+      cabinet: "Project cabinet",
       loginToSubmit: "Sign in to submit",
       searchPlaceholder: "Search by company, market or business idea",
       all: "All statuses",
@@ -61,11 +62,14 @@ export function ProjectsMarketplace() {
       noData: "No projects found for selected filters.",
       loadError: "Failed to load projects.",
       openSubmit: "Open submit form",
+      searchBtn: "Search",
+      resetBtn: "Reset",
     },
     RU: {
       title: "Малые бизнес-проекты",
       sub: "Размещайте и изучайте обычные небольшие проекты для инвестиций: от идеи до первых результатов.",
       create: "Подать проект",
+      cabinet: "Кабинет проектов",
       loginToSubmit: "Войти для подачи",
       searchPlaceholder: "Поиск по компании, рынку или идее",
       all: "Все статусы",
@@ -89,34 +93,39 @@ export function ProjectsMarketplace() {
       noData: "По выбранным фильтрам проектов не найдено.",
       loadError: "Не удалось загрузить проекты.",
       openSubmit: "Открыть форму подачи",
+      searchBtn: "Поиск",
+      resetBtn: "Сброс",
     },
     KZ: {
-      title: "Ша?ын бизнес жобалары",
-      sub: "Инвестиция?а арнал?ан к?дімгі ша?ын жобаларды орналастыры?ыз ж?не ?ара?ыз: идеядан ал?аш?ы н?тижеге дейін.",
+      title: "Шағын бизнес жобалары",
+      sub: "Инвестицияға арналған кәдімгі шағын жобаларды орналастырып, идеядан алғашқы нәтижеге дейін бақылаңыз.",
       create: "Жобаны жіберу",
-      loginToSubmit: "Жіберу ?шін кіру",
-      searchPlaceholder: "Компания, нары? немесе идея бойынша іздеу",
-      all: "Барлы? статустар",
+      cabinet: "Жоба кабинеті",
+      loginToSubmit: "Жіберу үшін кіру",
+      searchPlaceholder: "Компания, нарық немесе идея бойынша іздеу",
+      all: "Барлық статустар",
       submitted: "Жіберілді",
       underReview: "Модерацияда",
-      needsRevision: "Т?зету керек",
-      approved: "Ма??лданды",
-      rejected: "?абылданбады",
+      needsRevision: "Түзету керек",
+      approved: "Мақұлданды",
+      rejected: "Қабылданбады",
       total: "Жобалар саны",
-      approvedCount: "Ма??лдан?ан",
-      reviewCount: "Модерацияда?ы",
-      requested: "С?рал?ан инвестиция",
+      approvedCount: "Мақұлданған",
+      reviewCount: "Модерациядағы",
+      requested: "Сұралған инвестиция",
       minTicket: "Минималды билет",
-      founder: "??рушы",
-      market: "Нары?",
+      founder: "Құрушы",
+      market: "Нарық",
       model: "Бизнес-модель",
-      traction: "Прототип / ал?аш?ы н?тиже",
-      legal: "За?ды? дайынды?",
-      forecast: "?аржылы? болжамдар",
+      traction: "Прототип / алғашқы нәтиже",
+      legal: "Заңдық дайындық",
+      forecast: "Қаржылық болжамдар",
       terms: "Инвестиция шарттары",
-      noData: "Та?дал?ан с?згі бойынша жоба табылмады.",
-      loadError: "Жобаларды ж?ктеу м?мкін болмады.",
+      noData: "Таңдалған сүзгі бойынша жоба табылмады.",
+      loadError: "Жобаларды жүктеу мүмкін болмады.",
       openSubmit: "Жіберу формасын ашу",
+      searchBtn: "Іздеу",
+      resetBtn: "Тазарту",
     },
   });
 
@@ -184,6 +193,11 @@ export function ProjectsMarketplace() {
             <Link href="/projects/submit" className="btn btn-primary">
               {sessionStatus === "authenticated" ? t.create : t.loginToSubmit}
             </Link>
+            {sessionStatus === "authenticated" ? (
+              <Link href="/cabinet/projects" className="btn btn-ghost">
+                {t.cabinet}
+              </Link>
+            ) : null}
           </div>
         </div>
 
@@ -235,7 +249,7 @@ export function ProjectsMarketplace() {
 
         <div className="plot-actions" style={{ marginTop: 12 }}>
           <button className="btn btn-ghost" type="button" onClick={() => setSearch(searchInput.trim())}>
-            Search
+            {t.searchBtn}
           </button>
           <button
             className="btn btn-ghost"
@@ -246,7 +260,7 @@ export function ProjectsMarketplace() {
               setStatusFilter("all");
             }}
           >
-            Reset
+            {t.resetBtn}
           </button>
           <Link href="/projects/submit" className="btn btn-primary">
             {t.openSubmit}
@@ -315,3 +329,5 @@ export function ProjectsMarketplace() {
     </>
   );
 }
+
+
