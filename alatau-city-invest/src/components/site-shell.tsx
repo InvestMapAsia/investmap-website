@@ -8,13 +8,14 @@ import { ReactNode, useMemo } from "react";
 import { NotificationsBell } from "@/components/notifications-bell";
 import { Lang } from "@/lib/i18n";
 import { useCurrentLanguage } from "@/lib/i18n-client";
-import { navLinks } from "@/lib/ui";
 
 const uiText: Record<
   Lang,
   {
     brandSubtitle: string;
     nav: Record<string, string>;
+    moreMenu: string;
+    accountMenu: string;
     investor: string;
     owner: string;
     projects: string;
@@ -39,8 +40,9 @@ const uiText: Record<
       "/news": "News",
       "/faq": "FAQ",
       "/contacts": "Contacts",
-      "/admin": "Admin",
     },
+    moreMenu: "More",
+    accountMenu: "Account",
     investor: "Investor",
     owner: "Owner",
     projects: "Projects",
@@ -64,8 +66,9 @@ const uiText: Record<
       "/news": "Новости",
       "/faq": "FAQ",
       "/contacts": "Контакты",
-      "/admin": "Админ",
     },
+    moreMenu: "Еще",
+    accountMenu: "Кабинет",
     investor: "Инвестор",
     owner: "Владелец",
     projects: "Проекты",
@@ -89,8 +92,9 @@ const uiText: Record<
       "/news": "Жаңалықтар",
       "/faq": "FAQ",
       "/contacts": "Байланыс",
-      "/admin": "Әкімші",
     },
+    moreMenu: "Қосымша",
+    accountMenu: "Кабинет",
     investor: "Инвестор",
     owner: "Жер иесі",
     projects: "Жобалар",
@@ -126,6 +130,8 @@ export function SiteShell({ children }: { children: ReactNode }) {
   const pathname = usePathname();
   const { data: session, status } = useSession();
   const { lang, setLanguage } = useCurrentLanguage();
+  const primaryNav = ["/", "/map", "/catalog", "/projects"] as const;
+  const secondaryNav = ["/pricing", "/news", "/faq", "/contacts"] as const;
 
   const t = useMemo(() => uiText[lang], [lang]);
   const role = session?.user?.role;
@@ -162,15 +168,33 @@ export function SiteShell({ children }: { children: ReactNode }) {
           </Link>
 
           <nav className="main-nav">
-            {navLinks.map((link) => (
+            {primaryNav.map((href) => (
               <Link
-                key={link.href}
-                className={pathname === link.href ? "active" : ""}
-                href={link.href}
+                key={href}
+                className={pathname === href ? "active" : ""}
+                href={href}
               >
-                {t.nav[link.href] ?? link.label}
+                {t.nav[href]}
               </Link>
             ))}
+            <details className="dropdown nav-dropdown">
+              <summary
+                className={
+                  secondaryNav.includes(pathname as (typeof secondaryNav)[number])
+                    ? "dropdown-summary active"
+                    : "dropdown-summary"
+                }
+              >
+                {t.moreMenu}
+              </summary>
+              <div className="dropdown-menu">
+                {secondaryNav.map((href) => (
+                  <Link key={href} href={href}>
+                    {t.nav[href]}
+                  </Link>
+                ))}
+              </div>
+            </details>
           </nav>
 
           <div className="header-actions">
@@ -178,39 +202,32 @@ export function SiteShell({ children }: { children: ReactNode }) {
             <NotificationsBell />
 
             {status === "authenticated" ? (
-              <>
-                <span className="badge">{roleLabel}</span>
+              <details className="dropdown account-dropdown">
+                <summary className="btn btn-ghost account-summary">{t.accountMenu}</summary>
+                <div className="dropdown-menu dropdown-menu-right">
+                  <span className="dropdown-role">{roleLabel}</span>
 
-                {role === "INVESTOR" ? (
-                  <Link href="/cabinet/investor" className="btn btn-ghost">
-                    {t.investor}
-                  </Link>
-                ) : null}
+                  {role === "INVESTOR" ? (
+                    <Link href="/cabinet/investor">{t.investor}</Link>
+                  ) : null}
 
-                {(role === "INVESTOR" || role === "OWNER") && (
-                  <Link href="/cabinet/projects" className="btn btn-ghost">
-                    {t.projects}
-                  </Link>
-                )}
+                  {(role === "INVESTOR" || role === "OWNER") && (
+                    <Link href="/cabinet/projects">{t.projects}</Link>
+                  )}
 
-                {role === "OWNER" && (
-                  <Link href="/cabinet/owner" className="btn btn-ghost">
-                    {t.owner}
-                  </Link>
-                )}
-                {(role === "ADMIN" || role === "MODERATOR") && (
-                  <Link href="/admin" className="btn btn-ghost">
-                    {t.admin}
-                  </Link>
-                )}
-                <button
-                  type="button"
-                  className="btn btn-primary"
-                  onClick={() => void signOut({ callbackUrl: "/" })}
-                >
-                  {t.signOut}
-                </button>
-              </>
+                  {role === "OWNER" ? <Link href="/cabinet/owner">{t.owner}</Link> : null}
+
+                  {(role === "ADMIN" || role === "MODERATOR") && <Link href="/admin">{t.admin}</Link>}
+
+                  <button
+                    className="dropdown-signout"
+                    type="button"
+                    onClick={() => void signOut({ callbackUrl: "/" })}
+                  >
+                    {t.signOut}
+                  </button>
+                </div>
+              </details>
             ) : (
               <Link href="/login" className="btn btn-primary">
                 {t.login}
