@@ -1,6 +1,6 @@
 :root {
-  --font-fraunces: Cambria, Georgia, "Times New Roman", serif;
-  --font-sora: "Trebuchet MS", "Segoe UI", system-ui, sans-serif;
+  --font-fraunces: var(--font-main-serif), "Noto Serif", Cambria, Georgia, "Times New Roman", serif;
+  --font-sora: var(--font-main-sans), "Noto Sans", "Segoe UI", system-ui, sans-serif;
   --bg: #EAEFEF;
   --bg-soft: #DCE7EE;
   --surface: #ffffff;
