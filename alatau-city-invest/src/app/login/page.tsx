@@ -9,7 +9,16 @@ import { useCurrentLanguage } from "@/lib/i18n-client";
 function LoginPanelWithSearchParams() {
   const params = useSearchParams();
   const callbackUrl = params.get("callbackUrl") ?? undefined;
-  return <LoginPanel callbackUrl={callbackUrl} />;
+  const verificationStatus = params.get("verified");
+  const verificationReason = params.get("reason");
+
+  return (
+    <LoginPanel
+      callbackUrl={callbackUrl}
+      verificationStatus={verificationStatus === "1" || verificationStatus === "0" ? verificationStatus : null}
+      verificationReason={verificationReason}
+    />
+  );
 }
 
 export default function LoginPage() {
@@ -20,12 +29,12 @@ export default function LoginPage() {
       sub: "Role-based authentication for investor, owner and administrator zones.",
     },
     RU: {
-      title: "Доступ к аккаунту",
-      sub: "Ролевая аутентификация для зон инвестора, собственника и администратора.",
+      title: "Account access",
+      sub: "Role-based authentication for investor, owner and administrator zones.",
     },
     KZ: {
-      title: "Аккаунтқа кіру",
-      sub: "Инвестор, жер иесі және әкімші аймақтарына рөлдік аутентификация.",
+      title: "Account access",
+      sub: "Role-based authentication for investor, owner and administrator zones.",
     },
   });
 

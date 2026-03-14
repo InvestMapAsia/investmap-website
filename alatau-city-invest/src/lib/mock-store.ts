@@ -30,6 +30,7 @@ type MockAuthUser = {
   name: string;
   password: string;
   role: Role;
+  emailVerifiedAt: string | null;
 };
 
 type MockApplicationRecord = Application & {
@@ -47,6 +48,7 @@ const mockUsers: MockAuthUser[] = [
     name: "Admin User",
     password: "Admin#2026",
     role: "ADMIN",
+    emailVerifiedAt: new Date().toISOString(),
   },
   {
     id: "mock-investor",
@@ -54,6 +56,7 @@ const mockUsers: MockAuthUser[] = [
     name: "Investor User",
     password: "Investor#2026",
     role: "INVESTOR",
+    emailVerifiedAt: new Date().toISOString(),
   },
   {
     id: "mock-owner",
@@ -61,6 +64,7 @@ const mockUsers: MockAuthUser[] = [
     name: "Owner User",
     password: "Owner#2026",
     role: "OWNER",
+    emailVerifiedAt: new Date().toISOString(),
   },
   {
     id: "mock-moderator",
@@ -68,6 +72,7 @@ const mockUsers: MockAuthUser[] = [
     name: "Moderator User",
     password: "Moderator#2026",
     role: "MODERATOR",
+    emailVerifiedAt: new Date().toISOString(),
   },
 ];
 
@@ -78,6 +83,7 @@ const businessProjectOwners = new Map<string, string>([
 ]);
 const favoritesByUser = new Map<string, Set<string>>();
 const notificationsByUser = new Map<string, NotificationItem[]>();
+const emailVerificationTokens = new Map<string, { email: string; expiresAt: string }>();
 let auditLogs: AuditLogItem[] = [];
 
 function nowIso() {
@@ -114,6 +120,7 @@ export function listMockUsers() {
     email: user.email,
     name: user.name,
     role: user.role,
+    emailVerifiedAt: user.emailVerifiedAt,
   }));
 }
 
@@ -149,6 +156,7 @@ export function registerMockUser(payload: {
     email: payload.email,
     password: payload.password,
     role: payload.role,
+    emailVerifiedAt: null,
   };
 
   mockUsers.push(user);
@@ -157,7 +165,55 @@ export function registerMockUser(payload: {
     email: user.email,
     name: user.name,
     role: user.role,
+    emailVerifiedAt: user.emailVerifiedAt,
   };
+}
+
+export function getMockEmailVerificationStatus(email: string) {
+  const user = findMockUserByEmail(email);
+  return {
+    exists: Boolean(user),
+    verified: Boolean(user?.emailVerifiedAt),
+  };
+}
+
+export function createMockEmailVerificationToken(payload: {
+  email: string;
+  token: string;
+  expiresAt: Date;
+}) {
+  for (const [token, row] of emailVerificationTokens.entries()) {
+    if (row.email.toLowerCase() === payload.email.toLowerCase()) {
+      emailVerificationTokens.delete(token);
+    }
+  }
+
+  emailVerificationTokens.set(payload.token, {
+    email: payload.email,
+    expiresAt: payload.expiresAt.toISOString(),
+  });
+}
+
+export function consumeMockEmailVerificationToken(token: string) {
+  const row = emailVerificationTokens.get(token);
+  if (!row) {
+    return { status: "invalid" as const, user: null };
+  }
+
+  if (new Date(row.expiresAt) < new Date()) {
+    emailVerificationTokens.delete(token);
+    return { status: "expired" as const, user: null };
+  }
+
+  const user = findMockUserByEmail(row.email);
+  if (!user) {
+    emailVerificationTokens.delete(token);
+    return { status: "invalid" as const, user: null };
+  }
+
+  user.emailVerifiedAt = nowIso();
+  emailVerificationTokens.delete(token);
+  return { status: "verified" as const, user };
 }
 
 export function listMockPlots(filters?: {

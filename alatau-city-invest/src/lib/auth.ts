@@ -4,7 +4,7 @@ import { NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import { z } from "zod";
 import { isMockMode } from "@/lib/data-mode";
-import { validateMockCredentials } from "@/lib/mock-store";
+import { getMockEmailVerificationStatus, validateMockCredentials } from "@/lib/mock-store";
 import { prisma } from "@/lib/prisma";
 
 const credentialsSchema = z.object({
@@ -35,7 +35,17 @@ export const authOptions: NextAuthOptions = {
         const { email, password } = parsed.data;
 
         if (isMockMode()) {
-          return validateMockCredentials(email, password);
+          const mockUser = validateMockCredentials(email, password);
+          if (!mockUser) {
+            return null;
+          }
+
+          const verification = getMockEmailVerificationStatus(email);
+          if (!verification.verified) {
+            throw new Error("EMAIL_NOT_VERIFIED");
+          }
+
+          return mockUser;
         }
 
         const user = await prisma.user.findUnique({
@@ -49,6 +59,10 @@ export const authOptions: NextAuthOptions = {
         const matches = await bcrypt.compare(password, user.passwordHash);
         if (!matches) {
           return null;
+        }
+
+        if (!user.emailVerifiedAt) {
+          throw new Error("EMAIL_NOT_VERIFIED");
         }
 
         return {

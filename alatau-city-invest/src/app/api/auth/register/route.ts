@@ -1,9 +1,12 @@
-﻿import { Role } from "@prisma/client";
+import { Role } from "@prisma/client";
 import bcrypt from "bcryptjs";
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { writeAuditLog } from "@/lib/audit";
 import { isMockMode } from "@/lib/data-mode";
+import { sendEmail } from "@/lib/email/sender";
+import { buildEmailVerificationTemplate } from "@/lib/email/templates";
+import { issueEmailVerificationToken } from "@/lib/email/verification";
 import { registerMockUser } from "@/lib/mock-store";
 import { prisma } from "@/lib/prisma";
 
@@ -23,9 +26,17 @@ export async function POST(request: NextRequest) {
   }
 
   const { name, email, password, role } = parsed.data;
+  const normalizedEmail = email.trim().toLowerCase();
+  const allowPreviewLink = process.env.NODE_ENV !== "production";
 
   if (isMockMode()) {
-    const user = registerMockUser({ name, email, password, role });
+    const user = registerMockUser({
+      name,
+      email: normalizedEmail,
+      password,
+      role,
+    });
+
     if (!user) {
       return NextResponse.json({ error: "Email already registered" }, { status: 409 });
     }
@@ -41,10 +52,56 @@ export async function POST(request: NextRequest) {
       },
     });
 
-    return NextResponse.json({ data: user }, { status: 201 });
+    const verification = await issueEmailVerificationToken({
+      email: user.email,
+      origin: request.nextUrl.origin,
+    });
+
+    const emailHtml = buildEmailVerificationTemplate({
+      name: user.name,
+      verificationUrl: verification.verificationUrl,
+    });
+
+    const emailResult = await sendEmail({
+      to: user.email,
+      subject: "Confirm your email - Alatau City Invest",
+      html: emailHtml,
+    });
+
+    await writeAuditLog({
+      action: "USER_EMAIL_VERIFICATION_ISSUED",
+      entityType: "User",
+      entityId: user.id,
+      actorUserId: user.id,
+      actorRole: user.role,
+      details: {
+        email: user.email,
+        provider: emailResult.provider,
+        sent: emailResult.sent,
+        expiresAt: verification.expiresAt.toISOString(),
+      },
+    });
+
+    return NextResponse.json(
+      {
+        data: user,
+        verification: {
+          required: true,
+          sent: emailResult.sent,
+          provider: emailResult.provider,
+          expiresAt: verification.expiresAt.toISOString(),
+          previewUrl:
+            !emailResult.sent && allowPreviewLink ? verification.verificationUrl : null,
+        },
+      },
+      { status: 201 }
+    );
   }
 
-  const exists = await prisma.user.findUnique({ where: { email } });
+  const exists = await prisma.user.findUnique({
+    where: { email: normalizedEmail },
+  });
+
   if (exists) {
     return NextResponse.json({ error: "Email already registered" }, { status: 409 });
   }
@@ -54,7 +111,7 @@ export async function POST(request: NextRequest) {
   const user = await prisma.user.create({
     data: {
       name,
-      email,
+      email: normalizedEmail,
       passwordHash,
       role: role as Role,
     },
@@ -63,6 +120,7 @@ export async function POST(request: NextRequest) {
       email: true,
       role: true,
       name: true,
+      emailVerifiedAt: true,
     },
   });
 
@@ -77,5 +135,48 @@ export async function POST(request: NextRequest) {
     },
   });
 
-  return NextResponse.json({ data: user }, { status: 201 });
+  const verification = await issueEmailVerificationToken({
+    email: user.email,
+    origin: request.nextUrl.origin,
+  });
+
+  const emailHtml = buildEmailVerificationTemplate({
+    name: user.name,
+    verificationUrl: verification.verificationUrl,
+  });
+
+  const emailResult = await sendEmail({
+    to: user.email,
+    subject: "Confirm your email - Alatau City Invest",
+    html: emailHtml,
+  });
+
+  await writeAuditLog({
+    action: "USER_EMAIL_VERIFICATION_ISSUED",
+    entityType: "User",
+    entityId: user.id,
+    actorUserId: user.id,
+    actorRole: user.role,
+    details: {
+      email: user.email,
+      provider: emailResult.provider,
+      sent: emailResult.sent,
+      expiresAt: verification.expiresAt.toISOString(),
+    },
+  });
+
+  return NextResponse.json(
+    {
+      data: user,
+      verification: {
+        required: true,
+        sent: emailResult.sent,
+        provider: emailResult.provider,
+        expiresAt: verification.expiresAt.toISOString(),
+        previewUrl:
+          !emailResult.sent && allowPreviewLink ? verification.verificationUrl : null,
+      },
+    },
+    { status: 201 }
+  );
 }

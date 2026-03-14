@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { FormEvent, useMemo, useState } from "react";
 import { signIn } from "next-auth/react";
@@ -7,11 +7,41 @@ import { pickLang } from "@/lib/i18n";
 
 type Mode = "login" | "register";
 
-export function LoginPanel({ callbackUrl }: { callbackUrl?: string }) {
+type RegisterResponse = {
+  error?: string;
+  verification?: {
+    required?: boolean;
+    sent?: boolean;
+    provider?: "resend" | "console";
+    expiresAt?: string;
+    previewUrl?: string | null;
+  };
+};
+
+type ResendResponse = {
+  ok?: boolean;
+  error?: string;
+  sent?: boolean;
+  alreadyVerified?: boolean;
+  previewUrl?: string | null;
+};
+
+export function LoginPanel({
+  callbackUrl,
+  verificationStatus,
+  verificationReason,
+}: {
+  callbackUrl?: string;
+  verificationStatus?: "1" | "0" | null;
+  verificationReason?: string | null;
+}) {
   const { lang } = useCurrentLanguage();
   const [mode, setMode] = useState<Mode>("login");
   const [loading, setLoading] = useState(false);
+  const [resending, setResending] = useState(false);
+  const [canResend, setCanResend] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
+  const [verificationPreviewUrl, setVerificationPreviewUrl] = useState<string | null>(null);
 
   const [form, setForm] = useState({
     name: "",
@@ -20,67 +50,135 @@ export function LoginPanel({ callbackUrl }: { callbackUrl?: string }) {
     role: "INVESTOR",
   });
 
-  const t = pickLang(lang, {
-    EN: {
-      invalid: "Invalid credentials.",
-      regFailed: "Registration failed.",
-      regSuccess: "Registration successful. You can now sign in.",
-      login: "Login",
-      register: "Register",
-      name: "Name",
-      email: "Email",
-      password: "Password",
-      role: "Role",
-      investor: "Investor",
-      owner: "Owner",
-      wait: "Please wait...",
-      signIn: "Sign in",
-      create: "Create account",
-      demo:
-        "Demo logins: admin@alatau.city / Admin#2026, investor@alatau.city / Investor#2026, owner@alatau.city / Owner#2026",
-      loadRoleError: "Could not detect role after login. Opening investor cabinet.",
-    },
-    RU: {
-      invalid: "Неверные данные для входа.",
-      regFailed: "Ошибка регистрации.",
-      regSuccess: "Регистрация успешна. Теперь вы можете войти.",
-      login: "Вход",
-      register: "Регистрация",
-      name: "Имя",
-      email: "Email",
-      password: "Пароль",
-      role: "Роль",
-      investor: "Инвестор",
-      owner: "Собственник",
-      wait: "Подождите...",
-      signIn: "Войти",
-      create: "Создать аккаунт",
-      demo:
-        "Демо-доступ: admin@alatau.city / Admin#2026, investor@alatau.city / Investor#2026, owner@alatau.city / Owner#2026",
-      loadRoleError: "Не удалось определить роль после входа. Открываем кабинет инвестора.",
-    },
-    KZ: {
-      invalid: "Кіру деректері қате.",
-      regFailed: "Тіркелу қатесі.",
-      regSuccess: "Тіркелу сәтті. Енді жүйеге кіре аласыз.",
-      login: "Кіру",
-      register: "Тіркелу",
-      name: "Аты",
-      email: "Email",
-      password: "Құпиясөз",
-      role: "Рөл",
-      investor: "Инвестор",
-      owner: "Жер иесі",
-      wait: "Күте тұрыңыз...",
-      signIn: "Кіру",
-      create: "Аккаунт ашу",
-      demo:
-        "Демо кіру: admin@alatau.city / Admin#2026, investor@alatau.city / Investor#2026, owner@alatau.city / Owner#2026",
-      loadRoleError: "Кіруден кейін рөл анықталмады. Инвестор кабинетіне өту орындалады.",
-    },
-  });
+  const t = useMemo(
+    () =>
+      pickLang(lang, {
+        EN: {
+          invalid: "Invalid credentials.",
+          emailNotVerified: "Please confirm your email first. Check your inbox and try again.",
+          regFailed: "Registration failed.",
+          regSuccess: "Registration successful. Check your email to confirm your account.",
+          regSuccessPreview:
+            "Registration successful. Email provider is not configured, use preview link below.",
+          verifySuccess: "Email confirmed. You can now sign in.",
+          verifyInvalid: "Verification link is invalid.",
+          verifyExpired:
+            "Verification link has expired. Enter your email and request a new one.",
+          resend: "Resend verification email",
+          resendWait: "Sending...",
+          resendNeedEmail: "Enter your email first, then request a new verification link.",
+          resendSuccess: "Verification email sent. Check your inbox.",
+          resendSuccessPreview:
+            "Email provider is not configured, use the preview verification link below.",
+          resendAlreadyVerified: "This email is already verified. You can sign in.",
+          resendFailed: "Could not resend verification email.",
+          login: "Login",
+          register: "Register",
+          name: "Name",
+          email: "Email",
+          password: "Password",
+          role: "Role",
+          investor: "Investor",
+          owner: "Owner",
+          wait: "Please wait...",
+          signIn: "Sign in",
+          create: "Create account",
+          previewLabel: "Verification link preview:",
+          open: "Open",
+          demo:
+            "Demo logins: admin@alatau.city / Admin#2026, investor@alatau.city / Investor#2026, owner@alatau.city / Owner#2026",
+          loadRoleError: "Could not detect role after login. Opening investor cabinet.",
+        },
+        RU: {
+          invalid: "Invalid credentials.",
+          emailNotVerified: "Please confirm your email first. Check your inbox and try again.",
+          regFailed: "Registration failed.",
+          regSuccess: "Registration successful. Check your email to confirm your account.",
+          regSuccessPreview:
+            "Registration successful. Email provider is not configured, use preview link below.",
+          verifySuccess: "Email confirmed. You can now sign in.",
+          verifyInvalid: "Verification link is invalid.",
+          verifyExpired:
+            "Verification link has expired. Enter your email and request a new one.",
+          resend: "Resend verification email",
+          resendWait: "Sending...",
+          resendNeedEmail: "Enter your email first, then request a new verification link.",
+          resendSuccess: "Verification email sent. Check your inbox.",
+          resendSuccessPreview:
+            "Email provider is not configured, use the preview verification link below.",
+          resendAlreadyVerified: "This email is already verified. You can sign in.",
+          resendFailed: "Could not resend verification email.",
+          login: "Login",
+          register: "Register",
+          name: "Name",
+          email: "Email",
+          password: "Password",
+          role: "Role",
+          investor: "Investor",
+          owner: "Owner",
+          wait: "Please wait...",
+          signIn: "Sign in",
+          create: "Create account",
+          previewLabel: "Verification link preview:",
+          open: "Open",
+          demo:
+            "Demo logins: admin@alatau.city / Admin#2026, investor@alatau.city / Investor#2026, owner@alatau.city / Owner#2026",
+          loadRoleError: "Could not detect role after login. Opening investor cabinet.",
+        },
+        KZ: {
+          invalid: "Invalid credentials.",
+          emailNotVerified: "Please confirm your email first. Check your inbox and try again.",
+          regFailed: "Registration failed.",
+          regSuccess: "Registration successful. Check your email to confirm your account.",
+          regSuccessPreview:
+            "Registration successful. Email provider is not configured, use preview link below.",
+          verifySuccess: "Email confirmed. You can now sign in.",
+          verifyInvalid: "Verification link is invalid.",
+          verifyExpired:
+            "Verification link has expired. Enter your email and request a new one.",
+          resend: "Resend verification email",
+          resendWait: "Sending...",
+          resendNeedEmail: "Enter your email first, then request a new verification link.",
+          resendSuccess: "Verification email sent. Check your inbox.",
+          resendSuccessPreview:
+            "Email provider is not configured, use the preview verification link below.",
+          resendAlreadyVerified: "This email is already verified. You can sign in.",
+          resendFailed: "Could not resend verification email.",
+          login: "Login",
+          register: "Register",
+          name: "Name",
+          email: "Email",
+          password: "Password",
+          role: "Role",
+          investor: "Investor",
+          owner: "Owner",
+          wait: "Please wait...",
+          signIn: "Sign in",
+          create: "Create account",
+          previewLabel: "Verification link preview:",
+          open: "Open",
+          demo:
+            "Demo logins: admin@alatau.city / Admin#2026, investor@alatau.city / Investor#2026, owner@alatau.city / Owner#2026",
+          loadRoleError: "Could not detect role after login. Opening investor cabinet.",
+        },
+      }),
+    [lang]
+  );
 
   const target = useMemo(() => callbackUrl || "/cabinet/investor", [callbackUrl]);
+
+  const verificationMessage = useMemo(() => {
+    if (verificationStatus === "1") {
+      return t.verifySuccess;
+    }
+    if (verificationStatus === "0") {
+      if (verificationReason === "expired") {
+        return t.verifyExpired;
+      }
+      return t.verifyInvalid;
+    }
+    return null;
+  }, [verificationReason, verificationStatus, t.verifyExpired, t.verifyInvalid, t.verifySuccess]);
 
   const resolveRoleRedirect = async () => {
     if (callbackUrl) return callbackUrl;
@@ -104,6 +202,7 @@ export function LoginPanel({ callbackUrl }: { callbackUrl?: string }) {
     event.preventDefault();
     setLoading(true);
     setMessage(null);
+    setVerificationPreviewUrl(null);
 
     const result = await signIn("credentials", {
       email: form.email,
@@ -115,7 +214,13 @@ export function LoginPanel({ callbackUrl }: { callbackUrl?: string }) {
     setLoading(false);
 
     if (!result || result.error) {
-      setMessage(t.invalid);
+      if (result?.error?.includes("EMAIL_NOT_VERIFIED")) {
+        setMessage(t.emailNotVerified);
+        setCanResend(true);
+      } else {
+        setMessage(t.invalid);
+        setCanResend(false);
+      }
       return;
     }
 
@@ -131,6 +236,8 @@ export function LoginPanel({ callbackUrl }: { callbackUrl?: string }) {
     event.preventDefault();
     setLoading(true);
     setMessage(null);
+    setVerificationPreviewUrl(null);
+    setCanResend(false);
 
     const response = await fetch("/api/auth/register", {
       method: "POST",
@@ -143,17 +250,78 @@ export function LoginPanel({ callbackUrl }: { callbackUrl?: string }) {
       }),
     });
 
+    const payload = (await response.json().catch(() => null)) as RegisterResponse | null;
     setLoading(false);
 
     if (!response.ok) {
-      const payload = (await response.json().catch(() => null)) as { error?: string } | null;
       setMessage(payload?.error || t.regFailed);
       return;
     }
 
     setMode("login");
+    setVerificationPreviewUrl(payload?.verification?.previewUrl ?? null);
+    setCanResend(true);
+
+    if (payload?.verification?.sent) {
+      setMessage(t.regSuccess);
+      return;
+    }
+
+    if (payload?.verification?.previewUrl) {
+      setMessage(t.regSuccessPreview);
+      return;
+    }
+
     setMessage(t.regSuccess);
   };
+
+  const handleResend = async () => {
+    if (!form.email.trim()) {
+      setMessage(t.resendNeedEmail);
+      return;
+    }
+
+    setResending(true);
+    setMessage(null);
+    setVerificationPreviewUrl(null);
+
+    const response = await fetch("/api/auth/resend-verification", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email: form.email }),
+    });
+
+    const payload = (await response.json().catch(() => null)) as ResendResponse | null;
+    setResending(false);
+
+    if (!response.ok) {
+      setMessage(payload?.error || t.resendFailed);
+      return;
+    }
+
+    if (payload?.alreadyVerified) {
+      setMessage(t.resendAlreadyVerified);
+      setCanResend(false);
+      return;
+    }
+
+    setCanResend(true);
+    setVerificationPreviewUrl(payload?.previewUrl ?? null);
+    if (payload?.sent) {
+      setMessage(t.resendSuccess);
+      return;
+    }
+
+    if (payload?.previewUrl) {
+      setMessage(t.resendSuccessPreview);
+      return;
+    }
+
+    setMessage(t.resendSuccess);
+  };
+
+  const displayMessage = message ?? verificationMessage;
+  const showResendAction = mode === "login" && (canResend || verificationStatus === "0");
 
   return (
     <section className="card" style={{ maxWidth: 560, margin: "0 auto" }}>
@@ -228,9 +396,31 @@ export function LoginPanel({ callbackUrl }: { callbackUrl?: string }) {
         </div>
       </form>
 
-      {message ? (
+      {displayMessage ? (
         <p className="muted" style={{ marginTop: 12 }}>
-          {message}
+          {displayMessage}
+        </p>
+      ) : null}
+
+      {showResendAction ? (
+        <div className="plot-actions" style={{ marginTop: 8 }}>
+          <button
+            type="button"
+            className="btn btn-ghost"
+            disabled={resending}
+            onClick={handleResend}
+          >
+            {resending ? t.resendWait : t.resend}
+          </button>
+        </div>
+      ) : null}
+
+      {verificationPreviewUrl ? (
+        <p className="muted" style={{ marginTop: 8, wordBreak: "break-all" }}>
+          {t.previewLabel}{" "}
+          <a href={verificationPreviewUrl} target="_blank" rel="noreferrer">
+            {t.open}
+          </a>
         </p>
       ) : null}
 
@@ -240,4 +430,3 @@ export function LoginPanel({ callbackUrl }: { callbackUrl?: string }) {
     </section>
   );
 }
-

@@ -296,34 +296,52 @@ async function main() {
 
   const admin = await prisma.user.upsert({
     where: { email: "admin@alatau.city" },
-    update: { role: Role.ADMIN, passwordHash: adminPassword, name: "Platform Admin" },
+    update: {
+      role: Role.ADMIN,
+      passwordHash: adminPassword,
+      name: "Platform Admin",
+      emailVerifiedAt: new Date(),
+    },
     create: {
       email: "admin@alatau.city",
       name: "Platform Admin",
       role: Role.ADMIN,
       passwordHash: adminPassword,
+      emailVerifiedAt: new Date(),
     },
   });
 
   await prisma.user.upsert({
     where: { email: "investor@alatau.city" },
-    update: { role: Role.INVESTOR, passwordHash: investorPassword, name: "Demo Investor" },
+    update: {
+      role: Role.INVESTOR,
+      passwordHash: investorPassword,
+      name: "Demo Investor",
+      emailVerifiedAt: new Date(),
+    },
     create: {
       email: "investor@alatau.city",
       name: "Demo Investor",
       role: Role.INVESTOR,
       passwordHash: investorPassword,
+      emailVerifiedAt: new Date(),
     },
   });
 
   const owner = await prisma.user.upsert({
     where: { email: "owner@alatau.city" },
-    update: { role: Role.OWNER, passwordHash: ownerPassword, name: "Demo Owner" },
+    update: {
+      role: Role.OWNER,
+      passwordHash: ownerPassword,
+      name: "Demo Owner",
+      emailVerifiedAt: new Date(),
+    },
     create: {
       email: "owner@alatau.city",
       name: "Demo Owner",
       role: Role.OWNER,
       passwordHash: ownerPassword,
+      emailVerifiedAt: new Date(),
     },
   });
 

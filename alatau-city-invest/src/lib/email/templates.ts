@@ -54,6 +54,46 @@ export function buildApplicationStatusEmailTemplate(payload: {
 `.trim();
 }
 
+export function buildEmailVerificationTemplate(payload: {
+  name?: string | null;
+  verificationUrl: string;
+}) {
+  const greetingName = payload.name?.trim() ? escapeHtml(payload.name.trim()) : "there";
+
+  return `
+<!doctype html>
+<html>
+  <body style="margin:0;padding:0;background:#f7f3ec;font-family:'Segoe UI',Arial,sans-serif;color:#132435;">
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="padding:24px 0;">
+      <tr>
+        <td align="center">
+          <table role="presentation" width="640" cellpadding="0" cellspacing="0" style="background:#ffffff;border:1px solid #d9d2c5;border-radius:14px;overflow:hidden;">
+            <tr>
+              <td style="background:linear-gradient(145deg,#0c3347 0%,#0f5a73 100%);padding:18px 22px;color:#fff;">
+                <h1 style="margin:0;font-size:20px;line-height:1.2;">Alatau City Invest</h1>
+                <p style="margin:8px 0 0;font-size:13px;opacity:.9;">Email confirmation</p>
+              </td>
+            </tr>
+            <tr>
+              <td style="padding:22px;">
+                <p style="margin:0 0 10px;">Hello ${greetingName},</p>
+                <p style="margin:0 0 14px;">Please confirm your email to activate your account.</p>
+                <a href="${escapeHtml(payload.verificationUrl)}" style="display:inline-block;background:#0f5a73;color:#fff;text-decoration:none;padding:11px 16px;border-radius:999px;font-weight:600;">
+                  Confirm email
+                </a>
+                <p style="margin:14px 0 0;color:#475569;font-size:13px;">If the button does not work, copy this link:</p>
+                <p style="margin:8px 0 0;font-size:13px;word-break:break-all;color:#1f3b57;">${escapeHtml(payload.verificationUrl)}</p>
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>
+  </body>
+</html>
+`.trim();
+}
+
 function escapeHtml(input: string) {
   return input
     .replaceAll("&", "&amp;")
