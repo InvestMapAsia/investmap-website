@@ -5,10 +5,10 @@ import Link from "next/link";
 import { signOut, useSession } from "next-auth/react";
 import { usePathname } from "next/navigation";
 import { ReactNode, useMemo } from "react";
-import { useCurrentLanguage } from "@/lib/i18n-client";
-import { Lang } from "@/lib/i18n";
-import { navLinks } from "@/lib/ui";
 import { NotificationsBell } from "@/components/notifications-bell";
+import { Lang } from "@/lib/i18n";
+import { useCurrentLanguage } from "@/lib/i18n-client";
+import { navLinks } from "@/lib/ui";
 
 const uiText: Record<
   Lang,
@@ -17,6 +17,7 @@ const uiText: Record<
     nav: Record<string, string>;
     investor: string;
     owner: string;
+    projects: string;
     admin: string;
     signOut: string;
     login: string;
@@ -41,6 +42,7 @@ const uiText: Record<
     },
     investor: "Investor",
     owner: "Owner",
+    projects: "Projects",
     admin: "Admin",
     signOut: "Sign out",
     login: "Login",
@@ -50,48 +52,52 @@ const uiText: Record<
     support: "Support",
   },
   RU: {
-    brandSubtitle: "РџР»Р°С‚С„РѕСЂРјР° Р·РµРјРµР»СЊРЅС‹С… РёРЅРІРµСЃС‚РёС†РёР№",
+    brandSubtitle: "Платформа земельных инвестиций",
     nav: {
-      "/": "Р“Р»Р°РІРЅР°СЏ",
-      "/map": "РљР°СЂС‚Р°",
-      "/catalog": "РљР°С‚Р°Р»РѕРі",
-      "/pricing": "РўР°СЂРёС„С‹",
-      "/news": "РќРѕРІРѕСЃС‚Рё",
+      "/": "Главная",
+      "/map": "Карта",
+      "/catalog": "Каталог",
+      "/projects": "Проекты",
+      "/pricing": "Тарифы",
+      "/news": "Новости",
       "/faq": "FAQ",
-      "/contacts": "РљРѕРЅС‚Р°РєС‚С‹",
-      "/admin": "РђРґРјРёРЅ",
+      "/contacts": "Контакты",
+      "/admin": "Админ",
     },
-    investor: "РРЅРІРµСЃС‚РѕСЂ",
-    owner: "Р’Р»Р°РґРµР»РµС†",
-    admin: "РђРґРјРёРЅ",
-    signOut: "Р’С‹Р№С‚Рё",
-    login: "Р’РѕР№С‚Рё",
-    footerDescription: "РџСЂРµРјРёР°Р»СЊРЅР°СЏ С†РёС„СЂРѕРІР°СЏ РїР»Р°С‚С„РѕСЂРјР° РёРЅРІРµСЃС‚РёС†РёР№ РІ Р·РµРјРµР»СЊРЅС‹Рµ СѓС‡Р°СЃС‚РєРё Alatau City.",
-    legal: "РџСЂР°РІРѕРІС‹Рµ",
+    investor: "Инвестор",
+    owner: "Владелец",
+    projects: "Проекты",
+    admin: "Админ",
+    signOut: "Выйти",
+    login: "Войти",
+    footerDescription: "Премиальная цифровая платформа инвестиций в земельные участки Alatau City.",
+    legal: "Правовые",
     faq: "FAQ",
-    support: "РџРѕРґРґРµСЂР¶РєР°",
+    support: "Поддержка",
   },
   KZ: {
-    brandSubtitle: "Р–РµСЂ РёРЅРІРµСЃС‚РёС†РёСЏ РїР»Р°С‚С„РѕСЂРјР°СЃС‹",
+    brandSubtitle: "Жер инвестиция платформасы",
     nav: {
-      "/": "Р‘Р°СЃС‚С‹ Р±РµС‚",
-      "/map": "РљР°СЂС‚Р°",
-      "/catalog": "РљР°С‚Р°Р»РѕРі",
-      "/pricing": "РўР°СЂРёС„С‚РµСЂ",
-      "/news": "Р–Р°ТЈР°Р»С‹Т›С‚Р°СЂ",
+      "/": "Басты бет",
+      "/map": "Карта",
+      "/catalog": "Каталог",
+      "/projects": "Жобалар",
+      "/pricing": "Тарифтер",
+      "/news": "Жаңалықтар",
       "/faq": "FAQ",
-      "/contacts": "Р‘Р°Р№Р»Р°РЅС‹СЃ",
-      "/admin": "УРєС–РјС€С–",
+      "/contacts": "Байланыс",
+      "/admin": "Әкімші",
     },
-    investor: "РРЅРІРµСЃС‚РѕСЂ",
-    owner: "Р–РµСЂ РёРµСЃС–",
-    admin: "УРєС–РјС€С–",
-    signOut: "РЁС‹Т“Сѓ",
-    login: "РљС–СЂСѓ",
-    footerDescription: "Alatau City Р¶РµСЂ СѓС‡Р°СЃРєРµР»РµСЂС–РЅРµ РёРЅРІРµСЃС‚РёС†РёСЏР»Р°СѓТ“Р° Р°СЂРЅР°Р»Т“Р°РЅ РїСЂРµРјРёСѓРј С†РёС„СЂР»С‹Т› РїР»Р°С‚С„РѕСЂРјР°.",
-    legal: "Р—Р°ТЈ",
+    investor: "Инвестор",
+    owner: "Жер иесі",
+    projects: "Жобалар",
+    admin: "Әкімші",
+    signOut: "Шығу",
+    login: "Кіру",
+    footerDescription: "Alatau City жер учаскелеріне инвестициялауға арналған премиум цифрлық платформа.",
+    legal: "Заң",
     faq: "FAQ",
-    support: "ТљРѕР»РґР°Сѓ",
+    support: "Қолдау",
   },
 };
 
@@ -164,7 +170,7 @@ export function SiteShell({ children }: { children: ReactNode }) {
                   {t.investor}
                 </Link>
                 <Link href="/cabinet/projects" className="btn btn-ghost">
-                  {lang === "RU" ? "РџСЂРѕРµРєС‚С‹" : lang === "KZ" ? "Р–РѕР±Р°Р»Р°СЂ" : "Projects"}
+                  {t.projects}
                 </Link>
                 {(role === "OWNER" || role === "ADMIN") && (
                   <Link href="/cabinet/owner" className="btn btn-ghost">
@@ -212,4 +218,3 @@ export function SiteShell({ children }: { children: ReactNode }) {
     </>
   );
 }
-
