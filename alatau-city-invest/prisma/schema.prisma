@@ -50,6 +50,14 @@ enum InvestorType {
   fund
 }
 
+enum BusinessProjectStatus {
+  submitted
+  under_review
+  needs_revision
+  approved
+  rejected
+}
+
 model User {
   id           String        @id @default(cuid())
   name         String?
@@ -67,6 +75,7 @@ model User {
   ownerPlans   OwnerPlan[]
   notifications Notification[]
   auditLogs     AuditLog[]   @relation("AuditActor")
+  businessProjects BusinessProject[]
 }
 
 model Plot {
@@ -174,6 +183,35 @@ model OwnerPlan {
   createdAt   DateTime @default(now())
 
   user User @relation(fields: [userId], references: [id])
+}
+
+model BusinessProject {
+  id                 String                @id @default(cuid())
+  createdAt          DateTime              @default(now())
+  updatedAt          DateTime              @updatedAt
+  status             BusinessProjectStatus @default(submitted)
+  moderationNote     String?
+  companyName        String
+  businessOverview   String
+  market             String
+  businessModel      String
+  traction           String
+  legalReadiness     String
+  financialForecasts String
+  investmentTerms    String
+  founderName        String
+  founderEmail       String
+  founderPhone       String
+  city               String?
+  website            String?
+  requestedAmount    Int?
+  minimumTicket      Int?
+
+  userId String?
+  user   User? @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([status, createdAt(sort: Desc)])
+  @@index([userId, createdAt(sort: Desc)])
 }
 
 model Account {

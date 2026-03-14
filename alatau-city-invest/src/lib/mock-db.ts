@@ -1,4 +1,14 @@
-import { Application, FaqItem, NewsItem, OwnerDraftPlotInput, Plot, PlotStatus, PricingPlan } from "@/lib/types";
+import {
+  Application,
+  BusinessProject,
+  BusinessProjectStatus,
+  FaqItem,
+  NewsItem,
+  OwnerDraftPlotInput,
+  Plot,
+  PlotStatus,
+  PricingPlan,
+} from "@/lib/types";
 
 const todayIso = new Date().toISOString().slice(0, 10);
 
@@ -334,8 +344,66 @@ const pricingPlans: PricingPlan[] = [
   },
 ];
 
+const baseBusinessProjects: BusinessProject[] = [
+  {
+    id: "BIZ-101",
+    createdAt: "2026-03-12T09:20:00.000Z",
+    updatedAt: "2026-03-12T09:20:00.000Z",
+    status: "approved",
+    moderationNote: "Published in small business projects section.",
+    companyName: "GreenBox Local Foods",
+    businessOverview:
+      "Neighborhood mini-store chain with fast delivery for daily groceries in Alatau City districts.",
+    market: "Urban grocery convenience retail in Alatau City",
+    businessModel:
+      "Margin on product sales plus subscription for same-day delivery and partner shelf placements.",
+    traction:
+      "Pilot point is operating 4 months. Average 210 orders/day, repeat rate 48%, positive unit economics.",
+    legalReadiness: "LLP registered, lease agreements signed, tax and accounting setup complete.",
+    financialForecasts:
+      "Revenue target: 420k USD year 1 and 710k USD year 2, EBITDA margin goal 14% by month 18.",
+    investmentTerms:
+      "Seeking 120k USD for 15% equity, investor reporting monthly, board observer right included.",
+    founderName: "Ayan Sadykov",
+    founderEmail: "founder@greenbox.kz",
+    founderPhone: "+7 700 555 1010",
+    city: "Alatau City",
+    website: "https://greenbox.example",
+    requestedAmount: 120000,
+    minimumTicket: 15000,
+  },
+  {
+    id: "BIZ-102",
+    createdAt: "2026-03-13T14:50:00.000Z",
+    updatedAt: "2026-03-13T14:50:00.000Z",
+    status: "under_review",
+    moderationNote: null,
+    companyName: "QuickFix Home Service",
+    businessOverview:
+      "Mobile platform for urgent home repair micro-services: electrician, plumbing, appliance fixes.",
+    market: "On-demand home repair services for apartments and small offices",
+    businessModel:
+      "Commission from each order plus contractor subscription for premium lead priority.",
+    traction:
+      "MVP app launched, 320 completed jobs, NPS 69, 140 active paying customers.",
+    legalReadiness: "Sole proprietorship active, service contracts template approved by legal advisor.",
+    financialForecasts:
+      "Projected GMV 260k USD in 12 months; break-even expected in month 10 at 1,100 orders/month.",
+    investmentTerms:
+      "Raising 60k USD via SAFE note with 2.8M USD valuation cap and 20% discount at next round.",
+    founderName: "Timur Nurpeisov",
+    founderEmail: "timur@quickfix.kz",
+    founderPhone: "+7 701 111 2233",
+    city: "Alatau City",
+    website: null,
+    requestedAmount: 60000,
+    minimumTicket: 5000,
+  },
+];
+
 let plots: Plot[] = [...basePlots];
 let applications: Application[] = [];
+let businessProjects: BusinessProject[] = [...baseBusinessProjects];
 
 function genId(prefix: string) {
   return `${prefix}-${Math.floor(Math.random() * 90000 + 10000)}`;
@@ -405,6 +473,79 @@ export function listPricingPlans() {
 
 export function listApplications() {
   return applications;
+}
+
+export function listBusinessProjects(filters?: {
+  status?: BusinessProjectStatus | "all";
+  search?: string;
+}) {
+  let result = [...businessProjects];
+
+  if (filters?.status && filters.status !== "all") {
+    result = result.filter((item) => item.status === filters.status);
+  }
+
+  if (filters?.search) {
+    const query = filters.search.toLowerCase();
+    result = result.filter(
+      (item) =>
+        item.companyName.toLowerCase().includes(query) ||
+        item.market.toLowerCase().includes(query) ||
+        item.businessOverview.toLowerCase().includes(query)
+    );
+  }
+
+  result.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+  return result;
+}
+
+export function getBusinessProjectById(id: string) {
+  return businessProjects.find((item) => item.id === id) ?? null;
+}
+
+export function createBusinessProject(
+  payload: Omit<
+    BusinessProject,
+    "id" | "createdAt" | "updatedAt" | "status" | "moderationNote"
+  >
+) {
+  const now = new Date().toISOString();
+  const next: BusinessProject = {
+    ...payload,
+    id: genId("BIZ"),
+    createdAt: now,
+    updatedAt: now,
+    status: "submitted",
+    moderationNote: null,
+  };
+
+  businessProjects = [next, ...businessProjects];
+  return next;
+}
+
+export function updateBusinessProjectStatus(payload: {
+  id: string;
+  status: BusinessProjectStatus;
+  moderationNote?: string | null;
+}) {
+  const current = businessProjects.find((item) => item.id === payload.id);
+  if (!current) {
+    return null;
+  }
+
+  const updated: BusinessProject = {
+    ...current,
+    status: payload.status,
+    moderationNote: payload.moderationNote ?? null,
+    updatedAt: new Date().toISOString(),
+  };
+
+  businessProjects = businessProjects.map((item) => (item.id === payload.id ? updated : item));
+
+  return {
+    updated,
+    previousStatus: current.status,
+  };
 }
 
 export function createApplication(

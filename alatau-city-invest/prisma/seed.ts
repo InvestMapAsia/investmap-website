@@ -236,6 +236,59 @@ const basePlots = [
   },
 ] as const;
 
+const baseBusinessProjects = [
+  {
+    id: "BIZ-101",
+    status: "approved",
+    moderationNote: "Published in small business projects section.",
+    companyName: "GreenBox Local Foods",
+    businessOverview:
+      "Neighborhood mini-store chain with fast delivery for daily groceries in Alatau City districts.",
+    market: "Urban grocery convenience retail in Alatau City",
+    businessModel:
+      "Margin on product sales plus subscription for same-day delivery and partner shelf placements.",
+    traction:
+      "Pilot point is operating 4 months. Average 210 orders/day, repeat rate 48%, positive unit economics.",
+    legalReadiness: "LLP registered, lease agreements signed, tax and accounting setup complete.",
+    financialForecasts:
+      "Revenue target: 420k USD year 1 and 710k USD year 2, EBITDA margin goal 14% by month 18.",
+    investmentTerms:
+      "Seeking 120k USD for 15% equity, investor reporting monthly, board observer right included.",
+    founderName: "Ayan Sadykov",
+    founderEmail: "founder@greenbox.kz",
+    founderPhone: "+7 700 555 1010",
+    city: "Alatau City",
+    website: "https://greenbox.example",
+    requestedAmount: 120000,
+    minimumTicket: 15000,
+  },
+  {
+    id: "BIZ-102",
+    status: "under_review",
+    moderationNote: null,
+    companyName: "QuickFix Home Service",
+    businessOverview:
+      "Mobile platform for urgent home repair micro-services: electrician, plumbing, appliance fixes.",
+    market: "On-demand home repair services for apartments and small offices",
+    businessModel:
+      "Commission from each order plus contractor subscription for premium lead priority.",
+    traction:
+      "MVP app launched, 320 completed jobs, NPS 69, 140 active paying customers.",
+    legalReadiness: "Sole proprietorship active, service contracts template approved by legal advisor.",
+    financialForecasts:
+      "Projected GMV 260k USD in 12 months; break-even expected in month 10 at 1,100 orders/month.",
+    investmentTerms:
+      "Raising 60k USD via SAFE note with 2.8M USD valuation cap and 20% discount at next round.",
+    founderName: "Timur Nurpeisov",
+    founderEmail: "timur@quickfix.kz",
+    founderPhone: "+7 701 111 2233",
+    city: "Alatau City",
+    website: null,
+    requestedAmount: 60000,
+    minimumTicket: 5000,
+  },
+] as const;
+
 async function main() {
   const adminPassword = await bcrypt.hash("Admin#2026", 10);
   const investorPassword = await bcrypt.hash("Investor#2026", 10);
@@ -285,6 +338,53 @@ async function main() {
         ...plot,
         source: PlotSource.platform,
         ownerId: plot.id === "AC-106" ? owner.id : admin.id,
+      },
+    });
+  }
+
+  for (const project of baseBusinessProjects) {
+    await prisma.businessProject.upsert({
+      where: { id: project.id },
+      update: {
+        status: project.status,
+        moderationNote: project.moderationNote,
+        companyName: project.companyName,
+        businessOverview: project.businessOverview,
+        market: project.market,
+        businessModel: project.businessModel,
+        traction: project.traction,
+        legalReadiness: project.legalReadiness,
+        financialForecasts: project.financialForecasts,
+        investmentTerms: project.investmentTerms,
+        founderName: project.founderName,
+        founderEmail: project.founderEmail,
+        founderPhone: project.founderPhone,
+        city: project.city,
+        website: project.website,
+        requestedAmount: project.requestedAmount,
+        minimumTicket: project.minimumTicket,
+        userId: project.id === "BIZ-101" ? owner.id : admin.id,
+      },
+      create: {
+        id: project.id,
+        status: project.status,
+        moderationNote: project.moderationNote,
+        companyName: project.companyName,
+        businessOverview: project.businessOverview,
+        market: project.market,
+        businessModel: project.businessModel,
+        traction: project.traction,
+        legalReadiness: project.legalReadiness,
+        financialForecasts: project.financialForecasts,
+        investmentTerms: project.investmentTerms,
+        founderName: project.founderName,
+        founderEmail: project.founderEmail,
+        founderPhone: project.founderPhone,
+        city: project.city,
+        website: project.website,
+        requestedAmount: project.requestedAmount,
+        minimumTicket: project.minimumTicket,
+        userId: project.id === "BIZ-101" ? owner.id : admin.id,
       },
     });
   }

@@ -3,16 +3,22 @@
 import { Role } from "@prisma/client";
 import {
   createApplication,
+  createBusinessProject,
   createOwnerPlot,
+  getBusinessProjectById,
   getPlotById,
   listAdminQueue,
   listApplications,
+  listBusinessProjects,
   listPlots,
+  updateBusinessProjectStatus,
   updatePlotStatus,
 } from "@/lib/mock-db";
 import {
   Application,
   AuditLogItem,
+  BusinessProject,
+  BusinessProjectStatus,
   NotificationItem,
   OwnerDraftPlotInput,
   PlotStatus,
@@ -27,6 +33,10 @@ type MockAuthUser = {
 };
 
 type MockApplicationRecord = Application & {
+  userId?: string;
+};
+
+type MockBusinessProjectRecord = BusinessProject & {
   userId?: string;
 };
 
@@ -62,6 +72,10 @@ const mockUsers: MockAuthUser[] = [
 ];
 
 const applicationOwners = new Map<string, string>();
+const businessProjectOwners = new Map<string, string>([
+  ["BIZ-101", "mock-owner"],
+  ["BIZ-102", "mock-investor"],
+]);
 const favoritesByUser = new Map<string, Set<string>>();
 const notificationsByUser = new Map<string, NotificationItem[]>();
 let auditLogs: AuditLogItem[] = [];
@@ -254,6 +268,105 @@ export function listMockAdminApplications() {
       userEmail: user?.email ?? row.email,
       userName: user?.name ?? row.investorName,
       userId: user?.id ?? null,
+    };
+  });
+}
+
+export function listMockBusinessProjects(payload: {
+  userId?: string;
+  role?: Role;
+  status?: BusinessProjectStatus | "all";
+  search?: string;
+}) {
+  const rows = listBusinessProjects({
+    status: payload.status ?? "all",
+    search: payload.search,
+  }) as MockBusinessProjectRecord[];
+
+  if (payload.role === "ADMIN" || payload.role === "MODERATOR") {
+    return rows;
+  }
+
+  if (!payload.userId) {
+    return rows.filter((row) => row.status === "approved");
+  }
+
+  return rows.filter(
+    (row) => row.status === "approved" || businessProjectOwners.get(row.id) === payload.userId
+  );
+}
+
+export function createMockBusinessProject(
+  payload: Omit<
+    BusinessProject,
+    "id" | "createdAt" | "updatedAt" | "status" | "moderationNote"
+  > & {
+    userId?: string;
+  }
+) {
+  const created = createBusinessProject({
+    companyName: payload.companyName,
+    businessOverview: payload.businessOverview,
+    market: payload.market,
+    businessModel: payload.businessModel,
+    traction: payload.traction,
+    legalReadiness: payload.legalReadiness,
+    financialForecasts: payload.financialForecasts,
+    investmentTerms: payload.investmentTerms,
+    founderName: payload.founderName,
+    founderEmail: payload.founderEmail,
+    founderPhone: payload.founderPhone,
+    city: payload.city,
+    website: payload.website,
+    requestedAmount: payload.requestedAmount,
+    minimumTicket: payload.minimumTicket,
+  }) as MockBusinessProjectRecord;
+
+  if (payload.userId) {
+    businessProjectOwners.set(created.id, payload.userId);
+  }
+
+  return created;
+}
+
+export function getMockBusinessProjectById(id: string) {
+  return getBusinessProjectById(id) as MockBusinessProjectRecord | null;
+}
+
+export function getMockBusinessProjectUser(id: string) {
+  const userId = businessProjectOwners.get(id);
+  if (!userId) return null;
+  return mockUsers.find((user) => user.id === userId) ?? null;
+}
+
+export function updateMockBusinessProjectStatus(payload: {
+  id: string;
+  status: BusinessProjectStatus;
+  moderationNote?: string | null;
+}) {
+  return updateBusinessProjectStatus({
+    id: payload.id,
+    status: payload.status,
+    moderationNote: payload.moderationNote ?? null,
+  });
+}
+
+export function listMockAdminBusinessProjects(payload?: {
+  status?: BusinessProjectStatus | "all";
+  search?: string;
+}) {
+  const rows = listBusinessProjects({
+    status: payload?.status ?? "all",
+    search: payload?.search,
+  }) as MockBusinessProjectRecord[];
+
+  return rows.map((row) => {
+    const user = getMockBusinessProjectUser(row.id);
+    return {
+      ...row,
+      userId: user?.id ?? null,
+      userEmail: user?.email ?? row.founderEmail,
+      userName: user?.name ?? row.founderName,
     };
   });
 }

@@ -20,6 +20,7 @@ export function OwnerDashboard() {
       activePlots: "Active owner plots",
       moderationQueue: "Moderation queue",
       addPlot: "Add plot",
+      addProject: "Add small project",
       pricing: "Pricing plans",
       analytics: "Owner analytics",
       views: "Total views",
@@ -43,6 +44,7 @@ export function OwnerDashboard() {
       activePlots: "Активные участки",
       moderationQueue: "Очередь модерации",
       addPlot: "Добавить участок",
+      addProject: "Добавить проект",
       pricing: "Тарифы",
       analytics: "Аналитика собственника",
       views: "Просмотры",
@@ -66,6 +68,7 @@ export function OwnerDashboard() {
       activePlots: "Белсенді учаскелер",
       moderationQueue: "Модерация кезегі",
       addPlot: "Учаске қосу",
+      addProject: "Жоба қосу",
       pricing: "Тарифтер",
       analytics: "Жер иесі аналитикасы",
       views: "Қаралым саны",
@@ -124,6 +127,9 @@ export function OwnerDashboard() {
           <div className="plot-actions" style={{ marginTop: 12 }}>
             <Link className="btn btn-primary" href="/owner/add-plot">
               {t.addPlot}
+            </Link>
+            <Link className="btn btn-ghost" href="/projects/submit">
+              {t.addProject}
             </Link>
             <Link className="btn btn-ghost" href="/pricing">
               {t.pricing}
@@ -199,3 +205,4 @@ export function OwnerDashboard() {
     </>
   );
 }
+

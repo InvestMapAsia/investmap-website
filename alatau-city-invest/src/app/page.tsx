@@ -21,6 +21,7 @@ export default function HomePage() {
       openMap: "Open map",
       browseCatalog: "Browse catalog",
       addLand: "Add your land",
+      smallProjects: "Small projects",
       legallyVerified: "Legally verified lots",
       moderationSla: "Moderation SLA",
       averageForecastRoi: "Average forecast ROI",
@@ -58,6 +59,7 @@ export default function HomePage() {
       openMap: "Открыть карту",
       browseCatalog: "Открыть каталог",
       addLand: "Добавить участок",
+      smallProjects: "Малые проекты",
       legallyVerified: "Юридически проверенные участки",
       moderationSla: "SLA модерации",
       averageForecastRoi: "Средний прогноз ROI",
@@ -95,6 +97,7 @@ export default function HomePage() {
       openMap: "Картаны ашу",
       browseCatalog: "Каталогты ашу",
       addLand: "Учаске қосу",
+      smallProjects: "Шағын жобалар",
       legallyVerified: "Заңды тексерілген учаскелер",
       moderationSla: "Модерация SLA",
       averageForecastRoi: "Орташа болжам ROI",
@@ -143,6 +146,9 @@ export default function HomePage() {
               </Link>
               <Link className="btn btn-accent" href="/owner/add-plot">
                 {t.addLand}
+              </Link>
+              <Link className="btn btn-ghost" href="/projects">
+                {t.smallProjects}
               </Link>
             </div>
           </div>
@@ -259,3 +265,4 @@ export default function HomePage() {
     </div>
   );
 }
+

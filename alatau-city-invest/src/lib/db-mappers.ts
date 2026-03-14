@@ -1,11 +1,18 @@
-﻿import {
+import {
   Plot as PrismaPlot,
   Application as PrismaApplication,
   Notification as PrismaNotification,
   AuditLog as PrismaAuditLog,
+  BusinessProject as PrismaBusinessProject,
   Prisma,
 } from "@prisma/client";
-import { Application, AuditLogItem, NotificationItem, Plot } from "@/lib/types";
+import {
+  Application,
+  AuditLogItem,
+  BusinessProject,
+  NotificationItem,
+  Plot,
+} from "@/lib/types";
 
 function toStringArray(value: Prisma.JsonValue): string[] {
   if (!Array.isArray(value)) return [];
@@ -81,5 +88,30 @@ export function normalizeAuditLog(row: PrismaAuditLog): AuditLogItem {
     actorRole: row.actorRole ?? null,
     actorUserId: row.actorUserId ?? null,
     details: row.details ?? null,
+  };
+}
+
+export function normalizeBusinessProject(row: PrismaBusinessProject): BusinessProject {
+  return {
+    id: row.id,
+    createdAt: row.createdAt.toISOString(),
+    updatedAt: row.updatedAt.toISOString(),
+    status: row.status,
+    moderationNote: row.moderationNote ?? null,
+    companyName: row.companyName,
+    businessOverview: row.businessOverview,
+    market: row.market,
+    businessModel: row.businessModel,
+    traction: row.traction,
+    legalReadiness: row.legalReadiness,
+    financialForecasts: row.financialForecasts,
+    investmentTerms: row.investmentTerms,
+    founderName: row.founderName,
+    founderEmail: row.founderEmail,
+    founderPhone: row.founderPhone,
+    city: row.city ?? undefined,
+    website: row.website ?? null,
+    requestedAmount: row.requestedAmount ?? null,
+    minimumTicket: row.minimumTicket ?? null,
   };
 }

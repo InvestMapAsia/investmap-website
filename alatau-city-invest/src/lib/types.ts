@@ -58,6 +58,36 @@ export interface Application {
   sourceOfFunds: string;
 }
 
+export type BusinessProjectStatus =
+  | "submitted"
+  | "under_review"
+  | "needs_revision"
+  | "approved"
+  | "rejected";
+
+export interface BusinessProject {
+  id: string;
+  createdAt: string;
+  updatedAt?: string;
+  status: BusinessProjectStatus;
+  moderationNote?: string | null;
+  companyName: string;
+  businessOverview: string;
+  market: string;
+  businessModel: string;
+  traction: string;
+  legalReadiness: string;
+  financialForecasts: string;
+  investmentTerms: string;
+  founderName: string;
+  founderEmail: string;
+  founderPhone: string;
+  city?: string;
+  website?: string | null;
+  requestedAmount?: number | null;
+  minimumTicket?: number | null;
+}
+
 export interface NotificationItem {
   id: string;
   createdAt: string;
