@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import Image from "next/image";
 import Link from "next/link";
@@ -154,7 +154,7 @@ export function SiteShell({ children }: { children: ReactNode }) {
             <span className="brand-logo">
               <Image
                 src="/alatau-logo.png"
-                alt="Alatau City Invest logo"
+                alt="InvestMap logo"
                 fill
                 sizes="56px"
                 style={{ objectFit: "contain" }}
@@ -162,7 +162,7 @@ export function SiteShell({ children }: { children: ReactNode }) {
               />
             </span>
             <span className="brand-text">
-              <span className="brand-title">Alatau City Invest</span>
+              <span className="brand-title">InvestMap</span>
               <span className="brand-subtitle">{t.brandSubtitle}</span>
             </span>
           </Link>
@@ -242,7 +242,7 @@ export function SiteShell({ children }: { children: ReactNode }) {
       <footer className="site-footer">
         <div className="container footer-inner">
           <div>
-            <strong>Alatau City Invest</strong>
+            <strong>InvestMap</strong>
             <p className="muted">{t.footerDescription}</p>
           </div>
           <div className="footer-links">

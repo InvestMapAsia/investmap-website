@@ -12,7 +12,7 @@ type EmailSendResult = {
 
 export async function sendEmail(payload: SendEmailPayload): Promise<EmailSendResult> {
   const resendApiKey = process.env.RESEND_API_KEY;
-  const from = process.env.EMAIL_FROM ?? "Alatau City Invest <no-reply@alatau.city>";
+  const from = process.env.EMAIL_FROM ?? "InvestMap <no-reply@investmap.asia>";
 
   if (!resendApiKey) {
     console.info("[email] No RESEND_API_KEY configured. Email preview fallback enabled.", {

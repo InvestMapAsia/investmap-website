@@ -15,9 +15,9 @@ const notoSerif = Noto_Serif({
 });
 
 export const metadata: Metadata = {
-  title: "Alatau City Invest",
+  title: "InvestMap",
   description:
-    "Premium multilingual investment platform for land plots in Alatau City with map, analytics, AI assistant, owner and investor cabinets.",
+    "Premium multilingual investment platform for land plots in Alatau City with map, analytics, AI assistant, owner and investor cabinets by InvestMap.",
 };
 
 export default function RootLayout({

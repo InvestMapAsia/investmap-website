@@ -41,17 +41,17 @@ export default function ContactsPage() {
         <article className="card">
           <h3 className="card-title">{t.investDesk}</h3>
           <p className="muted">+7 (700) 100-20-30</p>
-          <p className="muted">invest@alatau-city-invest.com</p>
+          <p className="muted">invest@investmap.asia</p>
         </article>
         <article className="card">
           <h3 className="card-title">{t.legalDesk}</h3>
           <p className="muted">+7 (700) 100-20-31</p>
-          <p className="muted">legal@alatau-city-invest.com</p>
+          <p className="muted">legal@investmap.asia</p>
         </article>
         <article className="card">
           <h3 className="card-title">{t.supportDesk}</h3>
           <p className="muted">+7 (700) 100-20-32</p>
-          <p className="muted">support@alatau-city-invest.com</p>
+          <p className="muted">support@investmap.asia</p>
         </article>
       </section>
 

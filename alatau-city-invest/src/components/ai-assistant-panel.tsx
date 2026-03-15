@@ -22,7 +22,7 @@ export function AIAssistantPanel() {
   const t = pickLang(lang, {
     EN: {
       greeting:
-        "Hello. I am Alatau City Invest AI assistant. Share your goal and I will shortlist plots by ROI, legal profile and risk.",
+        "Hello. I am InvestMap AI assistant. Share your goal and I will shortlist plots by ROI, legal profile and risk.",
       tempError: "Temporary AI error. Please try again or contact support.",
       thinking: "Thinking...",
       placeholder: "For example: show medium-risk plots under 600k",
@@ -39,7 +39,7 @@ export function AIAssistantPanel() {
     },
     RU: {
       greeting:
-        "Здравствуйте. Я AI-ассистент Alatau City Invest. Опишите цель, и я подберу участки по ROI, юридическому профилю и риску.",
+        "Здравствуйте. Я AI-ассистент InvestMap. Опишите цель, и я подберу участки по ROI, юридическому профилю и риску.",
       tempError: "Временная ошибка AI. Попробуйте снова или обратитесь в поддержку.",
       thinking: "AI анализирует...",
       placeholder: "Например: покажи участки со средним риском до 600k",
@@ -56,7 +56,7 @@ export function AIAssistantPanel() {
     },
     KZ: {
       greeting:
-        "Сәлеметсіз бе. Мен Alatau City Invest AI-ассистентімін. Мақсатыңызды айтыңыз, мен ROI, заң профилі және тәуекел бойынша учаскелерді ұсынамын.",
+        "Сәлеметсіз бе. Мен InvestMap AI-ассистентімін. Мақсатыңызды айтыңыз, мен ROI, заң профилі және тәуекел бойынша учаскелерді ұсынамын.",
       tempError: "AI уақытша қатесі. Қайта көріңіз немесе қолдауға жазыңыз.",
       thinking: "AI талдап жатыр...",
       placeholder: "Мысалы: тәуекелі орташа, бағасы 600k дейінгі учаскелерді көрсет",

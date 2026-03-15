@@ -64,7 +64,7 @@ export async function POST(request: NextRequest) {
 
     const emailResult = await sendEmail({
       to: user.email,
-      subject: "Confirm your email - Alatau City Invest",
+      subject: "Confirm your email - InvestMap",
       html: emailHtml,
     });
 
@@ -149,7 +149,7 @@ export async function POST(request: NextRequest) {
 
   const emailResult = await sendEmail({
     to: user.email,
-    subject: "Confirm your email - Alatau City Invest",
+    subject: "Confirm your email - InvestMap",
     html: emailHtml,
   });
 

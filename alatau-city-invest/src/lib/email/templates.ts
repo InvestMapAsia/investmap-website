@@ -1,4 +1,4 @@
-﻿import { ApplicationStatus } from "@prisma/client";
+import { ApplicationStatus } from "@prisma/client";
 
 const statusLabel: Record<ApplicationStatus, string> = {
   draft: "Draft",
@@ -30,7 +30,7 @@ export function buildApplicationStatusEmailTemplate(payload: {
           <table role="presentation" width="640" cellpadding="0" cellspacing="0" style="background:#ffffff;border:1px solid #d9d2c5;border-radius:14px;overflow:hidden;">
             <tr>
               <td style="background:linear-gradient(145deg,#0c3347 0%,#0f5a73 100%);padding:18px 22px;color:#fff;">
-                <h1 style="margin:0;font-size:20px;line-height:1.2;">Alatau City Invest</h1>
+                <h1 style="margin:0;font-size:20px;line-height:1.2;">InvestMap</h1>
                 <p style="margin:8px 0 0;font-size:13px;opacity:.9;">Application status update</p>
               </td>
             </tr>
@@ -70,7 +70,7 @@ export function buildEmailVerificationTemplate(payload: {
           <table role="presentation" width="640" cellpadding="0" cellspacing="0" style="background:#ffffff;border:1px solid #d9d2c5;border-radius:14px;overflow:hidden;">
             <tr>
               <td style="background:linear-gradient(145deg,#0c3347 0%,#0f5a73 100%);padding:18px 22px;color:#fff;">
-                <h1 style="margin:0;font-size:20px;line-height:1.2;">Alatau City Invest</h1>
+                <h1 style="margin:0;font-size:20px;line-height:1.2;">InvestMap</h1>
                 <p style="margin:8px 0 0;font-size:13px;opacity:.9;">Email confirmation</p>
               </td>
             </tr>
