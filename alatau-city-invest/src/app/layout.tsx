@@ -13,6 +13,15 @@ export const metadata: Metadata = {
   title: "InvestMap",
   description:
     "Premium multilingual investment platform for land plots in Alatau City with map, analytics, AI assistant, owner and investor cabinets by InvestMap.",
+  icons: {
+    icon: [
+      { url: "/icon.png", type: "image/png", sizes: "32x32" },
+      { url: "/icon.png", type: "image/png", sizes: "192x192" },
+      { url: "/icon.png", type: "image/png", sizes: "512x512" },
+    ],
+    shortcut: "/icon.png",
+    apple: [{ url: "/apple-icon.png", sizes: "180x180", type: "image/png" }],
+  },
 };
 
 export default function RootLayout({
