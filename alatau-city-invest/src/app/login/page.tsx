@@ -29,12 +29,12 @@ export default function LoginPage() {
       sub: "Role-based authentication for investor, owner and administrator zones.",
     },
     RU: {
-      title: "Account access",
-      sub: "Role-based authentication for investor, owner and administrator zones.",
+      title: "Доступ к аккаунту",
+      sub: "Ролевая аутентификация для зон инвестора, собственника и администратора.",
     },
     KZ: {
-      title: "Account access",
-      sub: "Role-based authentication for investor, owner and administrator zones.",
+      title: "Аккаунтқа кіру",
+      sub: "Инвестор, жер иесі және әкімші аймақтарына арналған рөлдік аутентификация.",
     },
   });
 
