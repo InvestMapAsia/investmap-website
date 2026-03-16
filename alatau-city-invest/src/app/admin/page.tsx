@@ -9,7 +9,7 @@ export default function AdminPage() {
   const t = pickLang(lang, {
     EN: {
       title: "Administrative panel",
-      sub: "Moderation, legal incidents, owner listings, small projects and inventory control in one workspace.",
+      sub: "Moderation, legal incidents, owner listings, projects and inventory control in one workspace.",
       sla: "Operational SLA",
       firstResponse: "Application first response",
       in2h: "Within 2 hours",
@@ -23,7 +23,7 @@ export default function AdminPage() {
     },
     RU: {
       title: "Административная панель",
-      sub: "Модерация, юридические инциденты, листинги собственников, малые проекты и контроль инвентаря в одном окне.",
+      sub: "Модерация, юридические инциденты, листинги собственников, проекты и контроль инвентаря в одном окне.",
       sla: "Операционный SLA",
       firstResponse: "Первичный ответ по заявке",
       in2h: "В течение 2 часов",
@@ -37,7 +37,7 @@ export default function AdminPage() {
     },
     KZ: {
       title: "Әкімшілік панель",
-      sub: "Модерация, заңдық инциденттер, жер иелері листингтері, шағын жобалар және инвентарь бақылауы бір кеңістікте.",
+      sub: "Модерация, заңдық инциденттер, жер иелері листингтері, жобалар және инвентарь бақылауы бір кеңістікте.",
       sla: "Операциялық SLA",
       firstResponse: "Өтінімге алғашқы жауап",
       in2h: "2 сағат ішінде",

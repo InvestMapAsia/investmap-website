@@ -20,7 +20,7 @@ export function OwnerDashboard() {
       activePlots: "Active owner plots",
       moderationQueue: "Moderation queue",
       addPlot: "Add plot",
-      addProject: "Add small project",
+      addProject: "Add project",
       pricing: "Pricing plans",
       analytics: "Owner analytics",
       views: "Total views",

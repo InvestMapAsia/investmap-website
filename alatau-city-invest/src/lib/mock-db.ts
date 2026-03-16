@@ -350,7 +350,7 @@ const baseBusinessProjects: BusinessProject[] = [
     createdAt: "2026-03-12T09:20:00.000Z",
     updatedAt: "2026-03-12T09:20:00.000Z",
     status: "approved",
-    moderationNote: "Published in small business projects section.",
+    moderationNote: "Published in projects section.",
     companyName: "GreenBox Local Foods",
     businessOverview:
       "Neighborhood mini-store chain with fast delivery for daily groceries in Alatau City districts.",

@@ -35,8 +35,8 @@ export function ProjectsMarketplace() {
 
   const t = pickLang(lang, {
     EN: {
-      title: "Small business projects",
-      sub: "Add and discover ordinary small projects that need investment: from idea to first traction.",
+      title: "Projects",
+      sub: "Add and discover projects that need investment: from idea to first traction.",
       create: "Submit a project",
       cabinet: "Project cabinet",
       loginToSubmit: "Sign in to submit",
@@ -66,8 +66,8 @@ export function ProjectsMarketplace() {
       resetBtn: "Reset",
     },
     RU: {
-      title: "Малые бизнес-проекты",
-      sub: "Размещайте и изучайте обычные небольшие проекты для инвестиций: от идеи до первых результатов.",
+      title: "Проекты",
+      sub: "Размещайте и изучайте проекты для инвестиций: от идеи до первых результатов.",
       create: "Подать проект",
       cabinet: "Кабинет проектов",
       loginToSubmit: "Войти для подачи",
@@ -97,8 +97,8 @@ export function ProjectsMarketplace() {
       resetBtn: "Сброс",
     },
     KZ: {
-      title: "Шағын бизнес жобалары",
-      sub: "Инвестицияға арналған кәдімгі шағын жобаларды орналастырып, идеядан алғашқы нәтижеге дейін бақылаңыз.",
+      title: "Жобалар",
+      sub: "Инвестицияға арналған жобаларды орналастырып, идеядан алғашқы нәтижеге дейін бақылаңыз.",
       create: "Жобаны жіберу",
       cabinet: "Жоба кабинеті",
       loginToSubmit: "Жіберу үшін кіру",

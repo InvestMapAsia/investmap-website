@@ -8,15 +8,15 @@ export default function ProjectSubmitPage() {
   const { lang } = useCurrentLanguage();
   const t = pickLang(lang, {
     EN: {
-      title: "Submit a small project",
+      title: "Submit a project",
       sub: "Complete all criteria so investors can quickly evaluate business quality, legal readiness and terms.",
     },
     RU: {
-      title: "Подача малого проекта",
+      title: "Подача проекта",
       sub: "Заполните все критерии, чтобы инвесторы быстро оценили качество бизнеса, юридическую готовность и условия.",
     },
     KZ: {
-      title: "Шағын жобаны жіберу",
+      title: "Жобаны жіберу",
       sub: "Инвесторлар жоба сапасын, заңдық дайындығын және шарттарын тез бағалауы үшін барлық критерийді толтырыңыз.",
     },
   });

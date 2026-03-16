@@ -240,7 +240,7 @@ const baseBusinessProjects = [
   {
     id: "BIZ-101",
     status: "approved",
-    moderationNote: "Published in small business projects section.",
+    moderationNote: "Published in projects section.",
     companyName: "GreenBox Local Foods",
     businessOverview:
       "Neighborhood mini-store chain with fast delivery for daily groceries in Alatau City districts.",

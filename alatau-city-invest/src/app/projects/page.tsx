@@ -9,15 +9,15 @@ export default function ProjectsPage() {
   const t = pickLang(lang, {
     EN: {
       title: "Business projects marketplace",
-      sub: "A dedicated area for ordinary small projects that seek investor capital on transparent terms.",
+      sub: "A dedicated area for projects that seek investor capital on transparent terms.",
     },
     RU: {
       title: "Витрина бизнес-проектов",
-      sub: "Отдельный раздел для обычных небольших проектов, которые ищут инвестиции на прозрачных условиях.",
+      sub: "Отдельный раздел для проектов, которые ищут инвестиции на прозрачных условиях.",
     },
     KZ: {
       title: "Бизнес-жобалар витринасы",
-      sub: "Инвестиция іздейтін кәдімгі шағын жобаларға арналған ашық және түсінікті бөлім.",
+      sub: "Инвестиция іздейтін жобаларға арналған ашық және түсінікті бөлім.",
     },
   });
 

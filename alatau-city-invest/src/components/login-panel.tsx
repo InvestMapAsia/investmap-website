@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { FormEvent, useMemo, useState } from "react";
 import { signIn } from "next-auth/react";
@@ -66,8 +66,7 @@ export function LoginPanel({
             "Registration completed, but verification email was not sent. Contact support.",
           verifySuccess: "Email confirmed. You can now sign in.",
           verifyInvalid: "Verification link is invalid.",
-          verifyExpired:
-            "Verification link has expired. Enter your email and request a new one.",
+          verifyExpired: "Verification link has expired. Enter your email and request a new one.",
           resend: "Resend verification email",
           resendWait: "Sending...",
           resendNeedEmail: "Enter your email first, then request a new verification link.",
@@ -138,7 +137,7 @@ export function LoginPanel({
           invalid: "Кіру деректері қате.",
           emailNotVerified: "Алдымен email-ды растаңыз. Поштаңызды тексеріп, қайта кіріңіз.",
           regFailed: "Тіркелу қатесі.",
-          regSuccess: "Тіркелу сәтті. Аккаунтты растау үшін поштаны тексеріңіз.",
+          regSuccess: "Тіркелу сәтті. Аккаунтты растау үшін поштаңызды тексеріңіз.",
           regSuccessPreview:
             "Тіркелу сәтті. Пошта провайдері бапталмаған, төмендегі сілтемені қолданыңыз.",
           regNoEmail:
