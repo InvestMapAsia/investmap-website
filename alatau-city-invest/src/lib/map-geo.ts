@@ -1,8 +1,8 @@
 export const ALATAU_BOUNDS = {
-  minLat: 43.14,
-  maxLat: 43.36,
-  minLng: 76.8,
-  maxLng: 77.2,
+  minLat: 43.643919,
+  maxLat: 43.718018,
+  minLng: 77.083115,
+  maxLng: 77.144073,
 } as const;
 
 const MAP_PADDING_PERCENT = 10;
@@ -46,4 +46,3 @@ export function latLngToMapPoint(latInput?: unknown, lngInput?: unknown) {
 
   return { x, y };
 }
-
