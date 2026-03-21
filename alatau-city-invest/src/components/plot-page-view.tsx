@@ -87,6 +87,24 @@ export function PlotPageView({ plot, similar }: { plot: Plot; similar: Plot[] })
     },
   });
 
+  const shareT = pickLang(lang, {
+    EN: {
+      share: "Share",
+      shareSuccess: "Link copied. You can now share it.",
+      shareFail: "Could not share this page.",
+    },
+    RU: {
+      share: "Поделиться",
+      shareSuccess: "Ссылка скопирована. Можно отправлять.",
+      shareFail: "Не удалось поделиться этой страницей.",
+    },
+    KZ: {
+      share: "Бөлісу",
+      shareSuccess: "Сілтеме көшірілді. Енді жіберуге болады.",
+      shareFail: "Бұл бетті бөлісу мүмкін болмады.",
+    },
+  });
+
   const legalGradeLabel = {
     a_plus: t.legalAPlus,
     a: t.legalA,
@@ -101,6 +119,35 @@ export function PlotPageView({ plot, similar }: { plot: Plot; similar: Plot[] })
   if (plot.riskScore > 45) {
     riskNote = t.riskHigh;
   }
+
+  const handleShare = async () => {
+    const shareUrl = typeof window !== "undefined" ? window.location.href : "";
+
+    try {
+      if (typeof navigator !== "undefined" && navigator.share) {
+        await navigator.share({
+          title: plot.title,
+          text: `${plot.title} (${plot.id})`,
+          url: shareUrl,
+        });
+        return;
+      }
+
+      if (typeof navigator !== "undefined" && navigator.clipboard?.writeText) {
+        await navigator.clipboard.writeText(shareUrl);
+        if (typeof window !== "undefined") {
+          window.alert(shareT.shareSuccess);
+        }
+        return;
+      }
+
+      throw new Error("No available share method");
+    } catch {
+      if (typeof window !== "undefined") {
+        window.alert(shareT.shareFail);
+      }
+    }
+  };
 
   return (
     <div className="container">
@@ -146,6 +193,9 @@ export function PlotPageView({ plot, similar }: { plot: Plot; similar: Plot[] })
             <Link className="btn btn-accent" href={`/invest?plot=${plot.id}`}>
               {t.invest}
             </Link>
+            <button className="btn btn-ghost" type="button" onClick={handleShare}>
+              {shareT.share}
+            </button>
             <Link className="btn btn-ghost" href="/ai-assistant">
               {t.openAi}
             </Link>
