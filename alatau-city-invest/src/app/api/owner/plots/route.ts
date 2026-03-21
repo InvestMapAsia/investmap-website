@@ -9,25 +9,6 @@ import { createMockOwnerPlot, listMockOwnerPlots } from "@/lib/mock-store";
 import { createInAppNotification } from "@/lib/notifications";
 import { prisma } from "@/lib/prisma";
 
-function normalizeStringArray(value: unknown) {
-  if (Array.isArray(value)) {
-    const result = value
-      .map((item) => (typeof item === "string" ? item.trim() : ""))
-      .filter((item) => item.length > 0);
-    return result.length ? result : undefined;
-  }
-
-  if (typeof value === "string") {
-    const result = value
-      .split(/\r?\n|,/g)
-      .map((item) => item.trim())
-      .filter((item) => item.length > 0);
-    return result.length ? result : undefined;
-  }
-
-  return undefined;
-}
-
 function normalizeOptionalNumber(value: unknown) {
   if (value === null || value === undefined || value === "") return undefined;
   const next = Number(value);
@@ -133,7 +114,6 @@ export async function POST(request: NextRequest) {
     legalOwnerType?: string;
     hasUtilities?: boolean;
     description?: string;
-    mediaUrls?: string[] | string;
     mapAddress?: string;
     mapLat?: number | string;
     mapLng?: number | string;
@@ -144,6 +124,9 @@ export async function POST(request: NextRequest) {
   const roi = normalizeOptionalNumber(body.roi);
   const irr = normalizeOptionalNumber(body.irr);
   const distanceCenterKm = normalizeOptionalNumber(body.distanceCenterKm);
+  const mapLat = normalizeOptionalNumber(body.mapLat);
+  const mapLng = normalizeOptionalNumber(body.mapLng);
+  const mapPoint = mapPointFromCoordinates(mapLat, mapLng);
 
   if (
     !body.title ||
@@ -157,11 +140,6 @@ export async function POST(request: NextRequest) {
   ) {
     return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
   }
-
-  const mapLat = normalizeOptionalNumber(body.mapLat);
-  const mapLng = normalizeOptionalNumber(body.mapLng);
-  const mapPoint = mapPointFromCoordinates(mapLat, mapLng);
-  const mediaUrls = normalizeStringArray(body.mediaUrls);
 
   const qualityScore = scoreOwnerListing({
     title: body.title,
@@ -190,7 +168,6 @@ export async function POST(request: NextRequest) {
         legalOwnerType: body.legalOwnerType,
         hasUtilities: Boolean(body.hasUtilities),
         description: body.description,
-        mediaUrls,
         mapAddress: normalizeOptionalText(body.mapAddress),
         mapLat,
         mapLng,
@@ -260,7 +237,6 @@ export async function POST(request: NextRequest) {
         ownerType: body.legalOwnerType,
         docs: ["Owner provided package"],
         timeline: ["Moderation pending"],
-        mediaUrls,
         mapAddress: normalizeOptionalText(body.mapAddress),
         mapLat,
         mapLng,

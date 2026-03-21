@@ -15,13 +15,6 @@ type ApiErrorResponse = {
   detail?: string;
 };
 
-function parseMediaLinks(input: string) {
-  return input
-    .split(/\r?\n|,/g)
-    .map((item) => item.trim())
-    .filter((item) => item.length > 0);
-}
-
 function parseNumberValue(value: string) {
   const normalized = value.trim().replace(",", ".");
   if (!normalized) return undefined;
@@ -44,7 +37,6 @@ export function OwnerAddPlotForm() {
     legalOwnerType: "Individual",
     hasUtilities: true,
     description: "",
-    mediaLinks: "",
     mapAddress: "",
     mapLat: "",
     mapLng: "",
@@ -68,7 +60,6 @@ export function OwnerAddPlotForm() {
       legalOwnerType: "Legal owner type",
       utilitiesConfirmed: "Utilities confirmed",
       description: "Description",
-      mediaLinks: "Photo/video links (one URL per line)",
       mapAddress: "Map address or place",
       mapLat: "Latitude",
       mapLng: "Longitude",
@@ -112,7 +103,6 @@ export function OwnerAddPlotForm() {
       legalOwnerType: "Тип владельца",
       utilitiesConfirmed: "Коммуникации подтверждены",
       description: "Описание",
-      mediaLinks: "Ссылки на фото/видео (по одной в строке)",
       mapAddress: "Адрес или точка на карте",
       mapLat: "Широта",
       mapLng: "Долгота",
@@ -156,7 +146,6 @@ export function OwnerAddPlotForm() {
       legalOwnerType: "Иесінің құқықтық түрі",
       utilitiesConfirmed: "Коммуникация расталған",
       description: "Сипаттама",
-      mediaLinks: "Фото/видео сілтемелері (әр жолға біреуі)",
       mapAddress: "Картадағы мекенжай немесе нүкте",
       mapLat: "Ендік",
       mapLng: "Бойлық",
@@ -188,8 +177,6 @@ export function OwnerAddPlotForm() {
     },
   });
 
-  const mediaLinks = useMemo(() => parseMediaLinks(form.mediaLinks), [form.mediaLinks]);
-
   const score = useMemo(() => {
     let next = 0;
     if (form.title.trim().length > 3) next += 10;
@@ -201,10 +188,9 @@ export function OwnerAddPlotForm() {
     if (form.legalOwnerType.trim().length > 1) next += 10;
     if (form.hasUtilities) next += 10;
     if (form.description.trim().length > 120) next += 16;
-    if (mediaLinks.length > 0) next += 2;
     if (form.mapLat.trim().length > 0 && form.mapLng.trim().length > 0) next += 2;
     return Math.min(100, next);
-  }, [form, mediaLinks.length]);
+  }, [form]);
 
   const googleMapUrl = useMemo(() => {
     if (form.mapLat && form.mapLng) {
@@ -256,7 +242,6 @@ export function OwnerAddPlotForm() {
         legalOwnerType: form.legalOwnerType,
         hasUtilities: form.hasUtilities,
         description: form.description,
-        mediaUrls: mediaLinks,
         mapAddress: form.mapAddress || undefined,
         mapLat,
         mapLng,
@@ -310,7 +295,6 @@ export function OwnerAddPlotForm() {
       legalOwnerType: "Individual",
       hasUtilities: true,
       description: "",
-      mediaLinks: "",
       mapAddress: "",
       mapLat: "",
       mapLng: "",
@@ -450,16 +434,6 @@ export function OwnerAddPlotForm() {
                 required
               />
             </div>
-
-            <div className="form-field" style={{ gridColumn: "1 / -1" }}>
-              <label>{t.mediaLinks}</label>
-              <textarea
-                value={form.mediaLinks}
-                onChange={(event) => setForm((prev) => ({ ...prev, mediaLinks: event.target.value }))}
-                placeholder="https://..."
-              />
-            </div>
-
             <div className="form-field" style={{ gridColumn: "1 / -1" }}>
               <label>{t.mapAddress}</label>
               <input
