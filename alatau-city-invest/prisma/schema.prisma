@@ -102,6 +102,10 @@ model Plot {
   updatedAt        DateTime    @updatedAt
   docs             Json
   timeline         Json
+  mediaUrls        Json?
+  mapAddress       String?
+  mapLat           Float?
+  mapLng           Float?
   source           PlotSource  @default(platform)
   createdAt        DateTime    @default(now())
 
@@ -207,6 +211,10 @@ model BusinessProject {
   website            String?
   requestedAmount    Int?
   minimumTicket      Int?
+  mediaUrls          Json?
+  mapAddress         String?
+  mapLat             Float?
+  mapLng             Float?
 
   userId String?
   user   User? @relation(fields: [userId], references: [id], onDelete: SetNull)

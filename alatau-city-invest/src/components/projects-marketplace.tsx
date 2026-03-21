@@ -64,6 +64,12 @@ export function ProjectsMarketplace() {
       openSubmit: "Open submit form",
       searchBtn: "Search",
       resetBtn: "Reset",
+      share: "Share",
+      shareSuccess: "Project link copied.",
+      shareFail: "Could not share project link.",
+      media: "Media",
+      openMap: "Map point",
+      linksWord: "links",
     },
     RU: {
       title: "Проекты",
@@ -95,6 +101,12 @@ export function ProjectsMarketplace() {
       openSubmit: "Открыть форму подачи",
       searchBtn: "Поиск",
       resetBtn: "Сброс",
+      share: "Поделиться",
+      shareSuccess: "Ссылка на проект скопирована.",
+      shareFail: "Не удалось поделиться ссылкой.",
+      media: "Медиа",
+      openMap: "Точка на карте",
+      linksWord: "ссылок",
     },
     KZ: {
       title: "Жобалар",
@@ -126,6 +138,12 @@ export function ProjectsMarketplace() {
       openSubmit: "Жіберу формасын ашу",
       searchBtn: "Іздеу",
       resetBtn: "Тазарту",
+      share: "Бөлісу",
+      shareSuccess: "Жоба сілтемесі көшірілді.",
+      shareFail: "Сілтемені бөлісу мүмкін болмады.",
+      media: "Медиа",
+      openMap: "Карта нүктесі",
+      linksWord: "сілтеме",
     },
   });
 
@@ -180,6 +198,37 @@ export function ProjectsMarketplace() {
       requested: rows.reduce((sum, item) => sum + Number(item.requestedAmount ?? 0), 0),
     };
   }, [rows]);
+
+  const buildGoogleMapUrl = (project: ProjectRow) => {
+    if (project.mapLat !== undefined && project.mapLng !== undefined) {
+      return `https://www.google.com/maps?q=${encodeURIComponent(`${project.mapLat},${project.mapLng}`)}`;
+    }
+    if (project.mapAddress) {
+      return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(project.mapAddress)}`;
+    }
+    return null;
+  };
+
+  const handleShare = async (project: ProjectRow) => {
+    const shareUrl = `${window.location.origin}/projects#project-${project.id}`;
+    const shareData = {
+      title: project.companyName,
+      text: project.businessOverview,
+      url: shareUrl,
+    };
+
+    try {
+      if (navigator.share) {
+        await navigator.share(shareData);
+        return;
+      }
+
+      await navigator.clipboard.writeText(shareUrl);
+      window.alert(t.shareSuccess);
+    } catch {
+      window.alert(t.shareFail);
+    }
+  };
 
   return (
     <>
@@ -274,7 +323,7 @@ export function ProjectsMarketplace() {
           {rows.map((project) => {
             const tone = statusStyles[project.status];
             return (
-              <article className="card plot-card" key={project.id}>
+              <article className="card plot-card" key={project.id} id={`project-${project.id}`}>
                 <div className="plot-top">
                   <div>
                     <div className="plot-id">{project.id}</div>
@@ -320,7 +369,34 @@ export function ProjectsMarketplace() {
                   <strong>{t.terms}:</strong> {project.investmentTerms}
                 </p>
 
+                {project.mediaUrls?.length ? (
+                  <p>
+                    <strong>{t.media}:</strong>{" "}
+                    <a href={project.mediaUrls[0]} target="_blank" rel="noreferrer">
+                      {project.mediaUrls.length > 1
+                        ? `${project.mediaUrls.length} ${t.linksWord}`
+                        : project.mediaUrls[0]}
+                    </a>
+                  </p>
+                ) : null}
+
                 {project.moderationNote ? <div className="notice">{project.moderationNote}</div> : null}
+
+                <div className="plot-actions" style={{ marginTop: 12 }}>
+                  <button className="btn btn-ghost" type="button" onClick={() => void handleShare(project)}>
+                    {t.share}
+                  </button>
+                  {buildGoogleMapUrl(project) ? (
+                    <a
+                      className="btn btn-ghost"
+                      href={buildGoogleMapUrl(project) ?? undefined}
+                      target="_blank"
+                      rel="noreferrer"
+                    >
+                      {t.openMap}
+                    </a>
+                  ) : null}
+                </div>
               </article>
             );
           })}

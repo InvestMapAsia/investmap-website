@@ -384,6 +384,10 @@ export function createMockBusinessProject(
     website: payload.website,
     requestedAmount: payload.requestedAmount,
     minimumTicket: payload.minimumTicket,
+    mediaUrls: payload.mediaUrls,
+    mapAddress: payload.mapAddress,
+    mapLat: payload.mapLat,
+    mapLng: payload.mapLng,
   }) as MockBusinessProjectRecord;
 
   if (payload.userId) {

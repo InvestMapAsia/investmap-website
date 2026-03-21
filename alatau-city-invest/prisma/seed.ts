@@ -261,6 +261,12 @@ const baseBusinessProjects = [
     website: "https://greenbox.example",
     requestedAmount: 120000,
     minimumTicket: 15000,
+    mediaUrls: [
+      "https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&w=1200&q=80",
+    ],
+    mapAddress: "Alatau City, Central Arc",
+    mapLat: 43.2389,
+    mapLng: 76.8897,
   },
   {
     id: "BIZ-102",
@@ -286,6 +292,12 @@ const baseBusinessProjects = [
     website: null,
     requestedAmount: 60000,
     minimumTicket: 5000,
+    mediaUrls: [
+      "https://images.unsplash.com/photo-1450101499163-c8848c66ca85?auto=format&fit=crop&w=1200&q=80",
+    ],
+    mapAddress: "Alatau City, Innovation Belt",
+    mapLat: 43.2451,
+    mapLng: 76.9022,
   },
 ] as const;
 
@@ -381,6 +393,10 @@ async function main() {
         website: project.website,
         requestedAmount: project.requestedAmount,
         minimumTicket: project.minimumTicket,
+        mediaUrls: project.mediaUrls,
+        mapAddress: project.mapAddress,
+        mapLat: project.mapLat,
+        mapLng: project.mapLng,
         userId: project.id === "BIZ-101" ? owner.id : admin.id,
       },
       create: {
@@ -402,6 +418,10 @@ async function main() {
         website: project.website,
         requestedAmount: project.requestedAmount,
         minimumTicket: project.minimumTicket,
+        mediaUrls: project.mediaUrls,
+        mapAddress: project.mapAddress,
+        mapLat: project.mapLat,
+        mapLng: project.mapLng,
         userId: project.id === "BIZ-101" ? owner.id : admin.id,
       },
     });

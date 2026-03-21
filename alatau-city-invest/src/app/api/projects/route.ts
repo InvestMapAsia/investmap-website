@@ -19,6 +19,31 @@ function normalizeOptionalText(value: unknown) {
   return next.length ? next : undefined;
 }
 
+function normalizeStringArray(value: unknown) {
+  if (Array.isArray(value)) {
+    const result = value
+      .map((item) => (typeof item === "string" ? item.trim() : ""))
+      .filter((item) => item.length > 0);
+    return result.length ? result : undefined;
+  }
+
+  if (typeof value === "string") {
+    const result = value
+      .split(/\r?\n|,/g)
+      .map((item) => item.trim())
+      .filter((item) => item.length > 0);
+    return result.length ? result : undefined;
+  }
+
+  return undefined;
+}
+
+function normalizeOptionalNumber(value: unknown) {
+  if (value === null || value === undefined || value === "") return undefined;
+  const next = Number(value);
+  return Number.isFinite(next) ? next : undefined;
+}
+
 function calculateReadinessScore(payload: {
   companyName: string;
   businessOverview: string;
@@ -140,6 +165,10 @@ export async function POST(request: NextRequest) {
     website?: string;
     requestedAmount?: number;
     minimumTicket?: number;
+    mediaUrls?: string[] | string;
+    mapAddress?: string;
+    mapLat?: number | string;
+    mapLng?: number | string;
   };
 
   const payload = {
@@ -158,6 +187,10 @@ export async function POST(request: NextRequest) {
     website: normalizeOptionalText(body.website),
     requestedAmount: body.requestedAmount ? Number(body.requestedAmount) : undefined,
     minimumTicket: body.minimumTicket ? Number(body.minimumTicket) : undefined,
+    mediaUrls: normalizeStringArray(body.mediaUrls),
+    mapAddress: normalizeOptionalText(body.mapAddress),
+    mapLat: normalizeOptionalNumber(body.mapLat),
+    mapLng: normalizeOptionalNumber(body.mapLng),
   };
 
   if (
@@ -227,6 +260,10 @@ export async function POST(request: NextRequest) {
       website: payload.website,
       requestedAmount: payload.requestedAmount,
       minimumTicket: payload.minimumTicket,
+      mediaUrls: payload.mediaUrls,
+      mapAddress: payload.mapAddress,
+      mapLat: payload.mapLat,
+      mapLng: payload.mapLng,
       userId: session.user.id,
     },
   });

@@ -40,7 +40,7 @@ export default function LoginPage() {
 
   return (
     <div className="container" style={{ maxWidth: 760 }}>
-      <div className="section-title">
+      <div className="section-title" style={{ textAlign: "center" }}>
         <h2>{t.title}</h2>
         <p>{t.sub}</p>
       </div>

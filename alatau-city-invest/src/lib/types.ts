@@ -33,6 +33,10 @@ export interface Plot {
   updatedAt: string;
   docs: string[];
   timeline: string[];
+  mediaUrls?: string[];
+  mapAddress?: string;
+  mapLat?: number;
+  mapLng?: number;
   ownerId?: string;
   source?: "platform" | "owner";
 }
@@ -86,6 +90,10 @@ export interface BusinessProject {
   website?: string | null;
   requestedAmount?: number | null;
   minimumTicket?: number | null;
+  mediaUrls?: string[];
+  mapAddress?: string;
+  mapLat?: number;
+  mapLng?: number;
 }
 
 export interface NotificationItem {
@@ -123,6 +131,10 @@ export interface OwnerDraftPlotInput {
   legalOwnerType: string;
   hasUtilities: boolean;
   description: string;
+  mediaUrls?: string[];
+  mapAddress?: string;
+  mapLat?: number;
+  mapLng?: number;
 }
 
 export interface NewsItem {

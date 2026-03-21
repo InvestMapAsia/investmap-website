@@ -43,6 +43,10 @@ export function normalizePlot(row: PrismaPlot): Plot {
     updatedAt: row.updatedAt.toISOString().slice(0, 10),
     docs: toStringArray(row.docs),
     timeline: toStringArray(row.timeline),
+    mediaUrls: row.mediaUrls ? toStringArray(row.mediaUrls) : [],
+    mapAddress: row.mapAddress ?? undefined,
+    mapLat: row.mapLat ?? undefined,
+    mapLng: row.mapLng ?? undefined,
     ownerId: row.ownerId ?? undefined,
     source: row.source,
   };
@@ -113,5 +117,9 @@ export function normalizeBusinessProject(row: PrismaBusinessProject): BusinessPr
     website: row.website ?? null,
     requestedAmount: row.requestedAmount ?? null,
     minimumTicket: row.minimumTicket ?? null,
+    mediaUrls: row.mediaUrls ? toStringArray(row.mediaUrls) : [],
+    mapAddress: row.mapAddress ?? undefined,
+    mapLat: row.mapLat ?? undefined,
+    mapLng: row.mapLng ?? undefined,
   };
 }

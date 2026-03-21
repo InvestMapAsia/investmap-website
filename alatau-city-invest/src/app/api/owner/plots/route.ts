@@ -9,6 +9,47 @@ import { createMockOwnerPlot, listMockOwnerPlots } from "@/lib/mock-store";
 import { createInAppNotification } from "@/lib/notifications";
 import { prisma } from "@/lib/prisma";
 
+function normalizeStringArray(value: unknown) {
+  if (Array.isArray(value)) {
+    const result = value
+      .map((item) => (typeof item === "string" ? item.trim() : ""))
+      .filter((item) => item.length > 0);
+    return result.length ? result : undefined;
+  }
+
+  if (typeof value === "string") {
+    const result = value
+      .split(/\r?\n|,/g)
+      .map((item) => item.trim())
+      .filter((item) => item.length > 0);
+    return result.length ? result : undefined;
+  }
+
+  return undefined;
+}
+
+function normalizeOptionalNumber(value: unknown) {
+  if (value === null || value === undefined || value === "") return undefined;
+  const next = Number(value);
+  return Number.isFinite(next) ? next : undefined;
+}
+
+function normalizeOptionalText(value: unknown) {
+  if (typeof value !== "string") return undefined;
+  const next = value.trim();
+  return next.length ? next : undefined;
+}
+
+function mapPointFromCoordinates(lat?: number, lng?: number) {
+  if (!Number.isFinite(lat) || !Number.isFinite(lng)) {
+    return null;
+  }
+
+  const x = Math.max(10, Math.min(90, Math.round(50 + ((lng as number) - 76.89) * 25)));
+  const y = Math.max(10, Math.min(90, Math.round(50 + (43.24 - (lat as number)) * 35)));
+  return { x, y };
+}
+
 function scoreOwnerListing(payload: {
   title: string;
   cadastral: string;
@@ -81,6 +122,10 @@ export async function POST(request: NextRequest) {
     legalOwnerType?: string;
     hasUtilities?: boolean;
     description?: string;
+    mediaUrls?: string[] | string;
+    mapAddress?: string;
+    mapLat?: number | string;
+    mapLng?: number | string;
   };
 
   if (
@@ -95,6 +140,11 @@ export async function POST(request: NextRequest) {
   ) {
     return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
   }
+
+  const mapLat = normalizeOptionalNumber(body.mapLat);
+  const mapLng = normalizeOptionalNumber(body.mapLng);
+  const mapPoint = mapPointFromCoordinates(mapLat, mapLng);
+  const mediaUrls = normalizeStringArray(body.mediaUrls);
 
   const qualityScore = scoreOwnerListing({
     title: body.title,
@@ -123,6 +173,10 @@ export async function POST(request: NextRequest) {
         legalOwnerType: body.legalOwnerType,
         hasUtilities: Boolean(body.hasUtilities),
         description: body.description,
+        mediaUrls,
+        mapAddress: normalizeOptionalText(body.mapAddress),
+        mapLat,
+        mapLng,
       },
       session.user.id
     );
@@ -161,6 +215,9 @@ export async function POST(request: NextRequest) {
 
   const id = `OWN-${Math.floor(Math.random() * 9000 + 1000)}`;
 
+  const randomX = Math.floor(Math.random() * 70 + 15);
+  const randomY = Math.floor(Math.random() * 70 + 15);
+
   const created = await prisma.plot.create({
     data: {
       id,
@@ -176,14 +233,18 @@ export async function POST(request: NextRequest) {
       riskScore: qualityScore >= 80 ? 34 : 47,
       legalGrade: qualityScore >= 80 ? "b" : "c",
       status: "moderation",
-      x: Math.floor(Math.random() * 70 + 15),
-      y: Math.floor(Math.random() * 70 + 15),
+      x: mapPoint?.x ?? randomX,
+      y: mapPoint?.y ?? randomY,
       distanceCenterKm: body.distanceCenterKm ?? 9,
       utilities: body.hasUtilities ? ["Electricity", "Water"] : ["Not verified"],
       tags: ["Self-service"],
       ownerType: body.legalOwnerType,
       docs: ["Owner provided package"],
       timeline: ["Moderation pending"],
+      mediaUrls,
+      mapAddress: normalizeOptionalText(body.mapAddress),
+      mapLat,
+      mapLng,
       source: PlotSource.owner,
       ownerId: session.user.id,
     },

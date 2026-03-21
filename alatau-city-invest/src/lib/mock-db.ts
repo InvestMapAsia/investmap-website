@@ -371,6 +371,12 @@ const baseBusinessProjects: BusinessProject[] = [
     website: "https://greenbox.example",
     requestedAmount: 120000,
     minimumTicket: 15000,
+    mediaUrls: [
+      "https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&w=1200&q=80",
+    ],
+    mapAddress: "Alatau City, Central Arc",
+    mapLat: 43.2389,
+    mapLng: 76.8897,
   },
   {
     id: "BIZ-102",
@@ -398,6 +404,12 @@ const baseBusinessProjects: BusinessProject[] = [
     website: null,
     requestedAmount: 60000,
     minimumTicket: 5000,
+    mediaUrls: [
+      "https://images.unsplash.com/photo-1450101499163-c8848c66ca85?auto=format&fit=crop&w=1200&q=80",
+    ],
+    mapAddress: "Alatau City, Innovation Belt",
+    mapLat: 43.2451,
+    mapLng: 76.9022,
   },
 ];
 
@@ -564,6 +576,14 @@ export function createApplication(
 export function createOwnerPlot(payload: OwnerDraftPlotInput, ownerId = "owner-demo"): Plot {
   const qualityScore = calculateOwnerPlotQualityScore(payload);
   const id = `OWN-${Math.floor(Math.random() * 9000 + 1000)}`;
+  const hasPoint =
+    Number.isFinite(payload.mapLat) && Number.isFinite(payload.mapLng) && payload.mapLat && payload.mapLng;
+  const x = hasPoint
+    ? Math.max(10, Math.min(90, Math.round(50 + ((payload.mapLng as number) - 76.89) * 25)))
+    : Math.floor(Math.random() * 70 + 15);
+  const y = hasPoint
+    ? Math.max(10, Math.min(90, Math.round(50 + (43.24 - (payload.mapLat as number)) * 35)))
+    : Math.floor(Math.random() * 70 + 15);
 
   const plot: Plot = {
     id,
@@ -579,8 +599,8 @@ export function createOwnerPlot(payload: OwnerDraftPlotInput, ownerId = "owner-d
     riskScore: qualityScore >= 80 ? 34 : 47,
     legalGrade: qualityScore >= 80 ? "b" : "c",
     status: "moderation",
-    x: Math.floor(Math.random() * 70 + 15),
-    y: Math.floor(Math.random() * 70 + 15),
+    x,
+    y,
     distanceCenterKm: payload.distanceCenterKm ?? 9,
     utilities: payload.hasUtilities ? ["Electricity", "Water"] : ["Not verified"],
     tags: ["Self-service"],
@@ -588,6 +608,10 @@ export function createOwnerPlot(payload: OwnerDraftPlotInput, ownerId = "owner-d
     updatedAt: todayIso,
     docs: ["Owner provided package"],
     timeline: ["Moderation pending"],
+    mediaUrls: payload.mediaUrls ?? [],
+    mapAddress: payload.mapAddress,
+    mapLat: payload.mapLat,
+    mapLng: payload.mapLng,
     ownerId,
     source: "owner",
   };

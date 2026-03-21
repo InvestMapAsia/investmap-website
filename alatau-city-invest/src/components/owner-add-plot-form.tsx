@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import Link from "next/link";
 import { FormEvent, useMemo, useState } from "react";
@@ -9,6 +9,20 @@ type CreateResult = {
   data: { id: string; status: string };
   qualityScore: number;
 };
+
+type GeocodeResponse = {
+  data?: {
+    results?: Array<{ place?: string; lat?: number; lng?: number }>;
+  };
+  error?: string;
+};
+
+function parseMediaLinks(input: string) {
+  return input
+    .split(/\r?\n|,/g)
+    .map((item) => item.trim())
+    .filter((item) => item.length > 0);
+}
 
 export function OwnerAddPlotForm() {
   const { lang } = useCurrentLanguage();
@@ -25,10 +39,15 @@ export function OwnerAddPlotForm() {
     legalOwnerType: "Individual",
     hasUtilities: true,
     description: "",
+    mediaLinks: "",
+    mapAddress: "",
+    mapLat: "",
+    mapLng: "",
   });
 
   const [result, setResult] = useState<CreateResult | null>(null);
   const [saving, setSaving] = useState(false);
+  const [locating, setLocating] = useState(false);
 
   const t = pickLang(lang, {
     EN: {
@@ -45,6 +64,16 @@ export function OwnerAddPlotForm() {
       legalOwnerType: "Legal owner type",
       utilitiesConfirmed: "Utilities confirmed",
       description: "Description",
+      mediaLinks: "Photo/video links (one URL per line)",
+      mapAddress: "Map address or place",
+      mapLat: "Latitude",
+      mapLng: "Longitude",
+      findCoords: "Find coordinates",
+      openGoogleMap: "Open in Google Maps",
+      mapHint: "Add map address and coordinates so investors can locate your land quickly.",
+      geocodeNoAddress: "Enter map address first.",
+      geocodeError: "Could not get coordinates from map service.",
+      geocodeNoResults: "No map results found for this address.",
       purposeCommercial: "Commercial",
       purposeMixed: "Mixed-use",
       purposeResidential: "Residential",
@@ -57,6 +86,7 @@ export function OwnerAddPlotForm() {
       no: "No",
       submitError: "Failed to create owner listing. Check required fields.",
       submitting: "Submitting...",
+      locating: "Finding...",
       submit: "Submit for moderation",
       choosePricing: "Choose pricing plan",
       successTitle: "Plot submitted successfully.",
@@ -78,6 +108,16 @@ export function OwnerAddPlotForm() {
       legalOwnerType: "Тип владельца",
       utilitiesConfirmed: "Коммуникации подтверждены",
       description: "Описание",
+      mediaLinks: "Ссылки на фото/видео (по одной в строке)",
+      mapAddress: "Адрес или точка на карте",
+      mapLat: "Широта",
+      mapLng: "Долгота",
+      findCoords: "Найти координаты",
+      openGoogleMap: "Открыть в Google Maps",
+      mapHint: "Добавьте адрес и координаты, чтобы инвестор видел точку участка на карте.",
+      geocodeNoAddress: "Сначала введите адрес для карты.",
+      geocodeError: "Не удалось получить координаты из карт-сервиса.",
+      geocodeNoResults: "По этому адресу не найдено точек на карте.",
       purposeCommercial: "Коммерческое",
       purposeMixed: "Смешанное",
       purposeResidential: "Жилое",
@@ -90,6 +130,7 @@ export function OwnerAddPlotForm() {
       no: "Нет",
       submitError: "Не удалось создать листинг. Проверьте обязательные поля.",
       submitting: "Отправка...",
+      locating: "Поиск...",
       submit: "Отправить на модерацию",
       choosePricing: "Выбрать тариф",
       successTitle: "Участок успешно отправлен.",
@@ -111,6 +152,16 @@ export function OwnerAddPlotForm() {
       legalOwnerType: "Иесінің құқықтық түрі",
       utilitiesConfirmed: "Коммуникация расталған",
       description: "Сипаттама",
+      mediaLinks: "Фото/видео сілтемелері (әр жолға біреуі)",
+      mapAddress: "Картадағы мекенжай немесе нүкте",
+      mapLat: "Ендік",
+      mapLng: "Бойлық",
+      findCoords: "Координат табу",
+      openGoogleMap: "Google Maps-те ашу",
+      mapHint: "Инвестор картадан бірден көруі үшін мекенжай мен координат қосыңыз.",
+      geocodeNoAddress: "Алдымен карта үшін мекенжай енгізіңіз.",
+      geocodeError: "Карта сервисінен координат алу сәтсіз болды.",
+      geocodeNoResults: "Осы мекенжай бойынша картадан нүкте табылмады.",
       purposeCommercial: "Коммерциялық",
       purposeMixed: "Аралас",
       purposeResidential: "Тұрғын",
@@ -123,6 +174,7 @@ export function OwnerAddPlotForm() {
       no: "Жоқ",
       submitError: "Листинг құру сәтсіз. Міндетті өрістерді тексеріңіз.",
       submitting: "Жіберілуде...",
+      locating: "Іздеу...",
       submit: "Модерацияға жіберу",
       choosePricing: "Тариф таңдау",
       successTitle: "Учаске сәтті жіберілді.",
@@ -131,6 +183,8 @@ export function OwnerAddPlotForm() {
       openOwnerCabinet: "Жер иесі кабинетіне өту",
     },
   });
+
+  const mediaLinks = useMemo(() => parseMediaLinks(form.mediaLinks), [form.mediaLinks]);
 
   const score = useMemo(() => {
     let next = 0;
@@ -142,9 +196,55 @@ export function OwnerAddPlotForm() {
     if (Number(form.price) >= 10000) next += 10;
     if (form.legalOwnerType.trim().length > 1) next += 10;
     if (form.hasUtilities) next += 10;
-    if (form.description.trim().length > 120) next += 20;
+    if (form.description.trim().length > 120) next += 16;
+    if (mediaLinks.length > 0) next += 2;
+    if (form.mapLat.trim().length > 0 && form.mapLng.trim().length > 0) next += 2;
     return Math.min(100, next);
-  }, [form]);
+  }, [form, mediaLinks.length]);
+
+  const googleMapUrl = useMemo(() => {
+    if (form.mapLat && form.mapLng) {
+      return `https://www.google.com/maps?q=${encodeURIComponent(`${form.mapLat},${form.mapLng}`)}`;
+    }
+    if (form.mapAddress.trim()) {
+      return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(form.mapAddress.trim())}`;
+    }
+    return null;
+  }, [form.mapAddress, form.mapLat, form.mapLng]);
+
+  const locateAddress = async () => {
+    if (!form.mapAddress.trim()) {
+      window.alert(t.geocodeNoAddress);
+      return;
+    }
+
+    setLocating(true);
+    const response = await fetch(
+      `/api/integrations/maps/geocode?query=${encodeURIComponent(form.mapAddress.trim())}`,
+      { cache: "no-store" }
+    );
+    setLocating(false);
+
+    if (!response.ok) {
+      window.alert(t.geocodeError);
+      return;
+    }
+
+    const payload = (await response.json()) as GeocodeResponse;
+    const first = payload.data?.results?.[0];
+
+    if (!first || first.lat === undefined || first.lng === undefined) {
+      window.alert(t.geocodeNoResults);
+      return;
+    }
+
+    setForm((prev) => ({
+      ...prev,
+      mapAddress: first.place?.trim() || prev.mapAddress,
+      mapLat: String(first.lat),
+      mapLng: String(first.lng),
+    }));
+  };
 
   const submit = async (event: FormEvent) => {
     event.preventDefault();
@@ -154,12 +254,22 @@ export function OwnerAddPlotForm() {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        ...form,
+        title: form.title,
+        cadastral: form.cadastral,
+        district: form.district,
+        purpose: form.purpose,
         area: Number(form.area),
         price: Number(form.price),
         roi: form.roi ? Number(form.roi) : undefined,
         irr: form.irr ? Number(form.irr) : undefined,
         distanceCenterKm: form.distanceCenterKm ? Number(form.distanceCenterKm) : undefined,
+        legalOwnerType: form.legalOwnerType,
+        hasUtilities: form.hasUtilities,
+        description: form.description,
+        mediaUrls: mediaLinks,
+        mapAddress: form.mapAddress || undefined,
+        mapLat: form.mapLat ? Number(form.mapLat) : undefined,
+        mapLng: form.mapLng ? Number(form.mapLng) : undefined,
       }),
     });
 
@@ -186,6 +296,10 @@ export function OwnerAddPlotForm() {
       legalOwnerType: "Individual",
       hasUtilities: true,
       description: "",
+      mediaLinks: "",
+      mapAddress: "",
+      mapLat: "",
+      mapLng: "",
     });
   };
 
@@ -322,9 +436,55 @@ export function OwnerAddPlotForm() {
                 required
               />
             </div>
+
+            <div className="form-field" style={{ gridColumn: "1 / -1" }}>
+              <label>{t.mediaLinks}</label>
+              <textarea
+                value={form.mediaLinks}
+                onChange={(event) => setForm((prev) => ({ ...prev, mediaLinks: event.target.value }))}
+                placeholder="https://..."
+              />
+            </div>
+
+            <div className="form-field" style={{ gridColumn: "1 / -1" }}>
+              <label>{t.mapAddress}</label>
+              <input
+                value={form.mapAddress}
+                onChange={(event) => setForm((prev) => ({ ...prev, mapAddress: event.target.value }))}
+                placeholder="Alatau City"
+              />
+            </div>
+            <div className="form-field">
+              <label>{t.mapLat}</label>
+              <input
+                type="number"
+                step="0.000001"
+                value={form.mapLat}
+                onChange={(event) => setForm((prev) => ({ ...prev, mapLat: event.target.value }))}
+              />
+            </div>
+            <div className="form-field">
+              <label>{t.mapLng}</label>
+              <input
+                type="number"
+                step="0.000001"
+                value={form.mapLng}
+                onChange={(event) => setForm((prev) => ({ ...prev, mapLng: event.target.value }))}
+              />
+            </div>
           </div>
 
+          <p className="muted" style={{ marginTop: 10 }}>{t.mapHint}</p>
+
           <div className="plot-actions" style={{ marginTop: 14 }}>
+            <button className="btn btn-ghost" type="button" onClick={() => void locateAddress()} disabled={locating}>
+              {locating ? t.locating : t.findCoords}
+            </button>
+            {googleMapUrl ? (
+              <a href={googleMapUrl} target="_blank" rel="noreferrer" className="btn btn-ghost">
+                {t.openGoogleMap}
+              </a>
+            ) : null}
             <button className="btn btn-primary" type="submit" disabled={saving}>
               {saving ? t.submitting : t.submit}
             </button>
