@@ -33,6 +33,9 @@ export function PlotCard({ plot, mode = "catalog" }: { plot: Plot; mode?: Mode }
       removeCompare: "Remove compare",
       compare: "Compare",
       invest: "Invest",
+      share: "Share",
+      shareSuccess: "Plot link copied.",
+      shareFail: "Could not share plot link.",
       removeFavError: "Failed to remove favorite.",
       saveFavError: "Failed to save favorite.",
       compareLimit: "You can compare up to 4 plots.",
@@ -51,6 +54,9 @@ export function PlotCard({ plot, mode = "catalog" }: { plot: Plot; mode?: Mode }
       removeCompare: "Убрать из сравнения",
       compare: "Сравнить",
       invest: "Инвестировать",
+      share: "Поделиться",
+      shareSuccess: "Ссылка на участок скопирована.",
+      shareFail: "Не удалось поделиться ссылкой на участок.",
       removeFavError: "Не удалось удалить из избранного.",
       saveFavError: "Не удалось добавить в избранное.",
       compareLimit: "Можно сравнить не более 4 участков.",
@@ -69,6 +75,9 @@ export function PlotCard({ plot, mode = "catalog" }: { plot: Plot; mode?: Mode }
       removeCompare: "Салыстырудан алып тастау",
       compare: "Салыстыру",
       invest: "Инвестициялау",
+      share: "Бөлісу",
+      shareSuccess: "Учаске сілтемесі көшірілді.",
+      shareFail: "Учаске сілтемесімен бөлісу мүмкін болмады.",
       removeFavError: "Таңдаулыдан өшіру сәтсіз.",
       saveFavError: "Таңдаулыға қосу сәтсіз.",
       compareLimit: "Ең көбі 4 учаскені салыстыруға болады.",
@@ -154,6 +163,27 @@ export function PlotCard({ plot, mode = "catalog" }: { plot: Plot; mode?: Mode }
     emitClientEvent(COMPARE_CHANGE_EVENT);
   };
 
+  const handleShare = async () => {
+    const shareUrl = `${window.location.origin}/plots/${plot.id}`;
+    const shareData = {
+      title: plot.title,
+      text: `${plot.id} · ${plot.district}`,
+      url: shareUrl,
+    };
+
+    try {
+      if (navigator.share) {
+        await navigator.share(shareData);
+        return;
+      }
+
+      await navigator.clipboard.writeText(shareUrl);
+      window.alert(t.shareSuccess);
+    } catch {
+      window.alert(t.shareFail);
+    }
+  };
+
   return (
     <article className="card plot-card">
       <div className="plot-top">
@@ -202,6 +232,9 @@ export function PlotCard({ plot, mode = "catalog" }: { plot: Plot; mode?: Mode }
           </button>
           <button onClick={toggleCompare} className="btn btn-ghost" type="button">
             {inCompare ? t.removeCompare : t.compare}
+          </button>
+          <button onClick={() => void handleShare()} className="btn btn-ghost" type="button">
+            {t.share}
           </button>
           <Link href={`/invest?plot=${plot.id}`} className="btn btn-accent">
             {t.invest}
