@@ -5,6 +5,7 @@ import { writeAuditLog } from "@/lib/audit";
 import { authOptions } from "@/lib/auth";
 import { isMockMode } from "@/lib/data-mode";
 import { normalizePlot } from "@/lib/db-mappers";
+import { ALATAU_BOUNDS, isInsideAlatauBounds, latLngToMapPoint } from "@/lib/map-geo";
 import { createMockOwnerPlot, listMockOwnerPlots } from "@/lib/mock-store";
 import { createInAppNotification } from "@/lib/notifications";
 import { prisma } from "@/lib/prisma";
@@ -19,16 +20,6 @@ function normalizeOptionalText(value: unknown) {
   if (typeof value !== "string") return undefined;
   const next = value.trim();
   return next.length ? next : undefined;
-}
-
-function mapPointFromCoordinates(lat?: number, lng?: number) {
-  if (!Number.isFinite(lat) || !Number.isFinite(lng)) {
-    return null;
-  }
-
-  const x = Math.max(10, Math.min(90, Math.round(50 + ((lng as number) - 76.89) * 25)));
-  const y = Math.max(10, Math.min(90, Math.round(50 + (43.24 - (lat as number)) * 35)));
-  return { x, y };
 }
 
 function scoreOwnerListing(payload: {
@@ -126,7 +117,27 @@ export async function POST(request: NextRequest) {
   const distanceCenterKm = normalizeOptionalNumber(body.distanceCenterKm);
   const mapLat = normalizeOptionalNumber(body.mapLat);
   const mapLng = normalizeOptionalNumber(body.mapLng);
-  const mapPoint = mapPointFromCoordinates(mapLat, mapLng);
+  const hasMapLat = mapLat !== undefined;
+  const hasMapLng = mapLng !== undefined;
+  const mapPoint = latLngToMapPoint(mapLat, mapLng);
+
+  if (hasMapLat !== hasMapLng) {
+    return NextResponse.json(
+      { error: "Both mapLat and mapLng are required when coordinates are provided" },
+      { status: 400 }
+    );
+  }
+
+  if (hasMapLat && hasMapLng && !isInsideAlatauBounds(mapLat, mapLng)) {
+    return NextResponse.json(
+      {
+        error:
+          `Coordinates must be inside Alatau bounds: lat ${ALATAU_BOUNDS.minLat}..${ALATAU_BOUNDS.maxLat}, ` +
+          `lng ${ALATAU_BOUNDS.minLng}..${ALATAU_BOUNDS.maxLng}`,
+      },
+      { status: 400 }
+    );
+  }
 
   if (
     !body.title ||

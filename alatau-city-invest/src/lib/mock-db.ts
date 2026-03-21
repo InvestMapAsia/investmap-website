@@ -9,6 +9,7 @@ import {
   PlotStatus,
   PricingPlan,
 } from "@/lib/types";
+import { latLngToMapPoint } from "@/lib/map-geo";
 
 const todayIso = new Date().toISOString().slice(0, 10);
 
@@ -576,14 +577,9 @@ export function createApplication(
 export function createOwnerPlot(payload: OwnerDraftPlotInput, ownerId = "owner-demo"): Plot {
   const qualityScore = calculateOwnerPlotQualityScore(payload);
   const id = `OWN-${Math.floor(Math.random() * 9000 + 1000)}`;
-  const hasPoint =
-    Number.isFinite(payload.mapLat) && Number.isFinite(payload.mapLng) && payload.mapLat && payload.mapLng;
-  const x = hasPoint
-    ? Math.max(10, Math.min(90, Math.round(50 + ((payload.mapLng as number) - 76.89) * 25)))
-    : Math.floor(Math.random() * 70 + 15);
-  const y = hasPoint
-    ? Math.max(10, Math.min(90, Math.round(50 + (43.24 - (payload.mapLat as number)) * 35)))
-    : Math.floor(Math.random() * 70 + 15);
+  const mapPoint = latLngToMapPoint(payload.mapLat, payload.mapLng);
+  const x = mapPoint?.x ?? Math.floor(Math.random() * 70 + 15);
+  const y = mapPoint?.y ?? Math.floor(Math.random() * 70 + 15);
 
   const plot: Plot = {
     id,

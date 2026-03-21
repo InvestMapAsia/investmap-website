@@ -13,6 +13,7 @@ import {
   NotificationItem,
   Plot,
 } from "@/lib/types";
+import { latLngToMapPoint } from "@/lib/map-geo";
 
 function toStringArray(value: Prisma.JsonValue): string[] {
   if (!Array.isArray(value)) return [];
@@ -20,6 +21,8 @@ function toStringArray(value: Prisma.JsonValue): string[] {
 }
 
 export function normalizePlot(row: PrismaPlot): Plot {
+  const mapPoint = latLngToMapPoint(row.mapLat, row.mapLng);
+
   return {
     id: row.id,
     slug: row.slug,
@@ -34,8 +37,8 @@ export function normalizePlot(row: PrismaPlot): Plot {
     riskScore: row.riskScore,
     legalGrade: row.legalGrade,
     status: row.status,
-    x: row.x,
-    y: row.y,
+    x: mapPoint?.x ?? row.x,
+    y: mapPoint?.y ?? row.y,
     distanceCenterKm: row.distanceCenterKm,
     utilities: toStringArray(row.utilities),
     tags: toStringArray(row.tags),

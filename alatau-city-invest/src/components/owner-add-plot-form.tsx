@@ -4,6 +4,7 @@ import Link from "next/link";
 import { FormEvent, useMemo, useState } from "react";
 import { pickLang } from "@/lib/i18n";
 import { useCurrentLanguage } from "@/lib/i18n-client";
+import { ALATAU_BOUNDS, isInsideAlatauBounds } from "@/lib/map-geo";
 
 type CreateResult = {
   data: { id: string; status: string };
@@ -64,7 +65,7 @@ export function OwnerAddPlotForm() {
       mapLat: "Latitude",
       mapLng: "Longitude",
       openGoogleMap: "Open in Google Maps",
-      mapHint: "Add map address and coordinates so investors can locate your land quickly.",
+      mapHint: `Alatau bounds: lat ${ALATAU_BOUNDS.minLat}..${ALATAU_BOUNDS.maxLat}, lng ${ALATAU_BOUNDS.minLng}..${ALATAU_BOUNDS.maxLng}.`,
       purposeCommercial: "Commercial",
       purposeMixed: "Mixed-use",
       purposeResidential: "Residential",
@@ -78,6 +79,8 @@ export function OwnerAddPlotForm() {
       submitError: "Failed to create owner listing. Check required fields.",
       invalidArea: "Area must be a valid number greater than 0.",
       invalidPrice: "Price must be a valid number and at least 10,000 USD.",
+      invalidCoordinatesPair: "Enter both latitude and longitude, or leave both empty.",
+      invalidCoordinatesRange: `Coordinates must be inside Alatau bounds: lat ${ALATAU_BOUNDS.minLat}..${ALATAU_BOUNDS.maxLat}, lng ${ALATAU_BOUNDS.minLng}..${ALATAU_BOUNDS.maxLng}.`,
       unauthorized: "Your session is expired. Please sign in again.",
       forbidden: "Only owner/admin accounts can submit land listings.",
       errorDetailsTitle: "Server returned:",
@@ -107,7 +110,7 @@ export function OwnerAddPlotForm() {
       mapLat: "Широта",
       mapLng: "Долгота",
       openGoogleMap: "Открыть в Google Maps",
-      mapHint: "Добавьте адрес и координаты, чтобы инвестор видел точку участка на карте.",
+      mapHint: `Границы Алатау: широта ${ALATAU_BOUNDS.minLat}..${ALATAU_BOUNDS.maxLat}, долгота ${ALATAU_BOUNDS.minLng}..${ALATAU_BOUNDS.maxLng}.`,
       purposeCommercial: "Коммерческое",
       purposeMixed: "Смешанное",
       purposeResidential: "Жилое",
@@ -121,6 +124,8 @@ export function OwnerAddPlotForm() {
       submitError: "Не удалось создать листинг. Проверьте обязательные поля.",
       invalidArea: "Площадь должна быть числом больше 0.",
       invalidPrice: "Цена должна быть числом не меньше 10 000 USD.",
+      invalidCoordinatesPair: "Укажите и широту, и долготу, либо оставьте оба поля пустыми.",
+      invalidCoordinatesRange: `Координаты должны быть в пределах Алатау: широта ${ALATAU_BOUNDS.minLat}..${ALATAU_BOUNDS.maxLat}, долгота ${ALATAU_BOUNDS.minLng}..${ALATAU_BOUNDS.maxLng}.`,
       unauthorized: "Сессия истекла. Выполните вход заново.",
       forbidden: "Публиковать участки могут только владелец или администратор.",
       errorDetailsTitle: "Сервер вернул:",
@@ -150,7 +155,7 @@ export function OwnerAddPlotForm() {
       mapLat: "Ендік",
       mapLng: "Бойлық",
       openGoogleMap: "Google Maps-те ашу",
-      mapHint: "Инвестор картадан бірден көруі үшін мекенжай мен координат қосыңыз.",
+      mapHint: `Alatau шекарасы: ендік ${ALATAU_BOUNDS.minLat}..${ALATAU_BOUNDS.maxLat}, бойлық ${ALATAU_BOUNDS.minLng}..${ALATAU_BOUNDS.maxLng}.`,
       purposeCommercial: "Коммерциялық",
       purposeMixed: "Аралас",
       purposeResidential: "Тұрғын",
@@ -164,6 +169,8 @@ export function OwnerAddPlotForm() {
       submitError: "Листинг құру сәтсіз. Міндетті өрістерді тексеріңіз.",
       invalidArea: "Аумақ 0-ден үлкен дұрыс сан болуы керек.",
       invalidPrice: "Баға дұрыс сан болып, кемі 10 000 USD болуы керек.",
+      invalidCoordinatesPair: "Ендік пен бойлықты бірге енгізіңіз немесе екеуін де бос қалдырыңыз.",
+      invalidCoordinatesRange: `Координаттар Alatau шекарасында болуы керек: ендік ${ALATAU_BOUNDS.minLat}..${ALATAU_BOUNDS.maxLat}, бойлық ${ALATAU_BOUNDS.minLng}..${ALATAU_BOUNDS.maxLng}.`,
       unauthorized: "Сессия уақыты аяқталды. Қайта кіріңіз.",
       forbidden: "Учаске жариялауды тек иесі немесе әкімші жасай алады.",
       errorDetailsTitle: "Сервер жауабы:",
@@ -213,6 +220,8 @@ export function OwnerAddPlotForm() {
     const distanceCenterKm = parseNumberValue(form.distanceCenterKm);
     const mapLat = parseNumberValue(form.mapLat);
     const mapLng = parseNumberValue(form.mapLng);
+    const hasMapLat = mapLat !== undefined;
+    const hasMapLng = mapLng !== undefined;
 
     if (area === undefined || area <= 0) {
       setSaving(false);
@@ -223,6 +232,18 @@ export function OwnerAddPlotForm() {
     if (price === undefined || price < 10000) {
       setSaving(false);
       window.alert(t.invalidPrice);
+      return;
+    }
+
+    if (hasMapLat !== hasMapLng) {
+      setSaving(false);
+      window.alert(t.invalidCoordinatesPair);
+      return;
+    }
+
+    if (hasMapLat && hasMapLng && !isInsideAlatauBounds(mapLat, mapLng)) {
+      setSaving(false);
+      window.alert(t.invalidCoordinatesRange);
       return;
     }
 
