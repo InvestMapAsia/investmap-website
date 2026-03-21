@@ -58,7 +58,9 @@ export function MapExplorer() {
       roi: "ROI",
       open: "Open plot",
       apply: "Apply",
-      selectMarker: "Select a marker to open preview.",
+      selectMarker: "Select a zone or marker to open preview.",
+      selectZoneHint: "Click a zone on the map or pick from the list below.",
+      mapAlt: "Alatau City vector map",
     },
     RU: {
       mapFilters: "Фильтры карты",
@@ -85,7 +87,9 @@ export function MapExplorer() {
       roi: "ROI",
       open: "Открыть участок",
       apply: "Подать заявку",
-      selectMarker: "Выберите маркер, чтобы открыть превью.",
+      selectMarker: "Выберите зону или маркер, чтобы открыть превью.",
+      selectZoneHint: "Нажмите на зону участка на карте или выберите его из списка ниже.",
+      mapAlt: "Векторная карта Alatau City",
     },
     KZ: {
       mapFilters: "Карта сүзгілері",
@@ -112,7 +116,9 @@ export function MapExplorer() {
       roi: "ROI",
       open: "Учаскені ашу",
       apply: "Өтінім беру",
-      selectMarker: "Превью ашу үшін маркерді таңдаңыз.",
+      selectMarker: "Превью ашу үшін аймақты немесе маркерді таңдаңыз.",
+      selectZoneHint: "Картадан учаске аймағын басыңыз немесе төмендегі тізімнен таңдаңыз.",
+      mapAlt: "Alatau City векторлық картасы",
     },
   });
 
@@ -157,6 +163,11 @@ export function MapExplorer() {
 
     void load();
   }, [query]);
+
+  const zoneSize = (plot: Plot) => {
+    const base = Math.sqrt(Math.max(plot.area, 1)) * 1.25;
+    return Math.min(16, Math.max(7.5, base));
+  };
 
   return (
     <section className="map-layout">
@@ -223,22 +234,49 @@ export function MapExplorer() {
 
       <section className="map-content">
         <div className="map-board">
-          {loading ? (
-            <div className="empty-state" style={{ margin: 20 }}>
-              {t.loading}
-            </div>
-          ) : (
-            plots.map((plot) => (
+          <img className="map-base" src="/alatau-map.svg" alt={t.mapAlt} />
+          <div className="map-overlay" />
+          <div className="map-hint">{t.selectZoneHint}</div>
+          {loading ? <div className="empty-state map-empty">{t.loading}</div> : null}
+          {!loading && !plots.length ? <div className="empty-state map-empty">{t.noPlots}</div> : null}
+
+          {!loading
+            ? plots.map((plot) => {
+                const size = zoneSize(plot);
+                const isActive = selected?.id === plot.id;
+                return (
+                  <button
+                    key={`zone-${plot.id}`}
+                    type="button"
+                    className={`map-zone ${isActive ? "is-active" : ""}`}
+                    style={{
+                      left: `${plot.x}%`,
+                      top: `${plot.y}%`,
+                      width: `${size}%`,
+                      height: `${Math.max(6, size * 0.68)}%`,
+                      background: `${statusColor[plot.status]}2D`,
+                      borderColor: `${statusColor[plot.status]}A8`,
+                    }}
+                    title={`${plot.id} · ${plot.title}`}
+                    aria-label={`${plot.id} ${plot.title}`}
+                    onClick={() => setSelected(plot)}
+                  />
+                );
+              })
+            : null}
+
+          {!loading
+            ? plots.map((plot) => (
               <button
                 key={plot.id}
                 type="button"
-                className="map-marker"
+                className={`map-marker ${selected?.id === plot.id ? "is-active" : ""}`}
                 style={{ left: `${plot.x}%`, top: `${plot.y}%`, background: statusColor[plot.status] }}
                 title={plot.title}
                 onClick={() => setSelected(plot)}
               />
             ))
-          )}
+            : null}
         </div>
 
         <div className="map-legend">
@@ -255,8 +293,20 @@ export function MapExplorer() {
             <div className="empty-state">{t.noPlots}</div>
           ) : (
             plots.map((plot) => (
-              <div key={plot.id} className="list-item">
-                <strong onClick={() => setSelected(plot)}>
+              <div
+                key={plot.id}
+                className={`list-item ${selected?.id === plot.id ? "is-active" : ""}`}
+                role="button"
+                tabIndex={0}
+                onClick={() => setSelected(plot)}
+                onKeyDown={(event) => {
+                  if (event.key === "Enter" || event.key === " ") {
+                    event.preventDefault();
+                    setSelected(plot);
+                  }
+                }}
+              >
+                <strong>
                   {plot.id} · {plot.title}
                 </strong>
                 <span className="muted">

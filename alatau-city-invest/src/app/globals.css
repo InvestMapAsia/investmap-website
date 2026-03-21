@@ -581,23 +581,64 @@ input[type="submit"] {
 .map-board {
   position: relative;
   height: 460px;
+  background: linear-gradient(120deg, rgba(3, 96, 164, 0.16), rgba(176, 218, 42, 0.12));
+}
+
+.map-base {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0.4;
+  filter: saturate(1.1) contrast(1.03);
+}
+
+.map-overlay {
+  position: absolute;
+  inset: 0;
   background:
-    linear-gradient(120deg, rgba(3, 96, 164, 0.19), rgba(176, 218, 42, 0.14)),
-    repeating-linear-gradient(
-      90deg,
-      rgba(255, 255, 255, 0.35),
-      rgba(255, 255, 255, 0.35) 1px,
-      transparent 1px,
-      transparent 64px
-    ),
-    repeating-linear-gradient(
-      0deg,
-      rgba(255, 255, 255, 0.35),
-      rgba(255, 255, 255, 0.35) 1px,
-      transparent 1px,
-      transparent 64px
-    ),
-    #DCE9F3;
+    linear-gradient(180deg, rgba(255, 255, 255, 0.02), rgba(255, 255, 255, 0.16)),
+    radial-gradient(circle at 75% 25%, rgba(241, 218, 96, 0.12), transparent 48%);
+}
+
+.map-hint {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  z-index: 4;
+  background: rgba(0, 43, 93, 0.72);
+  color: #fff;
+  font-size: 0.77rem;
+  padding: 6px 10px;
+  border-radius: 999px;
+}
+
+.map-empty {
+  position: absolute;
+  inset: auto 18px 18px 18px;
+  z-index: 4;
+}
+
+.map-zone {
+  position: absolute;
+  transform: translate(-50%, -50%) rotate(-10deg);
+  border-radius: 8px;
+  border: 1px solid transparent;
+  cursor: pointer;
+  z-index: 2;
+  transition: transform 0.16s ease, box-shadow 0.16s ease, background 0.16s ease;
+}
+
+.map-zone:hover {
+  transform: translate(-50%, -50%) rotate(-10deg) scale(1.04);
+  box-shadow: 0 8px 18px rgba(19, 36, 53, 0.18);
+}
+
+.map-zone.is-active {
+  transform: translate(-50%, -50%) rotate(-10deg) scale(1.06);
+  box-shadow: 0 10px 22px rgba(19, 36, 53, 0.28);
+  background: rgba(255, 255, 255, 0.45) !important;
 }
 
 .map-marker {
@@ -609,10 +650,16 @@ input[type="submit"] {
   border-radius: 50%;
   cursor: pointer;
   box-shadow: 0 0 0 4px rgba(19, 36, 53, 0.16);
+  z-index: 3;
 }
 
 .map-marker:hover {
   transform: translate(-50%, -50%) scale(1.16);
+}
+
+.map-marker.is-active {
+  box-shadow: 0 0 0 5px rgba(0, 43, 93, 0.26);
+  transform: translate(-50%, -50%) scale(1.14);
 }
 
 .map-legend {
@@ -635,14 +682,17 @@ input[type="submit"] {
   gap: 4px;
   border-bottom: 1px dashed #d8d8d8;
   padding: 9px 0;
+  cursor: pointer;
+}
+
+.list-item.is-active {
+  background: linear-gradient(90deg, rgba(3, 96, 164, 0.08), rgba(176, 218, 42, 0.1));
+  border-radius: 10px;
+  padding: 9px 10px;
 }
 
 .list-item:last-child {
   border-bottom: 0;
-}
-
-.list-item strong {
-  cursor: pointer;
 }
 
 .split {
