@@ -68,7 +68,6 @@ export function ProjectsMarketplace() {
       shareSuccess: "Project link copied.",
       shareFail: "Could not share project link.",
       media: "Media",
-      openMap: "Map point",
       linksWord: "links",
     },
     RU: {
@@ -105,7 +104,6 @@ export function ProjectsMarketplace() {
       shareSuccess: "Ссылка на проект скопирована.",
       shareFail: "Не удалось поделиться ссылкой.",
       media: "Медиа",
-      openMap: "Точка на карте",
       linksWord: "ссылок",
     },
     KZ: {
@@ -142,7 +140,6 @@ export function ProjectsMarketplace() {
       shareSuccess: "Жоба сілтемесі көшірілді.",
       shareFail: "Сілтемені бөлісу мүмкін болмады.",
       media: "Медиа",
-      openMap: "Карта нүктесі",
       linksWord: "сілтеме",
     },
   });
@@ -198,16 +195,6 @@ export function ProjectsMarketplace() {
       requested: rows.reduce((sum, item) => sum + Number(item.requestedAmount ?? 0), 0),
     };
   }, [rows]);
-
-  const buildGoogleMapUrl = (project: ProjectRow) => {
-    if (project.mapLat !== undefined && project.mapLng !== undefined) {
-      return `https://www.google.com/maps?q=${encodeURIComponent(`${project.mapLat},${project.mapLng}`)}`;
-    }
-    if (project.mapAddress) {
-      return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(project.mapAddress)}`;
-    }
-    return null;
-  };
 
   const handleShare = async (project: ProjectRow) => {
     const shareUrl = `${window.location.origin}/projects#project-${project.id}`;
@@ -386,16 +373,6 @@ export function ProjectsMarketplace() {
                   <button className="btn btn-ghost" type="button" onClick={() => void handleShare(project)}>
                     {t.share}
                   </button>
-                  {buildGoogleMapUrl(project) ? (
-                    <a
-                      className="btn btn-ghost"
-                      href={buildGoogleMapUrl(project) ?? undefined}
-                      target="_blank"
-                      rel="noreferrer"
-                    >
-                      {t.openMap}
-                    </a>
-                  ) : null}
                 </div>
               </article>
             );

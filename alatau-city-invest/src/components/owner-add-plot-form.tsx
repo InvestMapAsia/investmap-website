@@ -10,13 +10,6 @@ type CreateResult = {
   qualityScore: number;
 };
 
-type GeocodeResponse = {
-  data?: {
-    results?: Array<{ place?: string; lat?: number; lng?: number }>;
-  };
-  error?: string;
-};
-
 function parseMediaLinks(input: string) {
   return input
     .split(/\r?\n|,/g)
@@ -47,7 +40,6 @@ export function OwnerAddPlotForm() {
 
   const [result, setResult] = useState<CreateResult | null>(null);
   const [saving, setSaving] = useState(false);
-  const [locating, setLocating] = useState(false);
 
   const t = pickLang(lang, {
     EN: {
@@ -68,12 +60,8 @@ export function OwnerAddPlotForm() {
       mapAddress: "Map address or place",
       mapLat: "Latitude",
       mapLng: "Longitude",
-      findCoords: "Find coordinates",
       openGoogleMap: "Open in Google Maps",
       mapHint: "Add map address and coordinates so investors can locate your land quickly.",
-      geocodeNoAddress: "Enter map address first.",
-      geocodeError: "Could not get coordinates from map service.",
-      geocodeNoResults: "No map results found for this address.",
       purposeCommercial: "Commercial",
       purposeMixed: "Mixed-use",
       purposeResidential: "Residential",
@@ -86,7 +74,6 @@ export function OwnerAddPlotForm() {
       no: "No",
       submitError: "Failed to create owner listing. Check required fields.",
       submitting: "Submitting...",
-      locating: "Finding...",
       submit: "Submit for moderation",
       choosePricing: "Choose pricing plan",
       successTitle: "Plot submitted successfully.",
@@ -112,12 +99,8 @@ export function OwnerAddPlotForm() {
       mapAddress: "Адрес или точка на карте",
       mapLat: "Широта",
       mapLng: "Долгота",
-      findCoords: "Найти координаты",
       openGoogleMap: "Открыть в Google Maps",
       mapHint: "Добавьте адрес и координаты, чтобы инвестор видел точку участка на карте.",
-      geocodeNoAddress: "Сначала введите адрес для карты.",
-      geocodeError: "Не удалось получить координаты из карт-сервиса.",
-      geocodeNoResults: "По этому адресу не найдено точек на карте.",
       purposeCommercial: "Коммерческое",
       purposeMixed: "Смешанное",
       purposeResidential: "Жилое",
@@ -130,7 +113,6 @@ export function OwnerAddPlotForm() {
       no: "Нет",
       submitError: "Не удалось создать листинг. Проверьте обязательные поля.",
       submitting: "Отправка...",
-      locating: "Поиск...",
       submit: "Отправить на модерацию",
       choosePricing: "Выбрать тариф",
       successTitle: "Участок успешно отправлен.",
@@ -156,12 +138,8 @@ export function OwnerAddPlotForm() {
       mapAddress: "Картадағы мекенжай немесе нүкте",
       mapLat: "Ендік",
       mapLng: "Бойлық",
-      findCoords: "Координат табу",
       openGoogleMap: "Google Maps-те ашу",
       mapHint: "Инвестор картадан бірден көруі үшін мекенжай мен координат қосыңыз.",
-      geocodeNoAddress: "Алдымен карта үшін мекенжай енгізіңіз.",
-      geocodeError: "Карта сервисінен координат алу сәтсіз болды.",
-      geocodeNoResults: "Осы мекенжай бойынша картадан нүкте табылмады.",
       purposeCommercial: "Коммерциялық",
       purposeMixed: "Аралас",
       purposeResidential: "Тұрғын",
@@ -174,7 +152,6 @@ export function OwnerAddPlotForm() {
       no: "Жоқ",
       submitError: "Листинг құру сәтсіз. Міндетті өрістерді тексеріңіз.",
       submitting: "Жіберілуде...",
-      locating: "Іздеу...",
       submit: "Модерацияға жіберу",
       choosePricing: "Тариф таңдау",
       successTitle: "Учаске сәтті жіберілді.",
@@ -211,40 +188,6 @@ export function OwnerAddPlotForm() {
     }
     return null;
   }, [form.mapAddress, form.mapLat, form.mapLng]);
-
-  const locateAddress = async () => {
-    if (!form.mapAddress.trim()) {
-      window.alert(t.geocodeNoAddress);
-      return;
-    }
-
-    setLocating(true);
-    const response = await fetch(
-      `/api/integrations/maps/geocode?query=${encodeURIComponent(form.mapAddress.trim())}`,
-      { cache: "no-store" }
-    );
-    setLocating(false);
-
-    if (!response.ok) {
-      window.alert(t.geocodeError);
-      return;
-    }
-
-    const payload = (await response.json()) as GeocodeResponse;
-    const first = payload.data?.results?.[0];
-
-    if (!first || first.lat === undefined || first.lng === undefined) {
-      window.alert(t.geocodeNoResults);
-      return;
-    }
-
-    setForm((prev) => ({
-      ...prev,
-      mapAddress: first.place?.trim() || prev.mapAddress,
-      mapLat: String(first.lat),
-      mapLng: String(first.lng),
-    }));
-  };
 
   const submit = async (event: FormEvent) => {
     event.preventDefault();
@@ -477,9 +420,6 @@ export function OwnerAddPlotForm() {
           <p className="muted" style={{ marginTop: 10 }}>{t.mapHint}</p>
 
           <div className="plot-actions" style={{ marginTop: 14 }}>
-            <button className="btn btn-ghost" type="button" onClick={() => void locateAddress()} disabled={locating}>
-              {locating ? t.locating : t.findCoords}
-            </button>
             {googleMapUrl ? (
               <a href={googleMapUrl} target="_blank" rel="noreferrer" className="btn btn-ghost">
                 {t.openGoogleMap}
