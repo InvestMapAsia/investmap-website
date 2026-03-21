@@ -125,11 +125,11 @@ export async function POST(request: NextRequest) {
     cadastral?: string;
     district?: string;
     purpose?: string;
-    area?: number;
-    price?: number;
-    roi?: number;
-    irr?: number;
-    distanceCenterKm?: number;
+    area?: number | string;
+    price?: number | string;
+    roi?: number | string;
+    irr?: number | string;
+    distanceCenterKm?: number | string;
     legalOwnerType?: string;
     hasUtilities?: boolean;
     description?: string;
@@ -139,13 +139,19 @@ export async function POST(request: NextRequest) {
     mapLng?: number | string;
   };
 
+  const area = normalizeOptionalNumber(body.area);
+  const price = normalizeOptionalNumber(body.price);
+  const roi = normalizeOptionalNumber(body.roi);
+  const irr = normalizeOptionalNumber(body.irr);
+  const distanceCenterKm = normalizeOptionalNumber(body.distanceCenterKm);
+
   if (
     !body.title ||
     !body.cadastral ||
     !body.district ||
     !body.purpose ||
-    !body.area ||
-    !body.price ||
+    area === undefined ||
+    price === undefined ||
     !body.legalOwnerType ||
     !body.description
   ) {
@@ -162,8 +168,8 @@ export async function POST(request: NextRequest) {
     cadastral: body.cadastral,
     district: body.district,
     purpose: body.purpose,
-    area: Number(body.area),
-    price: Number(body.price),
+    area,
+    price,
     legalOwnerType: body.legalOwnerType,
     hasUtilities: Boolean(body.hasUtilities),
     description: body.description,
@@ -176,11 +182,11 @@ export async function POST(request: NextRequest) {
         cadastral: body.cadastral,
         district: body.district,
         purpose: body.purpose,
-        area: Number(body.area),
-        price: Number(body.price),
-        roi: body.roi,
-        irr: body.irr,
-        distanceCenterKm: body.distanceCenterKm,
+        area,
+        price,
+        roi,
+        irr,
+        distanceCenterKm,
         legalOwnerType: body.legalOwnerType,
         hasUtilities: Boolean(body.hasUtilities),
         description: body.description,
@@ -224,42 +230,48 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  const id = `OWN-${Math.floor(Math.random() * 9000 + 1000)}`;
+  const id = `OWN-${Date.now().toString(36).toUpperCase()}-${Math.floor(Math.random() * 900 + 100)}`;
 
   const randomX = Math.floor(Math.random() * 70 + 15);
   const randomY = Math.floor(Math.random() * 70 + 15);
 
-  const created = await prisma.plot.create({
-    data: {
-      id,
-      slug: id.toLowerCase(),
-      title: body.title,
-      district: body.district,
-      purpose: body.purpose,
-      area: Number(body.area),
-      price: Number(body.price),
-      currency: "USD",
-      roi: body.roi ?? 12,
-      irr: body.irr ?? 15,
-      riskScore: qualityScore >= 80 ? 34 : 47,
-      legalGrade: qualityScore >= 80 ? "b" : "c",
-      status: "moderation",
-      x: mapPoint?.x ?? randomX,
-      y: mapPoint?.y ?? randomY,
-      distanceCenterKm: body.distanceCenterKm ?? 9,
-      utilities: body.hasUtilities ? ["Electricity", "Water"] : ["Not verified"],
-      tags: ["Self-service"],
-      ownerType: body.legalOwnerType,
-      docs: ["Owner provided package"],
-      timeline: ["Moderation pending"],
-      mediaUrls,
-      mapAddress: normalizeOptionalText(body.mapAddress),
-      mapLat,
-      mapLng,
-      source: PlotSource.owner,
-      ownerId: session.user.id,
-    },
-  });
+  let created;
+  try {
+    created = await prisma.plot.create({
+      data: {
+        id,
+        slug: id.toLowerCase(),
+        title: body.title,
+        district: body.district,
+        purpose: body.purpose,
+        area,
+        price,
+        currency: "USD",
+        roi: roi ?? 12,
+        irr: irr ?? 15,
+        riskScore: qualityScore >= 80 ? 34 : 47,
+        legalGrade: qualityScore >= 80 ? "b" : "c",
+        status: "moderation",
+        x: mapPoint?.x ?? randomX,
+        y: mapPoint?.y ?? randomY,
+        distanceCenterKm: distanceCenterKm ?? 9,
+        utilities: body.hasUtilities ? ["Electricity", "Water"] : ["Not verified"],
+        tags: ["Self-service"],
+        ownerType: body.legalOwnerType,
+        docs: ["Owner provided package"],
+        timeline: ["Moderation pending"],
+        mediaUrls,
+        mapAddress: normalizeOptionalText(body.mapAddress),
+        mapLat,
+        mapLng,
+        source: PlotSource.owner,
+        ownerId: session.user.id,
+      },
+    });
+  } catch (error) {
+    const detail = error instanceof Error ? error.message : "Unexpected database error";
+    return NextResponse.json({ error: "Failed to create plot", detail }, { status: 500 });
+  }
 
   await createInAppNotification({
     userId: session.user.id,

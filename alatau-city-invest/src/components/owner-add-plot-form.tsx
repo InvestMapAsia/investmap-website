@@ -10,11 +10,23 @@ type CreateResult = {
   qualityScore: number;
 };
 
+type ApiErrorResponse = {
+  error?: string;
+  detail?: string;
+};
+
 function parseMediaLinks(input: string) {
   return input
     .split(/\r?\n|,/g)
     .map((item) => item.trim())
     .filter((item) => item.length > 0);
+}
+
+function parseNumberValue(value: string) {
+  const normalized = value.trim().replace(",", ".");
+  if (!normalized) return undefined;
+  const next = Number(normalized);
+  return Number.isFinite(next) ? next : undefined;
 }
 
 export function OwnerAddPlotForm() {
@@ -73,6 +85,11 @@ export function OwnerAddPlotForm() {
       yes: "Yes",
       no: "No",
       submitError: "Failed to create owner listing. Check required fields.",
+      invalidArea: "Area must be a valid number greater than 0.",
+      invalidPrice: "Price must be a valid number and at least 10,000 USD.",
+      unauthorized: "Your session is expired. Please sign in again.",
+      forbidden: "Only owner/admin accounts can submit land listings.",
+      errorDetailsTitle: "Server returned:",
       submitting: "Submitting...",
       submit: "Submit for moderation",
       choosePricing: "Choose pricing plan",
@@ -112,6 +129,11 @@ export function OwnerAddPlotForm() {
       yes: "Да",
       no: "Нет",
       submitError: "Не удалось создать листинг. Проверьте обязательные поля.",
+      invalidArea: "Площадь должна быть числом больше 0.",
+      invalidPrice: "Цена должна быть числом не меньше 10 000 USD.",
+      unauthorized: "Сессия истекла. Выполните вход заново.",
+      forbidden: "Публиковать участки могут только владелец или администратор.",
+      errorDetailsTitle: "Сервер вернул:",
       submitting: "Отправка...",
       submit: "Отправить на модерацию",
       choosePricing: "Выбрать тариф",
@@ -151,6 +173,11 @@ export function OwnerAddPlotForm() {
       yes: "Иә",
       no: "Жоқ",
       submitError: "Листинг құру сәтсіз. Міндетті өрістерді тексеріңіз.",
+      invalidArea: "Аумақ 0-ден үлкен дұрыс сан болуы керек.",
+      invalidPrice: "Баға дұрыс сан болып, кемі 10 000 USD болуы керек.",
+      unauthorized: "Сессия уақыты аяқталды. Қайта кіріңіз.",
+      forbidden: "Учаске жариялауды тек иесі немесе әкімші жасай алады.",
+      errorDetailsTitle: "Сервер жауабы:",
       submitting: "Жіберілуде...",
       submit: "Модерацияға жіберу",
       choosePricing: "Тариф таңдау",
@@ -193,6 +220,26 @@ export function OwnerAddPlotForm() {
     event.preventDefault();
     setSaving(true);
 
+    const area = parseNumberValue(form.area);
+    const price = parseNumberValue(form.price);
+    const roi = parseNumberValue(form.roi);
+    const irr = parseNumberValue(form.irr);
+    const distanceCenterKm = parseNumberValue(form.distanceCenterKm);
+    const mapLat = parseNumberValue(form.mapLat);
+    const mapLng = parseNumberValue(form.mapLng);
+
+    if (area === undefined || area <= 0) {
+      setSaving(false);
+      window.alert(t.invalidArea);
+      return;
+    }
+
+    if (price === undefined || price < 10000) {
+      setSaving(false);
+      window.alert(t.invalidPrice);
+      return;
+    }
+
     const response = await fetch("/api/owner/plots", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -201,25 +248,49 @@ export function OwnerAddPlotForm() {
         cadastral: form.cadastral,
         district: form.district,
         purpose: form.purpose,
-        area: Number(form.area),
-        price: Number(form.price),
-        roi: form.roi ? Number(form.roi) : undefined,
-        irr: form.irr ? Number(form.irr) : undefined,
-        distanceCenterKm: form.distanceCenterKm ? Number(form.distanceCenterKm) : undefined,
+        area,
+        price,
+        roi,
+        irr,
+        distanceCenterKm,
         legalOwnerType: form.legalOwnerType,
         hasUtilities: form.hasUtilities,
         description: form.description,
         mediaUrls: mediaLinks,
         mapAddress: form.mapAddress || undefined,
-        mapLat: form.mapLat ? Number(form.mapLat) : undefined,
-        mapLng: form.mapLng ? Number(form.mapLng) : undefined,
+        mapLat,
+        mapLng,
       }),
     });
 
     setSaving(false);
 
     if (!response.ok) {
-      window.alert(t.submitError);
+      let details = "";
+      try {
+        const payload = (await response.json()) as ApiErrorResponse;
+        const parts = [payload.error, payload.detail].filter((part) => Boolean(part)) as string[];
+        details = parts.join(" | ");
+      } catch {
+        details = "";
+      }
+
+      if (response.status === 401) {
+        window.alert(t.unauthorized);
+        return;
+      }
+
+      if (response.status === 403) {
+        window.alert(t.forbidden);
+        return;
+      }
+
+      if (details) {
+        window.alert(`${t.submitError}\n${t.errorDetailsTitle} [${response.status}] ${details}`);
+        return;
+      }
+
+      window.alert(`${t.submitError}\n${t.errorDetailsTitle} [${response.status}]`);
       return;
     }
 
