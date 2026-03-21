@@ -5,13 +5,17 @@ import { listMockPlots } from "@/lib/mock-store";
 import { prisma } from "@/lib/prisma";
 
 export async function GET() {
-  if (isMockMode()) {
-    const purposes = Array.from(new Set(listMockPlots().map((item) => item.purpose))).sort((a, b) =>
+  const mockPurposes = () =>
+    Array.from(new Set(listMockPlots().map((item) => item.purpose))).sort((a, b) =>
       a.localeCompare(b)
     );
-    const queueCount = listMockPlots().filter(
-      (item) => item.status === "moderation" || item.status === "legal_issue"
-    ).length;
+  const mockQueueCount = () =>
+    listMockPlots().filter((item) => item.status === "moderation" || item.status === "legal_issue")
+      .length;
+
+  if (isMockMode()) {
+    const purposes = mockPurposes();
+    const queueCount = mockQueueCount();
 
     return NextResponse.json({
       data: {
@@ -24,18 +28,31 @@ export async function GET() {
     });
   }
 
-  const [purposeRows, queueCount] = await Promise.all([
-    prisma.plot.findMany({ select: { purpose: true }, distinct: ["purpose"] }),
-    prisma.plot.count({ where: { OR: [{ status: "moderation" }, { status: "legal_issue" }] } }),
-  ]);
+  try {
+    const [purposeRows, queueCount] = await Promise.all([
+      prisma.plot.findMany({ select: { purpose: true }, distinct: ["purpose"] }),
+      prisma.plot.count({ where: { OR: [{ status: "moderation" }, { status: "legal_issue" }] } }),
+    ]);
 
-  return NextResponse.json({
-    data: {
-      purposes: purposeRows.map((row) => row.purpose),
-      news: listNews(),
-      faqs: listFaqs(),
-      pricingPlans: listPricingPlans(),
-      adminQueueCount: queueCount,
-    },
-  });
+    const purposes = purposeRows.map((row) => row.purpose);
+    return NextResponse.json({
+      data: {
+        purposes: purposes.length ? purposes : mockPurposes(),
+        news: listNews(),
+        faqs: listFaqs(),
+        pricingPlans: listPricingPlans(),
+        adminQueueCount: purposes.length ? queueCount : mockQueueCount(),
+      },
+    });
+  } catch {
+    return NextResponse.json({
+      data: {
+        purposes: mockPurposes(),
+        news: listNews(),
+        faqs: listFaqs(),
+        pricingPlans: listPricingPlans(),
+        adminQueueCount: mockQueueCount(),
+      },
+    });
+  }
 }

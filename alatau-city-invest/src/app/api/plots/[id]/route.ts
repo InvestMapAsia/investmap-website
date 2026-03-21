@@ -20,13 +20,25 @@ export async function GET(_request: NextRequest, context: { params: Promise<{ id
     return NextResponse.json({ data: plot });
   }
 
-  const plot = await prisma.plot.findUnique({ where: { id } });
+  try {
+    const plot = await prisma.plot.findUnique({ where: { id } });
 
-  if (!plot) {
-    return NextResponse.json({ error: "Plot not found" }, { status: 404 });
+    if (!plot) {
+      const fallback = getMockPlotById(id);
+      if (!fallback) {
+        return NextResponse.json({ error: "Plot not found" }, { status: 404 });
+      }
+      return NextResponse.json({ data: fallback });
+    }
+
+    return NextResponse.json({ data: normalizePlot(plot) });
+  } catch {
+    const fallback = getMockPlotById(id);
+    if (!fallback) {
+      return NextResponse.json({ error: "Plot not found" }, { status: 404 });
+    }
+    return NextResponse.json({ data: fallback });
   }
-
-  return NextResponse.json({ data: normalizePlot(plot) });
 }
 
 export async function PATCH(request: NextRequest, context: { params: Promise<{ id: string }> }) {

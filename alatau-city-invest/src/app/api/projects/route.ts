@@ -135,12 +135,39 @@ export async function GET(request: NextRequest) {
     where.status = status === "all" ? "approved" : status;
   }
 
-  const rows = await prisma.businessProject.findMany({
-    where,
-    orderBy: { createdAt: "desc" },
-  });
+  try {
+    const rows = await prisma.businessProject.findMany({
+      where,
+      orderBy: { createdAt: "desc" },
+    });
 
-  return NextResponse.json({ data: rows.map(normalizeBusinessProject) });
+    const normalized = rows.map(normalizeBusinessProject);
+    if (normalized.length) {
+      return NextResponse.json({ data: normalized });
+    }
+
+    if (scope === "market") {
+      const fallbackRows = listMockBusinessProjects({
+        userId,
+        role,
+        status,
+        search,
+        scope,
+      });
+      return NextResponse.json({ data: fallbackRows });
+    }
+
+    return NextResponse.json({ data: normalized });
+  } catch {
+    const fallbackRows = listMockBusinessProjects({
+      userId,
+      role,
+      status,
+      search,
+      scope,
+    });
+    return NextResponse.json({ data: fallbackRows });
+  }
 }
 
 export async function POST(request: NextRequest) {

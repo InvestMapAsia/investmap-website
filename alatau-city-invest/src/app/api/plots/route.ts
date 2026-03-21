@@ -5,6 +5,13 @@ import { normalizePlot } from "@/lib/db-mappers";
 import { listMockPlots } from "@/lib/mock-store";
 import { prisma } from "@/lib/prisma";
 
+const pricePresets = [
+  { key: "all", label: "Any" },
+  { key: "lt300", label: "Under 300k USD" },
+  { key: "300to600", label: "300k - 600k USD" },
+  { key: "gt600", label: "Over 600k USD" },
+];
+
 export async function GET(request: NextRequest) {
   const searchParams = request.nextUrl.searchParams;
 
@@ -17,8 +24,8 @@ export async function GET(request: NextRequest) {
     (searchParams.get("sort") as "roi_desc" | "price_asc" | "price_desc" | "risk_asc" | null) ??
     "roi_desc";
 
-  if (isMockMode()) {
-    const rows = listMockPlots({
+  const mockRows = () =>
+    listMockPlots({
       purpose,
       status,
       risk,
@@ -26,6 +33,8 @@ export async function GET(request: NextRequest) {
       sort,
     });
 
+  const mockResponse = () => {
+    const rows = mockRows();
     const purposes = Array.from(new Set(listMockPlots().map((item) => item.purpose))).sort((a, b) =>
       a.localeCompare(b)
     );
@@ -34,14 +43,13 @@ export async function GET(request: NextRequest) {
       data: rows,
       meta: {
         purposes,
-        pricePresets: [
-          { key: "all", label: "Any" },
-          { key: "lt300", label: "Under 300k USD" },
-          { key: "300to600", label: "300k - 600k USD" },
-          { key: "gt600", label: "Over 600k USD" },
-        ],
+        pricePresets,
       },
     });
+  };
+
+  if (isMockMode()) {
+    return mockResponse();
   }
 
   const where: Prisma.PlotWhereInput = {};
@@ -83,25 +91,29 @@ export async function GET(request: NextRequest) {
           ? { riskScore: "asc" }
           : { roi: "desc" };
 
-  const [rows, purposeRows] = await Promise.all([
-    prisma.plot.findMany({ where, orderBy }),
-    prisma.plot.findMany({
-      select: { purpose: true },
-      distinct: ["purpose"],
-      orderBy: { purpose: "asc" },
-    }),
-  ]);
+  try {
+    const [rows, purposeRows] = await Promise.all([
+      prisma.plot.findMany({ where, orderBy }),
+      prisma.plot.findMany({
+        select: { purpose: true },
+        distinct: ["purpose"],
+        orderBy: { purpose: "asc" },
+      }),
+    ]);
 
-  return NextResponse.json({
-    data: rows.map(normalizePlot),
-    meta: {
-      purposes: purposeRows.map((item) => item.purpose),
-      pricePresets: [
-        { key: "all", label: "Any" },
-        { key: "lt300", label: "Under 300k USD" },
-        { key: "300to600", label: "300k - 600k USD" },
-        { key: "gt600", label: "Over 600k USD" },
-      ],
-    },
-  });
+    const normalized = rows.map(normalizePlot);
+    if (!normalized.length) {
+      return mockResponse();
+    }
+
+    return NextResponse.json({
+      data: normalized,
+      meta: {
+        purposes: purposeRows.map((item) => item.purpose),
+        pricePresets,
+      },
+    });
+  } catch {
+    return mockResponse();
+  }
 }

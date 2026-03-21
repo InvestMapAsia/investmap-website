@@ -87,15 +87,26 @@ export async function GET() {
     return NextResponse.json({ data: rows });
   }
 
-  const rows = await prisma.plot.findMany({
-    where:
-      role === "ADMIN" || role === "MODERATOR"
-        ? { source: "owner" }
-        : { source: "owner", ownerId: session.user.id },
-    orderBy: { updatedAt: "desc" },
-  });
+  try {
+    const rows = await prisma.plot.findMany({
+      where:
+        role === "ADMIN" || role === "MODERATOR"
+          ? { source: "owner" }
+          : { source: "owner", ownerId: session.user.id },
+      orderBy: { updatedAt: "desc" },
+    });
 
-  return NextResponse.json({ data: rows.map(normalizePlot) });
+    const normalized = rows.map(normalizePlot);
+    if (normalized.length) {
+      return NextResponse.json({ data: normalized });
+    }
+
+    const fallback = listMockOwnerPlots({ userId: session.user.id, role });
+    return NextResponse.json({ data: fallback });
+  } catch {
+    const fallback = listMockOwnerPlots({ userId: session.user.id, role });
+    return NextResponse.json({ data: fallback });
+  }
 }
 
 export async function POST(request: NextRequest) {
