@@ -592,8 +592,6 @@ input[type="submit"] {
   object-fit: contain;
   opacity: 0.42;
   filter: saturate(1.1) contrast(1.03);
-  transform: rotate(90deg) scale(1.04);
-  transform-origin: center;
   pointer-events: none;
 }
 
