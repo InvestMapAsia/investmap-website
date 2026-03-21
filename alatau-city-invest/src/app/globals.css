@@ -589,9 +589,12 @@ input[type="submit"] {
   inset: 0;
   width: 100%;
   height: 100%;
-  object-fit: cover;
-  opacity: 0.4;
+  object-fit: contain;
+  opacity: 0.42;
   filter: saturate(1.1) contrast(1.03);
+  transform: rotate(90deg) scale(1.04);
+  transform-origin: center;
+  pointer-events: none;
 }
 
 .map-overlay {
@@ -618,27 +621,6 @@ input[type="submit"] {
   position: absolute;
   inset: auto 18px 18px 18px;
   z-index: 4;
-}
-
-.map-zone {
-  position: absolute;
-  transform: translate(-50%, -50%) rotate(-10deg);
-  border-radius: 8px;
-  border: 1px solid transparent;
-  cursor: pointer;
-  z-index: 2;
-  transition: transform 0.16s ease, box-shadow 0.16s ease, background 0.16s ease;
-}
-
-.map-zone:hover {
-  transform: translate(-50%, -50%) rotate(-10deg) scale(1.04);
-  box-shadow: 0 8px 18px rgba(19, 36, 53, 0.18);
-}
-
-.map-zone.is-active {
-  transform: translate(-50%, -50%) rotate(-10deg) scale(1.06);
-  box-shadow: 0 10px 22px rgba(19, 36, 53, 0.28);
-  background: rgba(255, 255, 255, 0.45) !important;
 }
 
 .map-marker {
