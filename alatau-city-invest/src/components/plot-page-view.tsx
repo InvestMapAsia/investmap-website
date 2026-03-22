@@ -105,6 +105,24 @@ export function PlotPageView({ plot, similar }: { plot: Plot; similar: Plot[] })
     },
   });
 
+  const mapT = pickLang(lang, {
+    EN: {
+      locationMap: "Location on map",
+      openInGoogle: "Open in Google Maps",
+      noLocation: "Coordinates are not available for this plot.",
+    },
+    RU: {
+      locationMap: "Точка на карте",
+      openInGoogle: "Открыть в Google Maps",
+      noLocation: "Для этого участка пока нет координат.",
+    },
+    KZ: {
+      locationMap: "Картадағы нүкте",
+      openInGoogle: "Google Maps-те ашу",
+      noLocation: "Бұл учаске үшін координаттар әлі енгізілмеген.",
+    },
+  });
+
   const legalGradeLabel = {
     a_plus: t.legalAPlus,
     a: t.legalA,
@@ -119,6 +137,19 @@ export function PlotPageView({ plot, similar }: { plot: Plot; similar: Plot[] })
   if (plot.riskScore > 45) {
     riskNote = t.riskHigh;
   }
+
+  const hasCoordinates = Number.isFinite(plot.mapLat) && Number.isFinite(plot.mapLng);
+  const mapQuery = hasCoordinates
+    ? `${plot.mapLat},${plot.mapLng}`
+    : plot.mapAddress?.trim()
+      ? plot.mapAddress.trim()
+      : null;
+  const mapEmbedUrl = mapQuery
+    ? `https://maps.google.com/maps?q=${encodeURIComponent(mapQuery)}&z=15&output=embed`
+    : null;
+  const mapOpenUrl = mapQuery
+    ? `https://www.google.com/maps?q=${encodeURIComponent(mapQuery)}`
+    : null;
 
   const handleShare = async () => {
     const shareUrl = typeof window !== "undefined" ? window.location.href : "";
@@ -210,6 +241,27 @@ export function PlotPageView({ plot, similar }: { plot: Plot; similar: Plot[] })
           <p className="muted">{riskNote}</p>
           <div className="notice" style={{ marginTop: 12 }}>
             {t.aiNotice}
+          </div>
+          <div className="plot-mini-map-wrap">
+            <h4 className="plot-mini-map-title">{mapT.locationMap}</h4>
+            {mapEmbedUrl ? (
+              <>
+                <iframe
+                  className="plot-mini-map-frame"
+                  src={mapEmbedUrl}
+                  loading="lazy"
+                  referrerPolicy="no-referrer-when-downgrade"
+                  title={`${plot.title} map`}
+                />
+                {mapOpenUrl ? (
+                  <a className="btn btn-ghost" href={mapOpenUrl} target="_blank" rel="noreferrer">
+                    {mapT.openInGoogle}
+                  </a>
+                ) : null}
+              </>
+            ) : (
+              <p className="muted">{mapT.noLocation}</p>
+            )}
           </div>
         </aside>
       </section>
