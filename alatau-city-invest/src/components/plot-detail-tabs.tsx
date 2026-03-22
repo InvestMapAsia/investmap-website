@@ -23,6 +23,9 @@ export function PlotDetailTabs({ plot }: { plot: Plot }) {
       optimistic: "Optimistic",
       assumptions: "Model assumptions blend infrastructure timeline, liquidity profile and legal confidence.",
       milestones: "Roadmap milestones",
+      media: "Media gallery",
+      noMedia: "No media uploaded for this plot yet.",
+      openMedia: "Open media",
     },
     RU: {
       legalBlock: "Юридический блок",
@@ -37,6 +40,9 @@ export function PlotDetailTabs({ plot }: { plot: Plot }) {
       optimistic: "Оптимистичный",
       assumptions: "Модель учитывает инфраструктурные сроки, профиль ликвидности и уровень юридической уверенности.",
       milestones: "Ключевые этапы",
+      media: "Медиагалерея",
+      noMedia: "Для этого участка пока нет загруженных медиа.",
+      openMedia: "Открыть медиа",
     },
     KZ: {
       legalBlock: "Заң блогы",
@@ -51,8 +57,13 @@ export function PlotDetailTabs({ plot }: { plot: Plot }) {
       optimistic: "Оптимистік",
       assumptions: "Модель инфрақұрылым мерзімдерін, өтімділік профилін және заңдық сенімділік деңгейін біріктіреді.",
       milestones: "Негізгі кезеңдер",
+      media: "Медиа галерея",
+      noMedia: "Бұл учаске үшін медиа әлі жүктелмеген.",
+      openMedia: "Медианы ашу",
     },
   });
+
+  const isVideoUrl = (url: string) => /\.(mp4|webm|ogg|mov|m4v)(\?.*)?$/i.test(url);
 
   return (
     <section className="section card">
@@ -116,6 +127,32 @@ export function PlotDetailTabs({ plot }: { plot: Plot }) {
             <li key={item}>{item}</li>
           ))}
         </ul>
+      </div>
+
+      <div className="section" style={{ marginTop: 16 }}>
+        <h3 className="card-title">{t.media}</h3>
+        {plot.mediaUrls?.length ? (
+          <div className="uploaded-media-grid">
+            {plot.mediaUrls.map((url, index) => (
+              <div className="uploaded-media-item" key={`${url}-${index}`}>
+                <div className="uploaded-media-preview">
+                  {isVideoUrl(url) ? (
+                    <video src={url} controls preload="metadata" />
+                  ) : (
+                    <img src={url} alt={`plot-media-${index + 1}`} />
+                  )}
+                </div>
+                <div className="uploaded-media-actions">
+                  <a href={url} target="_blank" rel="noreferrer" className="btn btn-ghost">
+                    {t.openMedia}
+                  </a>
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <p className="muted">{t.noMedia}</p>
+        )}
       </div>
     </section>
   );

@@ -22,6 +22,22 @@ function normalizeOptionalText(value: unknown) {
   return next.length ? next : undefined;
 }
 
+function normalizeStringArray(value: unknown) {
+  if (!value) return [] as string[];
+  if (Array.isArray(value)) {
+    return value
+      .map((item) => (typeof item === "string" ? item.trim() : String(item).trim()))
+      .filter(Boolean);
+  }
+  if (typeof value === "string") {
+    return value
+      .split(/[\n,]/g)
+      .map((item) => item.trim())
+      .filter(Boolean);
+  }
+  return [] as string[];
+}
+
 function scoreOwnerListing(payload: {
   title: string;
   cadastral: string;
@@ -105,6 +121,7 @@ export async function POST(request: NextRequest) {
     legalOwnerType?: string;
     hasUtilities?: boolean;
     description?: string;
+    mediaUrls?: string[] | string;
     mapAddress?: string;
     mapLat?: number | string;
     mapLng?: number | string;
@@ -117,6 +134,7 @@ export async function POST(request: NextRequest) {
   const distanceCenterKm = normalizeOptionalNumber(body.distanceCenterKm);
   const mapLat = normalizeOptionalNumber(body.mapLat);
   const mapLng = normalizeOptionalNumber(body.mapLng);
+  const mediaUrls = normalizeStringArray(body.mediaUrls);
   const hasMapLat = mapLat !== undefined;
   const hasMapLng = mapLng !== undefined;
   const mapPoint = latLngToMapPoint(mapLat, mapLng);
@@ -179,6 +197,7 @@ export async function POST(request: NextRequest) {
         legalOwnerType: body.legalOwnerType,
         hasUtilities: Boolean(body.hasUtilities),
         description: body.description,
+        mediaUrls,
         mapAddress: normalizeOptionalText(body.mapAddress),
         mapLat,
         mapLng,
@@ -248,6 +267,7 @@ export async function POST(request: NextRequest) {
         ownerType: body.legalOwnerType,
         docs: ["Owner provided package"],
         timeline: ["Moderation pending"],
+        mediaUrls: mediaUrls.length ? mediaUrls : undefined,
         mapAddress: normalizeOptionalText(body.mapAddress),
         mapLat,
         mapLng,

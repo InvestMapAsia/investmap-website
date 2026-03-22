@@ -1,7 +1,7 @@
 ﻿"use client";
 
 import Link from "next/link";
-import { FormEvent, useMemo, useState } from "react";
+import { ChangeEvent, FormEvent, useMemo, useState } from "react";
 import { pickLang } from "@/lib/i18n";
 import { useCurrentLanguage } from "@/lib/i18n-client";
 import { ALATAU_BOUNDS, isInsideAlatauBounds } from "@/lib/map-geo";
@@ -12,6 +12,20 @@ type CreateResult = {
 };
 
 type ApiErrorResponse = {
+  error?: string;
+  detail?: string;
+};
+
+type UploadedMedia = {
+  url: string;
+  pathname?: string;
+  size?: number;
+  contentType?: string;
+  originalName?: string;
+};
+
+type UploadMediaResponse = {
+  data?: UploadedMedia;
   error?: string;
   detail?: string;
 };
@@ -45,6 +59,8 @@ export function OwnerAddPlotForm() {
 
   const [result, setResult] = useState<CreateResult | null>(null);
   const [saving, setSaving] = useState(false);
+  const [uploadedMedia, setUploadedMedia] = useState<UploadedMedia[]>([]);
+  const [uploadingMedia, setUploadingMedia] = useState(false);
 
   const t = pickLang(lang, {
     EN: {
@@ -66,6 +82,14 @@ export function OwnerAddPlotForm() {
       mapLng: "Longitude",
       openGoogleMap: "Open in Google Maps",
       mapHint: `Alatau bounds: lat ${ALATAU_BOUNDS.minLat}..${ALATAU_BOUNDS.maxLat}, lng ${ALATAU_BOUNDS.minLng}..${ALATAU_BOUNDS.maxLng}.`,
+      mediaSection: "Plot media (photo/video)",
+      mediaHint: "Upload files to Vercel Blob. Public links will be saved to this listing.",
+      mediaUploading: "Uploading files...",
+      mediaUploaded: "Uploaded files",
+      removeMedia: "Remove",
+      openMedia: "Open",
+      uploadFailed: "Some files could not be uploaded.",
+      waitMediaUpload: "Please wait until media upload is complete.",
       purposeCommercial: "Commercial",
       purposeMixed: "Mixed-use",
       purposeResidential: "Residential",
@@ -111,6 +135,14 @@ export function OwnerAddPlotForm() {
       mapLng: "Долгота",
       openGoogleMap: "Открыть в Google Maps",
       mapHint: `Границы Алатау: широта ${ALATAU_BOUNDS.minLat}..${ALATAU_BOUNDS.maxLat}, долгота ${ALATAU_BOUNDS.minLng}..${ALATAU_BOUNDS.maxLng}.`,
+      mediaSection: "Медиа участка (фото/видео)",
+      mediaHint: "Файлы загружаются в Vercel Blob. В листинге сохраняются публичные ссылки.",
+      mediaUploading: "Загрузка файлов...",
+      mediaUploaded: "Загруженные файлы",
+      removeMedia: "Удалить",
+      openMedia: "Открыть",
+      uploadFailed: "Часть файлов не удалось загрузить.",
+      waitMediaUpload: "Дождитесь завершения загрузки медиа.",
       purposeCommercial: "Коммерческое",
       purposeMixed: "Смешанное",
       purposeResidential: "Жилое",
@@ -156,6 +188,14 @@ export function OwnerAddPlotForm() {
       mapLng: "Бойлық",
       openGoogleMap: "Google Maps-те ашу",
       mapHint: `Alatau шекарасы: ендік ${ALATAU_BOUNDS.minLat}..${ALATAU_BOUNDS.maxLat}, бойлық ${ALATAU_BOUNDS.minLng}..${ALATAU_BOUNDS.maxLng}.`,
+      mediaSection: "Учаске медиасы (фото/видео)",
+      mediaHint: "Файлдар Vercel Blob-қа жүктеледі. Листингте ашық сілтемелер сақталады.",
+      mediaUploading: "Файлдар жүктелуде...",
+      mediaUploaded: "Жүктелген файлдар",
+      removeMedia: "Өшіру",
+      openMedia: "Ашу",
+      uploadFailed: "Кейбір файлдарды жүктеу мүмкін болмады.",
+      waitMediaUpload: "Медиа жүктеу аяқталғанша күтіңіз.",
       purposeCommercial: "Коммерциялық",
       purposeMixed: "Аралас",
       purposeResidential: "Тұрғын",
@@ -196,8 +236,9 @@ export function OwnerAddPlotForm() {
     if (form.hasUtilities) next += 10;
     if (form.description.trim().length > 120) next += 16;
     if (form.mapLat.trim().length > 0 && form.mapLng.trim().length > 0) next += 2;
+    if (uploadedMedia.length > 0) next += 2;
     return Math.min(100, next);
-  }, [form]);
+  }, [form, uploadedMedia.length]);
 
   const googleMapUrl = useMemo(() => {
     if (form.mapLat && form.mapLng) {
@@ -209,8 +250,59 @@ export function OwnerAddPlotForm() {
     return null;
   }, [form.mapAddress, form.mapLat, form.mapLng]);
 
+  const isVideoUrl = (url: string, contentType?: string) => {
+    if (contentType?.startsWith("video/")) return true;
+    return /\.(mp4|webm|ogg|mov|m4v)(\?.*)?$/i.test(url);
+  };
+
+  const handleMediaUpload = async (event: ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(event.target.files ?? []);
+    if (!files.length) return;
+
+    setUploadingMedia(true);
+    const failed: string[] = [];
+    const uploaded: UploadedMedia[] = [];
+
+    for (const file of files) {
+      try {
+        const payload = new FormData();
+        payload.append("file", file);
+
+        const response = await fetch("/api/uploads/plot-media", {
+          method: "POST",
+          body: payload,
+        });
+
+        const body = (await response.json()) as UploadMediaResponse;
+        if (!response.ok || !body.data?.url) {
+          failed.push(file.name);
+          continue;
+        }
+
+        uploaded.push(body.data);
+      } catch {
+        failed.push(file.name);
+      }
+    }
+
+    if (uploaded.length) {
+      setUploadedMedia((prev) => [...prev, ...uploaded]);
+    }
+
+    setUploadingMedia(false);
+    event.target.value = "";
+
+    if (failed.length) {
+      window.alert(`${t.uploadFailed}\n${failed.join(", ")}`);
+    }
+  };
+
   const submit = async (event: FormEvent) => {
     event.preventDefault();
+    if (uploadingMedia) {
+      window.alert(t.waitMediaUpload);
+      return;
+    }
     setSaving(true);
 
     const area = parseNumberValue(form.area);
@@ -263,6 +355,7 @@ export function OwnerAddPlotForm() {
         legalOwnerType: form.legalOwnerType,
         hasUtilities: form.hasUtilities,
         description: form.description,
+        mediaUrls: uploadedMedia.map((item) => item.url),
         mapAddress: form.mapAddress || undefined,
         mapLat,
         mapLng,
@@ -320,6 +413,7 @@ export function OwnerAddPlotForm() {
       mapLat: "",
       mapLng: "",
     });
+    setUploadedMedia([]);
   };
 
   return (
@@ -456,6 +550,54 @@ export function OwnerAddPlotForm() {
               />
             </div>
             <div className="form-field" style={{ gridColumn: "1 / -1" }}>
+              <label>{t.mediaSection}</label>
+              <input
+                type="file"
+                accept="image/*,video/*"
+                multiple
+                disabled={uploadingMedia}
+                onChange={handleMediaUpload}
+              />
+              <p className="muted">{t.mediaHint}</p>
+              {uploadingMedia ? <p className="muted">{t.mediaUploading}</p> : null}
+
+              {uploadedMedia.length ? (
+                <>
+                  <p className="muted">{t.mediaUploaded}: {uploadedMedia.length}</p>
+                  <div className="uploaded-media-grid">
+                    {uploadedMedia.map((item, index) => {
+                      const isVideo = isVideoUrl(item.url, item.contentType);
+                      return (
+                        <div className="uploaded-media-item" key={`${item.url}-${index}`}>
+                          <div className="uploaded-media-preview">
+                            {isVideo ? (
+                              <video src={item.url} controls preload="metadata" />
+                            ) : (
+                              <img src={item.url} alt={item.originalName || `media-${index + 1}`} />
+                            )}
+                          </div>
+                          <div className="uploaded-media-actions">
+                            <a href={item.url} target="_blank" rel="noreferrer" className="btn btn-ghost">
+                              {t.openMedia}
+                            </a>
+                            <button
+                              className="btn btn-ghost"
+                              type="button"
+                              onClick={() =>
+                                setUploadedMedia((prev) => prev.filter((_, itemIndex) => itemIndex !== index))
+                              }
+                            >
+                              {t.removeMedia}
+                            </button>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </>
+              ) : null}
+            </div>
+            <div className="form-field" style={{ gridColumn: "1 / -1" }}>
               <label>{t.mapAddress}</label>
               <input
                 value={form.mapAddress}
@@ -491,7 +633,7 @@ export function OwnerAddPlotForm() {
                 {t.openGoogleMap}
               </a>
             ) : null}
-            <button className="btn btn-primary" type="submit" disabled={saving}>
+            <button className="btn btn-primary" type="submit" disabled={saving || uploadingMedia}>
               {saving ? t.submitting : t.submit}
             </button>
             <Link className="btn btn-ghost" href="/pricing">
