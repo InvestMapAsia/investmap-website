@@ -6,7 +6,7 @@ import { authOptions } from "@/lib/auth";
 
 export const runtime = "nodejs";
 
-const MAX_FILE_SIZE_BYTES = 25 * 1024 * 1024; // 25 MB
+const MAX_FILE_SIZE_BYTES = 4 * 1024 * 1024; // 4 MB safe for server upload on Vercel
 
 function sanitizeFilename(input: string) {
   return input.replace(/[^a-zA-Z0-9._-]/g, "-").replace(/-+/g, "-");

@@ -30,6 +30,8 @@ type UploadMediaResponse = {
   detail?: string;
 };
 
+const MAX_MEDIA_UPLOAD_BYTES = 4 * 1024 * 1024; // 4 MB safe limit for Vercel function upload
+
 function parseNumberValue(value: string) {
   const normalized = value.trim().replace(",", ".");
   if (!normalized) return undefined;
@@ -89,6 +91,8 @@ export function OwnerAddPlotForm() {
       removeMedia: "Remove",
       openMedia: "Open",
       uploadFailed: "Some files could not be uploaded.",
+      uploadTooLarge: "File is too large for current upload mode (max 4 MB per file).",
+      uploadInvalidType: "Only image/video files are allowed.",
       waitMediaUpload: "Please wait until media upload is complete.",
       purposeCommercial: "Commercial",
       purposeMixed: "Mixed-use",
@@ -142,6 +146,8 @@ export function OwnerAddPlotForm() {
       removeMedia: "Удалить",
       openMedia: "Открыть",
       uploadFailed: "Часть файлов не удалось загрузить.",
+      uploadTooLarge: "Файл слишком большой для текущей загрузки (максимум 4 МБ на файл).",
+      uploadInvalidType: "Разрешены только файлы изображений и видео.",
       waitMediaUpload: "Дождитесь завершения загрузки медиа.",
       purposeCommercial: "Коммерческое",
       purposeMixed: "Смешанное",
@@ -195,6 +201,8 @@ export function OwnerAddPlotForm() {
       removeMedia: "Өшіру",
       openMedia: "Ашу",
       uploadFailed: "Кейбір файлдарды жүктеу мүмкін болмады.",
+      uploadTooLarge: "Файл ағымдағы жүктеу режимі үшін тым үлкен (әр файлға максимум 4 МБ).",
+      uploadInvalidType: "Тек сурет/видео файлдарына рұқсат етіледі.",
       waitMediaUpload: "Медиа жүктеу аяқталғанша күтіңіз.",
       purposeCommercial: "Коммерциялық",
       purposeMixed: "Аралас",
@@ -255,6 +263,9 @@ export function OwnerAddPlotForm() {
     return /\.(mp4|webm|ogg|mov|m4v)(\?.*)?$/i.test(url);
   };
 
+  const isAllowedMediaType = (file: File) =>
+    file.type.startsWith("image/") || file.type.startsWith("video/");
+
   const handleMediaUpload = async (event: ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(event.target.files ?? []);
     if (!files.length) return;
@@ -264,6 +275,16 @@ export function OwnerAddPlotForm() {
     const uploaded: UploadedMedia[] = [];
 
     for (const file of files) {
+      if (!isAllowedMediaType(file)) {
+        failed.push(`${file.name}: ${t.uploadInvalidType}`);
+        continue;
+      }
+
+      if (file.size > MAX_MEDIA_UPLOAD_BYTES) {
+        failed.push(`${file.name}: ${t.uploadTooLarge}`);
+        continue;
+      }
+
       try {
         const payload = new FormData();
         payload.append("file", file);
@@ -275,13 +296,14 @@ export function OwnerAddPlotForm() {
 
         const body = (await response.json()) as UploadMediaResponse;
         if (!response.ok || !body.data?.url) {
-          failed.push(file.name);
+          const reason = [body.error, body.detail].filter(Boolean).join(" | ");
+          failed.push(reason ? `${file.name}: ${reason}` : `${file.name}: HTTP ${response.status}`);
           continue;
         }
 
         uploaded.push(body.data);
       } catch {
-        failed.push(file.name);
+        failed.push(`${file.name}: network error`);
       }
     }
 
@@ -293,7 +315,7 @@ export function OwnerAddPlotForm() {
     event.target.value = "";
 
     if (failed.length) {
-      window.alert(`${t.uploadFailed}\n${failed.join(", ")}`);
+      window.alert(`${t.uploadFailed}\n${failed.join("\n")}`);
     }
   };
 
