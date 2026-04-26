@@ -35,7 +35,6 @@ const uiText: Record<
       "/alatau-city": "Alatau City",
       "/catalog": "Catalog",
       "/projects": "Projects",
-      "/map": "Map",
       "/pricing": "Pricing",
       "/news": "News",
       "/faq": "FAQ",
@@ -62,7 +61,6 @@ const uiText: Record<
       "/alatau-city": "Alatau City",
       "/catalog": "Каталог",
       "/projects": "Проекты",
-      "/map": "Карта",
       "/pricing": "Тарифы",
       "/news": "Новости",
       "/faq": "FAQ",
@@ -89,7 +87,6 @@ const uiText: Record<
       "/alatau-city": "Alatau City",
       "/catalog": "Каталог",
       "/projects": "Жобалар",
-      "/map": "Карта",
       "/pricing": "Тарифтер",
       "/news": "Жаңалықтар",
       "/faq": "FAQ",
@@ -133,7 +130,7 @@ export function SiteShell({ children }: { children: ReactNode }) {
   const { data: session, status } = useSession();
   const { lang, setLanguage } = useCurrentLanguage();
   const primaryNav = ["/", "/alatau-city", "/catalog", "/projects"] as const;
-  const secondaryNav = ["/map", "/pricing", "/news", "/faq", "/contacts"] as const;
+  const secondaryNav = ["/pricing", "/news", "/faq", "/contacts"] as const;
 
   const t = useMemo(() => uiText[lang], [lang]);
   const role = session?.user?.role;

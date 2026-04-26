@@ -70,7 +70,6 @@ export function CatalogExplorer() {
         "Have a plot ready for investors? Add cadastral data, price, media, legal details and send it to moderation as a separate land listing.",
       submitLand: "Register land",
       loginSubmitLand: "Sign in to register land",
-      openMap: "Open map",
     },
     RU: {
       purpose: "Назначение",
@@ -105,7 +104,6 @@ export function CatalogExplorer() {
         "Есть участок для инвесторов? Добавьте кадастровые данные, цену, медиа, юридические детали и отправьте землю на модерацию отдельным листингом.",
       submitLand: "Зарегистрировать землю",
       loginSubmitLand: "Войти для регистрации земли",
-      openMap: "Открыть карту",
     },
     KZ: {
       purpose: "Мақсаты",
@@ -140,7 +138,6 @@ export function CatalogExplorer() {
         "Инвесторларға дайын учаскеңіз бар ма? Кадастр деректерін, бағаны, медиа және заңдық мәліметтерді қосып, жерді бөлек листинг ретінде модерацияға жіберіңіз.",
       submitLand: "Жерді тіркеу",
       loginSubmitLand: "Жер тіркеу үшін кіру",
-      openMap: "Картаны ашу",
     },
   });
 
@@ -206,9 +203,6 @@ export function CatalogExplorer() {
         <div className="plot-actions">
           <Link className="btn btn-primary" href={submitLandHref}>
             {sessionStatus === "authenticated" ? t.submitLand : t.loginSubmitLand}
-          </Link>
-          <Link className="btn btn-ghost" href="/alatau-city#alatau-map">
-            {t.openMap}
           </Link>
         </div>
       </section>
