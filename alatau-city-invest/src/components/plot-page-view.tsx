@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useState } from "react";
 import { ListingQrCode } from "@/components/listing-qr-code";
 import { PlotCard } from "@/components/plot-card";
 import { PlotDetailTabs } from "@/components/plot-detail-tabs";
@@ -13,6 +14,7 @@ import { Plot } from "@/lib/types";
 
 export function PlotPageView({ plot, similar }: { plot: Plot; similar: Plot[] }) {
   const { lang } = useCurrentLanguage();
+  const [baiduZoom, setBaiduZoom] = useState(15);
 
   const t = pickLang(lang, {
     EN: {
@@ -190,7 +192,7 @@ export function PlotPageView({ plot, similar }: { plot: Plot; similar: Plot[] })
       ? plot.mapAddress.trim()
       : null;
   const baiduStaticMapUrl = baiduStaticCenter
-    ? `https://api.map.baidu.com/staticimage?center=${encodeURIComponent(baiduStaticCenter)}&width=512&height=170&zoom=15`
+    ? `https://api.map.baidu.com/staticimage?center=${encodeURIComponent(baiduStaticCenter)}&width=512&height=170&zoom=${baiduZoom}`
     : null;
   const breakEvenYear = 3;
   const roiProjection = [
@@ -412,12 +414,30 @@ export function PlotPageView({ plot, similar }: { plot: Plot; similar: Plot[] })
                 {baiduStaticMapUrl ? (
                   <div className="plot-baidu-window">
                     <div className="plot-baidu-window-label">{mapT.baiduMiniWindow}</div>
-                    <div
-                      className="plot-mini-map-frame plot-baidu-static-map"
-                      role="img"
-                      aria-label={`${plot.title} Baidu Maps`}
-                      style={{ backgroundImage: `url("${baiduStaticMapUrl}")` }}
-                    />
+                    <div className="plot-baidu-map-shell">
+                      <div
+                        className="plot-mini-map-frame plot-baidu-static-map"
+                        role="img"
+                        aria-label={`${plot.title} Baidu Maps`}
+                        style={{ backgroundImage: `url("${baiduStaticMapUrl}")` }}
+                      />
+                      <div className="plot-baidu-zoom" aria-label="Baidu map zoom">
+                        <button
+                          type="button"
+                          aria-label="Zoom in Baidu map"
+                          onClick={() => setBaiduZoom((current) => Math.min(18, current + 1))}
+                        >
+                          +
+                        </button>
+                        <button
+                          type="button"
+                          aria-label="Zoom out Baidu map"
+                          onClick={() => setBaiduZoom((current) => Math.max(3, current - 1))}
+                        >
+                          -
+                        </button>
+                      </div>
+                    </div>
                   </div>
                 ) : null}
                 <div className="plot-mini-map-actions">

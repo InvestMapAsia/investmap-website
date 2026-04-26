@@ -941,11 +941,44 @@ input[type="submit"] {
   color: var(--primary-strong);
 }
 
+.plot-baidu-map-shell {
+  position: relative;
+}
+
 .plot-baidu-static-map {
   height: 170px;
   background-position: center;
   background-size: cover;
   background-repeat: no-repeat;
+}
+
+.plot-baidu-zoom {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  display: grid;
+  gap: 4px;
+  z-index: 2;
+}
+
+.plot-baidu-zoom button {
+  width: 30px;
+  height: 30px;
+  display: grid;
+  place-items: center;
+  border: 1px solid rgba(15, 34, 56, 0.16);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.95);
+  color: var(--primary-strong);
+  cursor: pointer;
+  font: inherit;
+  font-size: 1.05rem;
+  font-weight: 800;
+  box-shadow: 0 8px 18px rgba(15, 34, 56, 0.12);
+}
+
+.plot-baidu-zoom button:hover {
+  background: #F4F8FB;
 }
 
 .plot-mini-map-actions {

@@ -4,7 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { signOut, useSession } from "next-auth/react";
 import { usePathname } from "next/navigation";
-import { ReactNode, useMemo } from "react";
+import { ReactNode, useEffect, useMemo, useState } from "react";
 import { NotificationsBell } from "@/components/notifications-bell";
 import { Lang } from "@/lib/i18n";
 import { useCurrentLanguage } from "@/lib/i18n-client";
@@ -129,6 +129,7 @@ export function SiteShell({ children }: { children: ReactNode }) {
   const pathname = usePathname();
   const { data: session, status } = useSession();
   const { lang, setLanguage } = useCurrentLanguage();
+  const [moreOpen, setMoreOpen] = useState(false);
   const primaryNav = ["/", "/alatau-city", "/catalog", "/projects"] as const;
   const secondaryNav = ["/pricing", "/news", "/faq", "/contacts"] as const;
 
@@ -150,11 +151,15 @@ export function SiteShell({ children }: { children: ReactNode }) {
     return pathname === href || pathname.startsWith(`${href}/`);
   };
 
+  useEffect(() => {
+    setMoreOpen(false);
+  }, [pathname]);
+
   return (
     <>
       <header className="site-header">
         <div className="container header-inner">
-          <Link className="brand" href="/">
+          <Link className="brand" href="/" onClick={() => setMoreOpen(false)}>
             <span className="brand-logo">
               <Image
                 src="/alatau-logo.png"
@@ -173,11 +178,20 @@ export function SiteShell({ children }: { children: ReactNode }) {
 
           <nav className="main-nav">
             {primaryNav.map((href) => (
-              <Link key={href} className={isActive(href) ? "active" : ""} href={href}>
+              <Link
+                key={href}
+                className={isActive(href) ? "active" : ""}
+                href={href}
+                onClick={() => setMoreOpen(false)}
+              >
                 {t.nav[href]}
               </Link>
             ))}
-            <details className="dropdown nav-dropdown">
+            <details
+              className="dropdown nav-dropdown"
+              open={moreOpen}
+              onToggle={(event) => setMoreOpen(event.currentTarget.open)}
+            >
               <summary
                 className={
                   secondaryNav.some((href) => isActive(href))
@@ -189,7 +203,7 @@ export function SiteShell({ children }: { children: ReactNode }) {
               </summary>
               <div className="dropdown-menu">
                 {secondaryNav.map((href) => (
-                  <Link key={href} href={href}>
+                  <Link key={href} href={href} onClick={() => setMoreOpen(false)}>
                     {t.nav[href]}
                   </Link>
                 ))}
@@ -197,8 +211,14 @@ export function SiteShell({ children }: { children: ReactNode }) {
             </details>
           </nav>
 
-          <div className="header-actions">
-            <LangSwitch lang={lang} onChange={setLanguage} />
+          <div className="header-actions" onClick={() => setMoreOpen(false)}>
+            <LangSwitch
+              lang={lang}
+              onChange={(nextLang) => {
+                setMoreOpen(false);
+                setLanguage(nextLang);
+              }}
+            />
             <NotificationsBell />
 
             {status === "authenticated" ? (
@@ -227,7 +247,7 @@ export function SiteShell({ children }: { children: ReactNode }) {
                 </div>
               </details>
             ) : (
-              <Link href="/login" className="btn btn-primary">
+              <Link href="/login" className="btn btn-primary" onClick={() => setMoreOpen(false)}>
                 {t.login}
               </Link>
             )}
