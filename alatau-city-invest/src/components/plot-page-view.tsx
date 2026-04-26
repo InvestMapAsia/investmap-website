@@ -125,6 +125,33 @@ export function PlotPageView({ plot, similar }: { plot: Plot; similar: Plot[] })
     },
   });
 
+  const projectionT = pickLang(lang, {
+    EN: {
+      title: "ROI projection",
+      expectedIrr: "Expected IRR",
+      breakEven: "Break-even",
+      year: "Year",
+      cumulative: "Cumulative ROI",
+      years: "Years",
+    },
+    RU: {
+      title: "График доходности (ROI projection)",
+      expectedIrr: "Ожидаемый IRR",
+      breakEven: "Точка окупаемости",
+      year: "Год",
+      cumulative: "Накопительный ROI",
+      years: "Годы",
+    },
+    KZ: {
+      title: "Табыстылық графигі (ROI projection)",
+      expectedIrr: "Күтілетін IRR",
+      breakEven: "Өтелу нүктесі",
+      year: "Жыл",
+      cumulative: "Жинақталған ROI",
+      years: "Жылдар",
+    },
+  });
+
   const legalGradeLabel = {
     a_plus: t.legalAPlus,
     a: t.legalA,
@@ -165,6 +192,38 @@ export function PlotPageView({ plot, similar }: { plot: Plot; similar: Plot[] })
   const baiduStaticMapUrl = baiduStaticCenter
     ? `https://api.map.baidu.com/staticimage?center=${encodeURIComponent(baiduStaticCenter)}&width=512&height=170&zoom=15`
     : null;
+  const breakEvenYear = 3;
+  const roiProjection = [
+    { year: 1, value: -10 },
+    { year: 2, value: -4 },
+    { year: 3, value: 0 },
+    { year: 4, value: Math.round(plot.irr * 0.85) },
+    { year: 5, value: Math.round(plot.irr * 1.75) },
+    { year: 6, value: Math.round(plot.irr * 2.5) },
+    { year: 7, value: Math.round(plot.irr * 3.4) },
+    { year: 8, value: Math.round(plot.irr * 4.35) },
+    { year: 9, value: Math.round(plot.irr * 5.2) },
+    { year: 10, value: Math.round(plot.irr * 6.2) },
+  ];
+  const chart = {
+    left: 54,
+    right: 736,
+    top: 34,
+    bottom: 226,
+    min: -20,
+    max: Math.max(80, Math.ceil(Math.max(...roiProjection.map((item) => item.value)) / 10) * 10),
+  };
+  const getChartX = (year: number) =>
+    chart.left + ((year - 1) / 9) * (chart.right - chart.left);
+  const getChartY = (value: number) =>
+    chart.bottom - ((value - chart.min) / (chart.max - chart.min)) * (chart.bottom - chart.top);
+  const projectionPoints = roiProjection
+    .map((point) => `${getChartX(point.year)},${getChartY(point.value)}`)
+    .join(" ");
+  const zeroY = getChartY(0);
+  const projectionArea = `M ${getChartX(1)} ${zeroY} L ${projectionPoints} L ${getChartX(10)} ${zeroY} Z`;
+  const yTicks = [chart.max, Math.round(chart.max / 2), 0, chart.min];
+  const milestoneYears = [1, 3, 5];
 
   const handleShare = async () => {
     const shareUrl = typeof window !== "undefined" ? window.location.href : "";
@@ -248,6 +307,91 @@ export function PlotPageView({ plot, similar }: { plot: Plot; similar: Plot[] })
             <Link className="btn btn-ghost" href="/catalog">
               {t.backToCatalog}
             </Link>
+          </div>
+
+          <div className="roi-projection-panel">
+            <div className="roi-projection-head">
+              <div>
+                <h2>{projectionT.title}</h2>
+                <p>
+                  {projectionT.expectedIrr}: <strong>{plot.irr}%</strong>
+                </p>
+                <p>
+                  {projectionT.breakEven}: {projectionT.year} {breakEvenYear}
+                </p>
+              </div>
+              <span className="roi-projection-mode">{projectionT.cumulative}</span>
+            </div>
+
+            <div className="roi-chart-wrap">
+              <svg className="roi-chart" viewBox="0 0 780 270" role="img" aria-label={projectionT.title}>
+                <defs>
+                  <linearGradient id={`roiFill-${plot.id}`} x1="0" x2="0" y1="0" y2="1">
+                    <stop offset="0%" stopColor="#B0DA2A" stopOpacity="0.34" />
+                    <stop offset="100%" stopColor="#B0DA2A" stopOpacity="0.03" />
+                  </linearGradient>
+                </defs>
+
+                {yTicks.map((tick) => {
+                  const y = getChartY(tick);
+                  return (
+                    <g key={tick}>
+                      <line
+                        className={tick === 0 ? "roi-zero-line" : "roi-grid-line"}
+                        x1={chart.left}
+                        x2={chart.right}
+                        y1={y}
+                        y2={y}
+                      />
+                      <text className="roi-axis-label" x={16} y={y + 4}>
+                        {tick}%
+                      </text>
+                    </g>
+                  );
+                })}
+
+                <path className="roi-area" d={projectionArea} fill={`url(#roiFill-${plot.id})`} />
+                <polyline className="roi-line" points={projectionPoints} />
+
+                {roiProjection.map((point) => {
+                  const x = getChartX(point.year);
+                  const y = getChartY(point.value);
+                  return (
+                    <g key={point.year}>
+                      <circle className="roi-dot" cx={x} cy={y} r={4.5} />
+                      <text className="roi-point-label" x={x} y={y - 10} textAnchor="middle">
+                        {point.value > 0 ? "+" : ""}
+                        {point.value}%
+                      </text>
+                      <text className="roi-axis-label" x={x} y={250} textAnchor="middle">
+                        {point.year}
+                      </text>
+                    </g>
+                  );
+                })}
+
+                <text className="roi-axis-label" x={(chart.left + chart.right) / 2} y={266} textAnchor="middle">
+                  {projectionT.years}
+                </text>
+              </svg>
+            </div>
+
+            <div className="roi-milestones">
+              {milestoneYears.map((year) => {
+                const point = roiProjection.find((item) => item.year === year);
+                return (
+                  <div className="roi-milestone" key={year}>
+                    <span>
+                      {projectionT.year} {year}
+                    </span>
+                    <strong>
+                      {(point?.value ?? 0) > 0 ? "+" : ""}
+                      {point?.value ?? 0}%
+                    </strong>
+                  </div>
+                );
+              })}
+            </div>
           </div>
         </article>
 

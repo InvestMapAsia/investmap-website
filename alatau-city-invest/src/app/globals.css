@@ -504,6 +504,129 @@ input[type="submit"] {
   gap: 8px;
 }
 
+.roi-projection-panel {
+  margin-top: 18px;
+  display: grid;
+  gap: 14px;
+  padding: 16px;
+  border: 1px solid #D7E5C6;
+  border-radius: 14px;
+  background: linear-gradient(180deg, #FFFFFF 0%, #F5FAEB 100%);
+  overflow: hidden;
+}
+
+.roi-projection-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  align-items: flex-start;
+}
+
+.roi-projection-head h2 {
+  font-size: 1.08rem;
+  margin-bottom: 6px;
+}
+
+.roi-projection-head p {
+  color: var(--muted);
+  font-size: 0.82rem;
+}
+
+.roi-projection-head strong {
+  color: #4B9A18;
+}
+
+.roi-projection-mode {
+  flex-shrink: 0;
+  border: 1px solid #D9E7EE;
+  border-radius: 999px;
+  background: #fff;
+  color: var(--muted);
+  font-size: 0.74rem;
+  font-weight: 700;
+  padding: 7px 10px;
+}
+
+.roi-chart-wrap {
+  overflow-x: auto;
+  padding-bottom: 2px;
+}
+
+.roi-chart {
+  width: 100%;
+  min-width: 640px;
+  height: auto;
+  display: block;
+}
+
+.roi-grid-line,
+.roi-zero-line {
+  stroke: #D7E1E8;
+  stroke-width: 1;
+}
+
+.roi-zero-line {
+  stroke: #AAB8C4;
+  stroke-dasharray: 4 4;
+}
+
+.roi-area {
+  pointer-events: none;
+}
+
+.roi-line {
+  fill: none;
+  stroke: #83C516;
+  stroke-width: 4;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.roi-dot {
+  fill: #83C516;
+  stroke: #FFFFFF;
+  stroke-width: 2;
+}
+
+.roi-point-label {
+  fill: var(--primary-strong);
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.roi-axis-label {
+  fill: var(--muted);
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.roi-milestones {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.roi-milestone {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  align-items: baseline;
+  padding: 10px 12px;
+  border: 1px solid #D7E5C6;
+  border-radius: 10px;
+  background: #fff;
+}
+
+.roi-milestone span {
+  color: var(--muted);
+  font-size: 0.78rem;
+}
+
+.roi-milestone strong {
+  color: #4B9A18;
+  font-size: 1rem;
+}
+
 .form-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -1756,6 +1879,7 @@ table th {
 
   .grid-3,
   .form-grid,
+  .roi-milestones,
   .journey-grid {
     grid-template-columns: 1fr;
   }
@@ -1836,6 +1960,15 @@ table th {
   .journey-steps,
   .land-metrics {
     grid-template-columns: 1fr;
+  }
+
+  .roi-projection-head {
+    flex-direction: column;
+  }
+
+  .roi-projection-mode {
+    width: 100%;
+    text-align: center;
   }
 
   .journey-step {
