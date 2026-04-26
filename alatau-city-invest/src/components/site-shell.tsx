@@ -30,12 +30,13 @@ const uiText: Record<
   }
 > = {
   EN: {
-    brandSubtitle: "Land Intelligence Platform",
+    brandSubtitle: "Investment Platform",
     nav: {
       "/": "Home",
-      "/map": "Map",
+      "/alatau-city": "Alatau City",
       "/catalog": "Catalog",
       "/projects": "Projects",
+      "/map": "Map",
       "/pricing": "Pricing",
       "/news": "News",
       "/faq": "FAQ",
@@ -50,18 +51,20 @@ const uiText: Record<
     moderator: "Moderator",
     signOut: "Sign out",
     login: "Login",
-    footerDescription: "Premium digital platform for land investment in Alatau City.",
+    footerDescription:
+      "Digital platform for businesses seeking external investment and investors looking for transparent opportunities.",
     legal: "Legal",
     faq: "FAQ",
     support: "Support",
   },
   RU: {
-    brandSubtitle: "Платформа земельных инвестиций",
+    brandSubtitle: "Инвестиционная платформа",
     nav: {
       "/": "Главная",
-      "/map": "Карта",
+      "/alatau-city": "Alatau City",
       "/catalog": "Каталог",
       "/projects": "Проекты",
+      "/map": "Карта",
       "/pricing": "Тарифы",
       "/news": "Новости",
       "/faq": "FAQ",
@@ -76,18 +79,20 @@ const uiText: Record<
     moderator: "Модератор",
     signOut: "Выйти",
     login: "Войти",
-    footerDescription: "Премиальная цифровая платформа инвестиций в земельные участки Alatau City.",
+    footerDescription:
+      "Цифровая платформа для бизнеса, который ищет внешние инвестиции, и инвесторов, которым нужны прозрачные возможности.",
     legal: "Правовые",
     faq: "FAQ",
     support: "Поддержка",
   },
   KZ: {
-    brandSubtitle: "Жер инвестиция платформасы",
+    brandSubtitle: "Инвестициялық платформа",
     nav: {
       "/": "Басты бет",
-      "/map": "Карта",
+      "/alatau-city": "Alatau City",
       "/catalog": "Каталог",
       "/projects": "Жобалар",
+      "/map": "Карта",
       "/pricing": "Тарифтер",
       "/news": "Жаңалықтар",
       "/faq": "FAQ",
@@ -96,13 +101,14 @@ const uiText: Record<
     moreMenu: "Қосымша",
     accountMenu: "Кабинет",
     investor: "Инвестор",
-    owner: "Жер иесі",
+    owner: "Иесі",
     projects: "Жобалар",
     admin: "Әкімші",
     moderator: "Модератор",
     signOut: "Шығу",
     login: "Кіру",
-    footerDescription: "Alatau City жер учаскелеріне инвестициялауға арналған премиум цифрлық платформа.",
+    footerDescription:
+      "Сыртқы инвестиция іздеген бизнес пен ашық мүмкіндіктер іздеген инвесторларға арналған цифрлық платформа.",
     legal: "Заң",
     faq: "FAQ",
     support: "Қолдау",
@@ -130,8 +136,8 @@ export function SiteShell({ children }: { children: ReactNode }) {
   const pathname = usePathname();
   const { data: session, status } = useSession();
   const { lang, setLanguage } = useCurrentLanguage();
-  const primaryNav = ["/", "/map", "/catalog", "/projects"] as const;
-  const secondaryNav = ["/pricing", "/news", "/faq", "/contacts"] as const;
+  const primaryNav = ["/", "/alatau-city", "/catalog", "/projects"] as const;
+  const secondaryNav = ["/map", "/pricing", "/news", "/faq", "/contacts"] as const;
 
   const t = useMemo(() => uiText[lang], [lang]);
   const role = session?.user?.role;
@@ -145,6 +151,11 @@ export function SiteShell({ children }: { children: ReactNode }) {
           : role === "INVESTOR"
             ? t.investor
             : role;
+
+  const isActive = (href: string) => {
+    if (href === "/") return pathname === "/";
+    return pathname === href || pathname.startsWith(`${href}/`);
+  };
 
   return (
     <>
@@ -169,18 +180,14 @@ export function SiteShell({ children }: { children: ReactNode }) {
 
           <nav className="main-nav">
             {primaryNav.map((href) => (
-              <Link
-                key={href}
-                className={pathname === href ? "active" : ""}
-                href={href}
-              >
+              <Link key={href} className={isActive(href) ? "active" : ""} href={href}>
                 {t.nav[href]}
               </Link>
             ))}
             <details className="dropdown nav-dropdown">
               <summary
                 className={
-                  secondaryNav.includes(pathname as (typeof secondaryNav)[number])
+                  secondaryNav.some((href) => isActive(href))
                     ? "dropdown-summary active"
                     : "dropdown-summary"
                 }
@@ -207,9 +214,7 @@ export function SiteShell({ children }: { children: ReactNode }) {
                 <div className="dropdown-menu dropdown-menu-right">
                   <span className="dropdown-role">{roleLabel}</span>
 
-                  {role === "INVESTOR" ? (
-                    <Link href="/cabinet/investor">{t.investor}</Link>
-                  ) : null}
+                  {role === "INVESTOR" ? <Link href="/cabinet/investor">{t.investor}</Link> : null}
 
                   {(role === "INVESTOR" || role === "OWNER") && (
                     <Link href="/cabinet/projects">{t.projects}</Link>
@@ -256,4 +261,3 @@ export function SiteShell({ children }: { children: ReactNode }) {
     </>
   );
 }
-

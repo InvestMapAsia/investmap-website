@@ -12,7 +12,7 @@ const notoSans = Noto_Sans({
 export const metadata: Metadata = {
   title: "InvestMap",
   description:
-    "Premium multilingual investment platform for land plots in Alatau City with map, analytics, AI assistant, owner and investor cabinets by InvestMap.",
+    "Multilingual investment platform for business projects, land opportunities, AI guidance, legal readiness, owner listings and investor workflows.",
   icons: {
     icon: [
       { url: "/icon.png", type: "image/png", sizes: "32x32" },

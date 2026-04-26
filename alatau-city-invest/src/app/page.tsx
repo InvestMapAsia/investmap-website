@@ -1,268 +1,369 @@
-﻿"use client";
+"use client";
 
 import Link from "next/link";
-import { PlotCard } from "@/components/plot-card";
 import { useCurrentLanguage } from "@/lib/i18n-client";
 import { pickLang } from "@/lib/i18n";
 import { listPlots } from "@/lib/mock-db";
 
+type RailItem = {
+  title: string;
+  label: string;
+  href: string;
+  meta: string;
+};
+
 export default function HomePage() {
   const { lang } = useCurrentLanguage();
-  const all = listPlots({ sort: "roi_desc" });
-  const available = all.filter((plot) => plot.status === "available");
-  const topPlots = available.slice(0, 3);
-  const avgRoi = Math.round(all.reduce((sum, plot) => sum + plot.roi, 0) / Math.max(all.length, 1));
+  const plots = listPlots({ sort: "roi_desc" });
+  const availablePlots = plots.filter((plot) => plot.status === "available");
+  const avgRoi = Math.round(plots.reduce((sum, plot) => sum + plot.roi, 0) / Math.max(plots.length, 1));
 
   const t = pickLang(lang, {
     EN: {
-      title: "Invest in Alatau City land with transparent legal verification and premium analytics",
-      subtitle:
-        "A commercial-grade platform with map intelligence, AI risk guidance, owner self-listing, investor workflows, and admin moderation.",
-      openMap: "Open map",
-      browseCatalog: "Browse catalog",
-      addLand: "Add your land",
-      smallProjects: "Projects",
-      legallyVerified: "Legally verified lots",
-      moderationSla: "Moderation SLA",
-      averageForecastRoi: "Average forecast ROI",
-      partners: "Partner institutions",
-      coreIndicators: "Core platform indicators",
-      coreIndicatorsSub: "Live summary for inventory, opportunity quality and deal flow.",
-      availableLots: "Available lots",
-      totalInventory: "Total inventory",
-      avgRoiLabel: "Average ROI",
-      pipelineApplications: "Pipeline applications",
-      realtimeCabinet: "Real-time via cabinet",
-      topPlots: "Top plots this week",
-      topPlotsSub: "Selected by ROI, legal profile, and infrastructure momentum.",
-      roadmap: "Territory roadmap",
-      road1: "Transport interchange and logistics acceleration phase.",
-      road2: "Main utility backbone expansion for gas and water.",
-      road3: "Education and healthcare anchor projects.",
-      road4: "International cargo link and commercial core extension.",
-      trust: "Trust architecture",
-      kyc: "KYC/AML policy",
-      mandatory: "Mandatory",
-      auditTrail: "Audit trail",
-      immutableLog: "Immutable log",
-      feeDisclosure: "Fee disclosure",
-      transparent: "Transparent",
-      notice:
-        "Legal and financial due diligence checkpoints are embedded directly in plot cards and application flow.",
-      openAi: "Open AI assistant",
-      startInvest: "Start investment",
+      heroKicker: "InvestMap for founders and investors",
+      heroTitle: "A brighter way to find capital and invest in real businesses",
+      heroText:
+        "InvestMap connects business owners who need external investment with investors looking for transparent opportunities, legal clarity, and AI-supported decisions.",
+      primaryCta: "Start your journey",
+      secondaryCta: "Explore Alatau City",
+      ownerCta: "List your business",
+      investorCta: "Browse opportunities",
+      activeProjects: "Active opportunities",
+      verifiedPipeline: "Verified pipeline",
+      averageRoi: "Average land ROI",
+      whatTitle: "What is InvestMap?",
+      whatLead: "Finding investment into your business is easier than ever.",
+      whatText:
+        "The platform helps companies present their business, prepare investor-ready information, and meet people who can finance the next stage of growth.",
+      ownerTitle: "For business owners",
+      ownerText:
+        "We are your key to opening the door to external investments: shape the story, prepare legal checkpoints, publish a clear offer, and start investor conversations from one platform.",
+      whyTitle: "Why us?",
+      whyItems: [
+        "Transparency from project profile to investment request",
+        "Legal support and document readiness before publication",
+        "AI helper for risk, ROI, and next-step questions",
+        "Projects, land plots, founder data, and investor flows in one place",
+      ],
+      showcaseTitle: "Biggest projects on InvestMap",
+      showcaseSub: "A moving strip of flagship opportunities. Open each one in its own page.",
+      aiTitle: "AI helper for both sides of the deal",
+      aiText:
+        "Ask the assistant to compare ROI, explain legal risk, prepare a shortlist, or help business owners improve their investor profile before publication.",
+      aiCta: "Open AI helper",
+      partnersTitle: "Partners and platform overview",
+      partnersText:
+        "InvestMap is built around a partner layer that supports verification, legal readiness, analytics, and investor confidence.",
+      partnerItems: ["Legal advisors", "Financial analysts", "KYC/AML providers", "City and infrastructure data"],
+      tutorialTitle: "How our platform works",
+      ownersFlow: "Business owners",
+      investorsFlow: "Investors",
+      ownerSteps: ["Sign up", "Set up your business", "Find investments"],
+      investorSteps: ["Sign up", "Find a business you like", "Invest"],
+      importanceTitle: "Why is it important and necessary to find investors?",
+      importanceText:
+        "External investment can unlock inventory, hiring, marketing, equipment, technology, and faster expansion. A strong investor is not only money; it is trust, discipline, connections, and a clearer path from local business to scalable company.",
+      finalCta: "Start your investment journey now!",
+      finalText:
+        "Create a profile, explore verified opportunities, or open the Alatau City project page to see how InvestMap turns complex investment decisions into a clear digital flow.",
+      legalSupport: "Legal readiness",
+      transparency: "Transparency",
+      aiSupport: "AI guidance",
+      ownerReady: "Owner ready",
     },
     RU: {
-      title: "Инвестируйте в землю Alatau City с прозрачной юридической проверкой и премиальной аналитикой",
-      subtitle:
-        "Платформа коммерческого уровня с картой, AI-анализом рисков, самостоятельным размещением участков, кабинетами инвестора и модерацией.",
-      openMap: "Открыть карту",
-      browseCatalog: "Открыть каталог",
-      addLand: "Добавить участок",
-      smallProjects: "Проекты",
-      legallyVerified: "Юридически проверенные участки",
-      moderationSla: "SLA модерации",
-      averageForecastRoi: "Средний прогноз ROI",
-      partners: "Партнерские организации",
-      coreIndicators: "Ключевые показатели платформы",
-      coreIndicatorsSub: "Сводка по инвентарю, качеству объектов и потоку сделок.",
-      availableLots: "Доступные участки",
-      totalInventory: "Всего участков",
-      avgRoiLabel: "Средний ROI",
-      pipelineApplications: "Заявки в работе",
-      realtimeCabinet: "В реальном времени в кабинете",
-      topPlots: "Лучшие участки недели",
-      topPlotsSub: "Отобраны по ROI, юридическому профилю и инфраструктурному потенциалу.",
-      roadmap: "Дорожная карта территории",
-      road1: "Фаза транспортной развязки и логистического ускорения.",
-      road2: "Расширение магистральных сетей газа и воды.",
-      road3: "Якорные проекты образования и здравоохранения.",
-      road4: "Международный грузовой коридор и расширение делового ядра.",
-      trust: "Архитектура доверия",
-      kyc: "Политика KYC/AML",
-      mandatory: "Обязательно",
-      auditTrail: "Аудит-дорожка",
-      immutableLog: "Неизменяемый лог",
-      feeDisclosure: "Раскрытие комиссий",
-      transparent: "Прозрачно",
-      notice:
-        "Юридические и финансовые этапы due diligence встроены прямо в карточки участков и процесс подачи заявки.",
-      openAi: "Открыть AI-ассистента",
-      startInvest: "Начать инвестирование",
+      heroKicker: "InvestMap для предпринимателей и инвесторов",
+      heroTitle: "Яркая платформа, где бизнес находит капитал, а инвесторы находят возможности",
+      heroText:
+        "InvestMap соединяет владельцев бизнеса, которым нужны внешние инвестиции, с инвесторами, которым важны прозрачность, юридическая ясность и решения с поддержкой AI.",
+      primaryCta: "Начать путь",
+      secondaryCta: "Открыть Alatau City",
+      ownerCta: "Разместить бизнес",
+      investorCta: "Смотреть возможности",
+      activeProjects: "Активные возможности",
+      verifiedPipeline: "Проверенный pipeline",
+      averageRoi: "Средний ROI земли",
+      whatTitle: "Что такое InvestMap?",
+      whatLead: "Finding investment into your business is easier than ever.",
+      whatText:
+        "Платформа помогает компаниям красиво представить бизнес, подготовить информацию для инвесторов и встретить людей, которые могут профинансировать следующий этап роста.",
+      ownerTitle: "Для владельцев бизнеса",
+      ownerText:
+        "Мы ваш ключ к открытию двери во внешние инвестиции: помогаем оформить историю, подготовить юридические чекпоинты, опубликовать понятное предложение и начать диалог с инвесторами.",
+      whyTitle: "Почему мы?",
+      whyItems: [
+        "Прозрачность от профиля проекта до инвестиционной заявки",
+        "Поддержка юридической части и подготовка документов",
+        "AI-помощник по рискам, ROI и следующим шагам",
+        "Проекты, участки, данные основателей и инвесторские сценарии в одном месте",
+      ],
+      showcaseTitle: "Крупнейшие проекты на InvestMap",
+      showcaseSub: "Длинная движущаяся витрина флагманских возможностей. Каждый проект ведет на свою страницу.",
+      aiTitle: "AI-помощник для обеих сторон сделки",
+      aiText:
+        "Попросите ассистента сравнить ROI, объяснить юридические риски, собрать shortlist или помочь владельцу бизнеса усилить профиль перед публикацией.",
+      aiCta: "Открыть AI",
+      partnersTitle: "Партнеры и обзор платформы",
+      partnersText:
+        "InvestMap строится вокруг партнерской сети, которая усиливает проверку, юридическую готовность, аналитику и доверие инвесторов.",
+      partnerItems: ["Юридические консультанты", "Финансовые аналитики", "KYC/AML провайдеры", "Городские и инфраструктурные данные"],
+      tutorialTitle: "Как работает наша платформа",
+      ownersFlow: "Владельцы бизнеса",
+      investorsFlow: "Инвесторы",
+      ownerSteps: ["Регистрация", "Настройте бизнес", "Найдите инвестиции"],
+      investorSteps: ["Регистрация", "Найдите бизнес", "Инвестируйте"],
+      importanceTitle: "Почему важно и необходимо искать инвесторов?",
+      importanceText:
+        "Внешние инвестиции помогают открыть запасы, найм, маркетинг, оборудование, технологии и более быстрый рост. Сильный инвестор - это не только деньги, но и доверие, дисциплина, связи и понятный путь от локального бизнеса к масштабируемой компании.",
+      finalCta: "Start your investment journey now!",
+      finalText:
+        "Создайте профиль, изучите проверенные возможности или откройте страницу Alatau City, чтобы увидеть, как InvestMap превращает сложные инвестиционные решения в понятный цифровой процесс.",
+      legalSupport: "Юр. готовность",
+      transparency: "Прозрачность",
+      aiSupport: "AI поддержка",
+      ownerReady: "Готово для владельца",
     },
     KZ: {
-      title: "Alatau City жеріне ашық заңдық тексеру және премиум аналитикамен инвестициялаңыз",
-      subtitle:
-        "Коммерциялық деңгейдегі платформа: карта, AI тәуекел талдауы, жерді өз бетінше орналастыру, инвестор кабинеті және модерация.",
-      openMap: "Картаны ашу",
-      browseCatalog: "Каталогты ашу",
-      addLand: "Учаске қосу",
-      smallProjects: "Жобалар",
-      legallyVerified: "Заңды тексерілген учаскелер",
-      moderationSla: "Модерация SLA",
-      averageForecastRoi: "Орташа болжам ROI",
-      partners: "Серіктес ұйымдар",
-      coreIndicators: "Платформаның негізгі көрсеткіштері",
-      coreIndicatorsSub: "Қор, объект сапасы және мәміле ағыны бойынша жедел шолу.",
-      availableLots: "Қолжетімді учаскелер",
-      totalInventory: "Жалпы инвентарь",
-      avgRoiLabel: "Орташа ROI",
-      pipelineApplications: "Қаралудағы өтінімдер",
-      realtimeCabinet: "Кабинетте нақты уақытта",
-      topPlots: "Аптаның үздік учаскелері",
-      topPlotsSub: "ROI, заңдық профиль және инфрақұрылым серпіні бойынша таңдалған.",
-      roadmap: "Аумақтың жол картасы",
-      road1: "Көлік торабы мен логистика жеделдету кезеңі.",
-      road2: "Газ және су магистральдық желілерін кеңейту.",
-      road3: "Білім және денсаулық сақтау якорь жобалары.",
-      road4: "Халықаралық жүк дәлізі және коммерциялық ядроны кеңейту.",
-      trust: "Сенім архитектурасы",
-      kyc: "KYC/AML саясаты",
-      mandatory: "Міндетті",
-      auditTrail: "Аудит ізі",
-      immutableLog: "Өзгермейтін журнал",
-      feeDisclosure: "Комиссия айқындығы",
-      transparent: "Ашық",
-      notice:
-        "Заңдық және қаржылық due diligence кезеңдері учаске карточкалары мен өтінім беру ағынына тікелей енгізілген.",
-      openAi: "AI-ассистентті ашу",
-      startInvest: "Инвестицияны бастау",
+      heroKicker: "InvestMap кәсіпкерлер мен инвесторларға",
+      heroTitle: "Бизнес капитал табатын, инвестор мүмкіндік табатын жарқын платформа",
+      heroText:
+        "InvestMap сыртқы инвестиция іздеген бизнес иелерін ашықтық, заңдық айқындық және AI қолдауы бар мүмкіндіктер іздеген инвесторлармен байланыстырады.",
+      primaryCta: "Бастау",
+      secondaryCta: "Alatau City ашу",
+      ownerCta: "Бизнесті қосу",
+      investorCta: "Мүмкіндіктерді көру",
+      activeProjects: "Белсенді мүмкіндіктер",
+      verifiedPipeline: "Тексерілген pipeline",
+      averageRoi: "Жер бойынша орташа ROI",
+      whatTitle: "InvestMap деген не?",
+      whatLead: "Finding investment into your business is easier than ever.",
+      whatText:
+        "Платформа компанияларға бизнесін таныстыруға, инвесторға дайын ақпарат дайындауға және келесі өсу кезеңін қаржыландыра алатын адамдармен байланысуға көмектеседі.",
+      ownerTitle: "Бизнес иелеріне",
+      ownerText:
+        "Біз сыртқы инвестицияға есік ашатын кілтпіз: тарихыңызды құрастырып, заңдық чекпоинттерді дайындап, нақты ұсыныс жариялап, инвестормен сөйлесуді бастайсыз.",
+      whyTitle: "Неге біз?",
+      whyItems: [
+        "Жоба профилінен инвестициялық өтінімге дейін ашықтық",
+        "Заңдық қолдау және құжаттарды жариялауға дайындау",
+        "Тәуекел, ROI және келесі қадамдар бойынша AI көмекші",
+        "Жобалар, жер учаскелері, негізін қалаушы деректері және инвестор жолдары бір жерде",
+      ],
+      showcaseTitle: "InvestMap-тағы ең үлкен жобалар",
+      showcaseSub: "Флагман мүмкіндіктердің қозғалыстағы ұзын витринасы. Әр жоба өз бетіне ашады.",
+      aiTitle: "Мәміленің екі жағына арналған AI көмекші",
+      aiText:
+        "Ассистенттен ROI салыстыруды, заңдық тәуекелді түсіндіруді, shortlist құруды немесе жариялау алдында бизнес профилін күшейтуді сұраңыз.",
+      aiCta: "AI ашу",
+      partnersTitle: "Серіктестер және платформа шолуы",
+      partnersText:
+        "InvestMap тексеру, заңдық дайындық, аналитика және инвестор сенімін күшейтетін серіктес қабатымен жұмыс істейді.",
+      partnerItems: ["Заң кеңесшілері", "Қаржы аналитиктері", "KYC/AML провайдерлері", "Қала және инфрақұрылым деректері"],
+      tutorialTitle: "Платформа қалай жұмыс істейді",
+      ownersFlow: "Бизнес иелері",
+      investorsFlow: "Инвесторлар",
+      ownerSteps: ["Тіркелу", "Бизнесті баптау", "Инвестиция табу"],
+      investorSteps: ["Тіркелу", "Ұнаған бизнесті табу", "Инвестициялау"],
+      importanceTitle: "Инвестор табу неге маңызды?",
+      importanceText:
+        "Сыртқы инвестиция тауар қорын, жалдауды, маркетингті, жабдықты, технологияны және жылдам өсуді ашады. Мықты инвестор - тек ақша емес, ол сенім, тәртіп, байланыс және бизнесті масштабтаудың анығырақ жолы.",
+      finalCta: "Start your investment journey now!",
+      finalText:
+        "Профиль құрыңыз, тексерілген мүмкіндіктерді көріңіз немесе Alatau City бетін ашып, InvestMap күрделі инвестициялық шешімді қалай түсінікті цифрлық ағынға айналдыратынын қараңыз.",
+      legalSupport: "Заңдық дайындық",
+      transparency: "Ашықтық",
+      aiSupport: "AI қолдау",
+      ownerReady: "Иеге дайын",
     },
   });
 
+  const showcaseItems: RailItem[] = [
+    {
+      title: "Alatau City",
+      label: t.verifiedPipeline,
+      href: "/alatau-city",
+      meta: `${availablePlots.length} available land opportunities`,
+    },
+    {
+      title: "GreenBox Local Foods",
+      label: t.ownerReady,
+      href: "/projects",
+      meta: "Retail growth round, founder profile, monthly reporting",
+    },
+    {
+      title: "QuickFix Home Service",
+      label: t.activeProjects,
+      href: "/projects",
+      meta: "Service marketplace, traction, SAFE-style raise",
+    },
+    {
+      title: "InvestMap AI",
+      label: t.aiSupport,
+      href: "/ai-assistant",
+      meta: "Risk notes, ROI prompts, owner readiness review",
+    },
+  ];
+
+  const duplicatedShowcase = [...showcaseItems, ...showcaseItems];
+
   return (
-    <div className="container">
-      <section className="hero">
-        <div className="hero-grid">
+    <div className="invest-landing">
+      <section className="container landing-hero">
+        <div className="landing-hero-copy">
+          <span className="landing-kicker">{t.heroKicker}</span>
+          <h1>{t.heroTitle}</h1>
+          <p>{t.heroText}</p>
+          <div className="inline-actions">
+            <Link className="btn btn-accent" href="/projects">
+              {t.primaryCta}
+            </Link>
+            <Link className="btn btn-ghost on-dark" href="/alatau-city">
+              {t.secondaryCta}
+            </Link>
+          </div>
+        </div>
+        <div className="landing-hero-proof" aria-label="InvestMap metrics">
           <div>
-            <h1>{t.title}</h1>
-            <p>{t.subtitle}</p>
-            <div className="inline-actions">
-              <Link className="btn btn-primary" href="/map">
-                {t.openMap}
-              </Link>
-              <Link className="btn btn-ghost" href="/catalog">
-                {t.browseCatalog}
-              </Link>
-              <Link className="btn btn-accent" href="/owner/add-plot">
-                {t.addLand}
-              </Link>
-              <Link className="btn btn-ghost" href="/projects">
-                {t.smallProjects}
-              </Link>
-            </div>
+            <span>{t.activeProjects}</span>
+            <strong>{availablePlots.length + 2}</strong>
           </div>
-
-          <div className="hero-stats">
-            <div className="hero-stat">
-              <span>{t.legallyVerified}</span>
-              <strong>81%</strong>
-            </div>
-            <div className="hero-stat">
-              <span>{t.moderationSla}</span>
-              <strong>24-72h</strong>
-            </div>
-            <div className="hero-stat">
-              <span>{t.averageForecastRoi}</span>
-              <strong>{avgRoi}%</strong>
-            </div>
-            <div className="hero-stat">
-              <span>{t.partners}</span>
-              <strong>24</strong>
-            </div>
+          <div>
+            <span>{t.verifiedPipeline}</span>
+            <strong>81%</strong>
           </div>
-        </div>
-      </section>
-
-      <section className="section">
-        <div className="section-title">
-          <h2>{t.coreIndicators}</h2>
-          <p>{t.coreIndicatorsSub}</p>
-        </div>
-
-        <div className="grid grid-4">
-          <div className="kpi">
-            <span className="muted">{t.availableLots}</span>
-            <strong>{available.length}</strong>
-          </div>
-          <div className="kpi">
-            <span className="muted">{t.totalInventory}</span>
-            <strong>{all.length}</strong>
-          </div>
-          <div className="kpi">
-            <span className="muted">{t.avgRoiLabel}</span>
+          <div>
+            <span>{t.averageRoi}</span>
             <strong>{avgRoi}%</strong>
           </div>
-          <div className="kpi">
-            <span className="muted">{t.pipelineApplications}</span>
-            <strong>{t.realtimeCabinet}</strong>
+        </div>
+      </section>
+
+      <section className="container intro-grid">
+        <div className="image-statement">
+          <div>
+            <span className="landing-kicker">{t.whatTitle}</span>
+            <h2>{t.whatLead}</h2>
+            <p>{t.whatText}</p>
+          </div>
+        </div>
+
+        <div className="owner-door">
+          <span className="landing-kicker">{t.ownerTitle}</span>
+          <p>{t.ownerText}</p>
+          <div className="inline-actions">
+            <Link className="btn btn-primary" href="/projects/submit">
+              {t.ownerCta}
+            </Link>
+            <Link className="btn btn-ghost" href="/projects">
+              {t.investorCta}
+            </Link>
           </div>
         </div>
       </section>
 
-      <section className="section">
+      <section className="container why-band">
         <div className="section-title">
-          <h2>{t.topPlots}</h2>
-          <p>{t.topPlotsSub}</p>
+          <h2>{t.whyTitle}</h2>
+          <p>{t.partnersText}</p>
         </div>
-        <div className="grid grid-3">
-          {topPlots.map((plot) => (
-            <PlotCard key={plot.id} plot={plot} />
+        <ul className="why-list">
+          {t.whyItems.map((item) => (
+            <li key={item}>{item}</li>
           ))}
+        </ul>
+      </section>
+
+      <section className="container showcase-section" aria-label={t.showcaseTitle}>
+        <div className="section-title">
+          <h2>{t.showcaseTitle}</h2>
+          <p>{t.showcaseSub}</p>
+        </div>
+        <div className="feature-rail">
+          <div className="feature-track">
+            {duplicatedShowcase.map((item, index) => (
+              <Link className="feature-pill" href={item.href} key={`${item.title}-${index}`}>
+                <span>{item.label}</span>
+                <strong>{item.title}</strong>
+                <small>{item.meta}</small>
+              </Link>
+            ))}
+          </div>
         </div>
       </section>
 
-      <section className="section split">
-        <div className="card">
-          <h3 className="card-title">{t.roadmap}</h3>
-          <div className="roadmap">
-            <div className="road-step">
-              <span>2026 Q2</span>
-              <p>{t.road1}</p>
+      <section className="container ai-partner-grid">
+        <Link className="ai-strip" href="/ai-assistant">
+          <span className="landing-kicker">{t.aiTitle}</span>
+          <p>{t.aiText}</p>
+          <strong>{t.aiCta}</strong>
+        </Link>
+
+        <div className="partners-overview">
+          <span className="landing-kicker">{t.partnersTitle}</span>
+          <p>{t.partnersText}</p>
+          <div className="partner-tags">
+            {t.partnerItems.map((item) => (
+              <span key={item}>{item}</span>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section className="container tutorial-section">
+        <div className="section-title">
+          <h2>{t.tutorialTitle}</h2>
+          <p>{t.whatText}</p>
+        </div>
+        <div className="journey-grid">
+          <div className="journey-panel owner-journey">
+            <h3>{t.ownersFlow}</h3>
+            <div className="journey-steps">
+              {t.ownerSteps.map((step, index) => (
+                <div className="journey-step" key={step}>
+                  <span>{index + 1}</span>
+                  <strong>{step}</strong>
+                  {index < t.ownerSteps.length - 1 ? <em aria-hidden="true">-&gt;</em> : null}
+                </div>
+              ))}
             </div>
-            <div className="road-step">
-              <span>2026 Q4</span>
-              <p>{t.road2}</p>
-            </div>
-            <div className="road-step">
-              <span>2027 Q1</span>
-              <p>{t.road3}</p>
-            </div>
-            <div className="road-step">
-              <span>2027 Q3</span>
-              <p>{t.road4}</p>
+          </div>
+
+          <div className="journey-panel investor-journey">
+            <h3>{t.investorsFlow}</h3>
+            <div className="journey-steps">
+              {t.investorSteps.map((step, index) => (
+                <div className="journey-step" key={step}>
+                  <span>{index + 1}</span>
+                  <strong>{step}</strong>
+                  {index < t.investorSteps.length - 1 ? <em aria-hidden="true">-&gt;</em> : null}
+                </div>
+              ))}
             </div>
           </div>
         </div>
+      </section>
 
-        <div className="card">
-          <h3 className="card-title">{t.trust}</h3>
-          <div className="metric-line">
-            <span className="muted">{t.kyc}</span>
-            <strong>{t.mandatory}</strong>
-          </div>
-          <div className="metric-line">
-            <span className="muted">{t.auditTrail}</span>
-            <strong>{t.immutableLog}</strong>
-          </div>
-          <div className="metric-line">
-            <span className="muted">{t.feeDisclosure}</span>
-            <strong>{t.transparent}</strong>
-          </div>
-          <div className="notice" style={{ marginTop: 12 }}>
-            {t.notice}
-          </div>
-          <div className="plot-actions" style={{ marginTop: 12 }}>
-            <Link className="btn btn-primary" href="/ai-assistant">
-              {t.openAi}
-            </Link>
-            <Link className="btn btn-ghost" href="/invest">
-              {t.startInvest}
-            </Link>
-          </div>
+      <section className="container importance-band">
+        <div>
+          <span className="landing-kicker">{t.importanceTitle}</span>
+          <p>{t.importanceText}</p>
+        </div>
+      </section>
+
+      <section className="container final-cta">
+        <div>
+          <h2>{t.finalCta}</h2>
+          <p>{t.finalText}</p>
+        </div>
+        <div className="inline-actions">
+          <Link className="btn btn-accent" href="/projects/submit">
+            {t.ownerCta}
+          </Link>
+          <Link className="btn btn-primary" href="/projects">
+            {t.investorCta}
+          </Link>
         </div>
       </section>
     </div>
   );
 }
-
