@@ -74,62 +74,36 @@ export const newsLocalizedByLang: Record<Lang, NewsOverride> = {
 
 export const pricingPageText: Record<Lang, { title: string; sub: string }> = {
   EN: {
-    title: "Placement pricing",
-    sub: "Transparent monetization for owner listings and promotion packages.",
+    title: "One clear placement fee",
+    sub: "Pay once for each project or land listing submitted for publication.",
   },
   RU: {
-    title: "Тарифы размещения",
-    sub: "Прозрачная монетизация для листингов собственников и пакетов продвижения.",
+    title: "Один понятный тариф за размещение",
+    sub: "Разовая оплата за каждое размещение проекта или земельного листинга.",
   },
   KZ: {
-    title: "Орналастыру тарифтері",
-    sub: "Жер иесі листингтері мен ілгерілету пакеттеріне арналған ашық монетизация.",
+    title: "Орналастыруға арналған бір нақты тариф",
+    sub: "Әр жоба немесе жер листингі үшін бір реттік төлем.",
   },
 };
 
 export const pricingPlanOverridesByLang: Record<Lang, PlanOverride> = {
   EN: {},
   RU: {
-    base: {
-      name: "Базовый",
-      features: ["1 активный участок", "Стандартная модерация", "Базовая аналитика"],
-    },
-    premium: {
-      name: "Премиум",
+    placement: {
+      name: "Одно размещение",
       features: [
-        "До 5 участков",
-        "Приоритет в каталоге",
-        "AI-подсказки по качеству",
-        "Аналитика лидов",
-      ],
-    },
-    corporate: {
-      name: "Корпоративный",
-      features: [
-        "До 20 участков",
-        "Персональный менеджер",
-        "API-экспорт",
-        "Приоритетная юр. проверка",
+        "1 проект или земельный листинг",
+        "Проверка модерацией",
+        "Чеклист юридической готовности",
+        "Публикация после одобрения",
       ],
     },
   },
   KZ: {
-    base: {
-      name: "Базалық",
-      features: ["1 белсенді учаске", "Стандартты модерация", "Базалық аналитика"],
-    },
-    premium: {
-      name: "Премиум",
-      features: [
-        "5 учаскеге дейін",
-        "Каталогта басым көрсету",
-        "Сапа бойынша AI-кеңестер",
-        "Лид аналитикасы",
-      ],
-    },
-    corporate: {
-      name: "Корпоративтік",
-      features: ["20 учаскеге дейін", "Жеке менеджер", "API экспорты", "Басым заң тексерісі"],
+    placement: {
+      name: "Бір орналастыру",
+      features: ["1 жоба немесе жер листингі", "Модерация тексерісі", "Заңдық дайындық чеклисті", "Мақұлданғаннан кейін жариялау"],
     },
   },
 };
@@ -214,6 +188,7 @@ export const pricingSelectorText: Record<
   Lang,
   {
     days: string;
+    perPlacement: string;
     checkout: string;
     selected: string;
     planWord: string;
@@ -229,45 +204,48 @@ export const pricingSelectorText: Record<
 > = {
   EN: {
     days: "days",
-    checkout: "Plan checkout",
+    perPlacement: "per placement",
+    checkout: "Placement checkout",
     selected: "Selected:",
-    planWord: "Plan",
+    planWord: "Placement",
     payer: "Payer type",
     individual: "Individual",
     company: "Company",
     invoice: "Email for invoice",
     tax: "Tax ID / BIN",
     promo: "Promo code",
-    activate: "Activate plan",
-    activated: "activated until",
+    activate: "Activate placement",
+    activated: "activated",
   },
   RU: {
     days: "дней",
-    checkout: "Оформление тарифа",
+    perPlacement: "за одно размещение",
+    checkout: "Оформление размещения",
     selected: "Выбрано:",
-    planWord: "Тариф",
+    planWord: "Размещение",
     payer: "Тип плательщика",
     individual: "Физлицо",
     company: "Компания",
     invoice: "Email для счета",
     tax: "ИИН / БИН",
     promo: "Промокод",
-    activate: "Активировать тариф",
-    activated: "активирован до",
+    activate: "Активировать размещение",
+    activated: "активировано",
   },
   KZ: {
     days: "күн",
-    checkout: "Тарифті рәсімдеу",
+    perPlacement: "бір орналастыру үшін",
+    checkout: "Орналастыруды рәсімдеу",
     selected: "Таңдалды:",
-    planWord: "Тариф",
+    planWord: "Орналастыру",
     payer: "Төлеуші түрі",
     individual: "Жеке тұлға",
     company: "Компания",
     invoice: "Шотқа арналған Email",
     tax: "ЖСН / БСН",
     promo: "Промокод",
-    activate: "Тарифті іске қосу",
-    activated: "келесі күнге дейін іске қосылды",
+    activate: "Орналастыруды іске қосу",
+    activated: "іске қосылды",
   },
 };
 

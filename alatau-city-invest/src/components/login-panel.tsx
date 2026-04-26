@@ -1,5 +1,6 @@
 ﻿"use client";
 
+import Link from "next/link";
 import { FormEvent, useMemo, useState } from "react";
 import { signIn } from "next-auth/react";
 import { useCurrentLanguage } from "@/lib/i18n-client";
@@ -50,6 +51,7 @@ export function LoginPanel({
     email: "",
     password: "",
     role: "INVESTOR",
+    policyAccepted: false,
   });
 
   const t = useMemo(
@@ -79,6 +81,9 @@ export function LoginPanel({
             "Could not send verification email. Check mail settings in Vercel and Resend.",
           login: "Login",
           register: "Register",
+          policyRequired: "Please accept the platform policy and terms to create an account.",
+          policyPrefix: "I agree to the",
+          policyLink: "platform policy, privacy rules and investment risk notice",
           name: "Name",
           email: "Email",
           password: "Password",
@@ -118,6 +123,10 @@ export function LoginPanel({
             "Не удалось отправить письмо. Проверьте настройки почты в Vercel и Resend.",
           login: "Вход",
           register: "Регистрация",
+          policyRequired: "Примите политику платформы и условия, чтобы создать аккаунт.",
+          policyPrefix: "Я принимаю",
+          policyLink:
+            "политику платформы, правила конфиденциальности и уведомление об инвестиционных рисках",
           name: "Имя",
           email: "Email",
           password: "Пароль",
@@ -157,6 +166,10 @@ export function LoginPanel({
             "Хатты жіберу мүмкін болмады. Vercel және Resend баптауларын тексеріңіз.",
           login: "Кіру",
           register: "Тіркелу",
+          policyRequired: "Аккаунт ашу үшін платформа саясаты мен шарттарын қабылдаңыз.",
+          policyPrefix: "Мен келісемін:",
+          policyLink:
+            "платформа саясаты, құпиялылық ережелері және инвестициялық тәуекелдер туралы ескерту",
           name: "Аты",
           email: "Email",
           password: "Құпиясөз",
@@ -245,6 +258,11 @@ export function LoginPanel({
 
   const handleRegister = async (event: FormEvent) => {
     event.preventDefault();
+    if (!form.policyAccepted) {
+      setMessage(t.policyRequired);
+      return;
+    }
+
     setLoading(true);
     setMessage(null);
     setVerificationPreviewUrl(null);
@@ -258,6 +276,7 @@ export function LoginPanel({
         email: form.email,
         password: form.password,
         role: form.role,
+        policyAccepted: form.policyAccepted,
       }),
     });
 
@@ -405,6 +424,26 @@ export function LoginPanel({
                 <option value="OWNER">{t.owner}</option>
               </select>
             </div>
+          ) : null}
+
+          {mode === "register" ? (
+            <label className="checkbox-line policy-check">
+              <input
+                type="checkbox"
+                checked={form.policyAccepted}
+                onChange={(event) =>
+                  setForm((prev) => ({ ...prev, policyAccepted: event.target.checked }))
+                }
+                required
+              />
+              <span>
+                {t.policyPrefix}{" "}
+                <Link href="/legal" target="_blank">
+                  {t.policyLink}
+                </Link>
+                .
+              </span>
+            </label>
           ) : null}
         </div>
 

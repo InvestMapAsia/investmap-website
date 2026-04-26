@@ -323,25 +323,16 @@ const faqs: FaqItem[] = [
 
 const pricingPlans: PricingPlan[] = [
   {
-    id: "base",
-    name: "Base",
-    priceUsd: 89,
-    durationDays: 30,
-    features: ["1 active plot", "Standard moderation", "Basic analytics"],
-  },
-  {
-    id: "premium",
-    name: "Premium",
-    priceUsd: 219,
-    durationDays: 30,
-    features: ["Up to 5 plots", "Priority listing", "AI quality hints", "Lead analytics"],
-  },
-  {
-    id: "corporate",
-    name: "Corporate",
-    priceUsd: 590,
-    durationDays: 30,
-    features: ["Up to 20 plots", "Personal manager", "API exports", "Priority legal review"],
+    id: "placement",
+    name: "Single placement",
+    priceUsd: 49,
+    durationDays: 0,
+    features: [
+      "1 project or land listing",
+      "Moderation review",
+      "Legal readiness checklist",
+      "Published after approval",
+    ],
   },
 ];
 

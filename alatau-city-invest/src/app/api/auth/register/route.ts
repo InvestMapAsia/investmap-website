@@ -15,6 +15,7 @@ const registerSchema = z.object({
   email: z.string().email(),
   password: z.string().min(8).max(128),
   role: z.enum(["INVESTOR", "OWNER"]),
+  policyAccepted: z.literal(true),
 });
 
 export async function POST(request: NextRequest) {

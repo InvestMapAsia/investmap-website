@@ -24,7 +24,6 @@ const uiText: Record<
     signOut: string;
     login: string;
     footerDescription: string;
-    legal: string;
     faq: string;
     support: string;
   }
@@ -53,7 +52,6 @@ const uiText: Record<
     login: "Login",
     footerDescription:
       "Digital platform for businesses seeking external investment and investors looking for transparent opportunities.",
-    legal: "Legal",
     faq: "FAQ",
     support: "Support",
   },
@@ -81,7 +79,6 @@ const uiText: Record<
     login: "Войти",
     footerDescription:
       "Цифровая платформа для бизнеса, который ищет внешние инвестиции, и инвесторов, которым нужны прозрачные возможности.",
-    legal: "Правовые",
     faq: "FAQ",
     support: "Поддержка",
   },
@@ -109,7 +106,6 @@ const uiText: Record<
     login: "Кіру",
     footerDescription:
       "Сыртқы инвестиция іздеген бизнес пен ашық мүмкіндіктер іздеген инвесторларға арналған цифрлық платформа.",
-    legal: "Заң",
     faq: "FAQ",
     support: "Қолдау",
   },
@@ -251,7 +247,6 @@ export function SiteShell({ children }: { children: ReactNode }) {
             <p className="muted">{t.footerDescription}</p>
           </div>
           <div className="footer-links">
-            <Link href="/legal">{t.legal}</Link>
             <Link href="/faq">{t.faq}</Link>
             <Link href="/contacts">{t.support}</Link>
             <Link href="/admin">{t.admin}</Link>

@@ -19,9 +19,12 @@ export function PricingSelector({ plans }: { plans: PricingPlan[] }) {
     if (!selectedPlan) return;
 
     const today = new Date();
-    const until = new Date(today.getTime() + selectedPlan.durationDays * 24 * 60 * 60 * 1000)
-      .toISOString()
-      .slice(0, 10);
+    const until =
+      selectedPlan.durationDays > 0
+        ? new Date(today.getTime() + selectedPlan.durationDays * 24 * 60 * 60 * 1000)
+            .toISOString()
+            .slice(0, 10)
+        : null;
 
     localStorage.setItem(
       "aci_owner_plan",
@@ -30,15 +33,20 @@ export function PricingSelector({ plans }: { plans: PricingPlan[] }) {
         planName: selectedPlan.name,
         priceUsd: selectedPlan.priceUsd,
         activeUntil: until,
+        pricingMode: selectedPlan.durationDays > 0 ? "duration" : "placement",
       })
     );
 
-    setResult(`${t.planWord} ${selectedPlan.name} ${t.activated} ${until}.`);
+    setResult(
+      until
+        ? `${t.planWord} ${selectedPlan.name} ${t.activated} ${until}.`
+        : `${t.planWord} ${selectedPlan.name} ${t.activated}.`
+    );
   };
 
   return (
     <>
-      <section className="grid grid-3">
+      <section className="grid pricing-single-grid">
         {plans.map((plan) => (
           <article
             className="card"
@@ -48,7 +56,7 @@ export function PricingSelector({ plans }: { plans: PricingPlan[] }) {
           >
             <h3 className="card-title">{plan.name}</h3>
             <p className="muted">
-              {plan.durationDays} {t.days}
+              {plan.durationDays > 0 ? `${plan.durationDays} ${t.days}` : t.perPlacement}
             </p>
             <p className="plot-price" style={{ margin: "8px 0" }}>
               {plan.priceUsd} USD
@@ -65,7 +73,8 @@ export function PricingSelector({ plans }: { plans: PricingPlan[] }) {
       <section className="section card" style={{ maxWidth: 760 }}>
         <h3 className="card-title">{t.checkout}</h3>
         <p className="muted">
-          {t.selected} {selectedPlan?.name} · {selectedPlan?.priceUsd} USD
+          {t.selected} {selectedPlan?.name} · {selectedPlan?.priceUsd} USD ·{" "}
+          {selectedPlan?.durationDays ? `${selectedPlan.durationDays} ${t.days}` : t.perPlacement}
         </p>
 
         <div className="form-grid" style={{ marginTop: 12 }}>

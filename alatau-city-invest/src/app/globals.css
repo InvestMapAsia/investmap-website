@@ -545,6 +545,20 @@ input[type="submit"] {
   color: var(--muted);
 }
 
+.policy-check {
+  padding: 12px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: #F7FBFF;
+}
+
+.policy-check a {
+  color: var(--secondary);
+  font-weight: 700;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
 .notice {
   border-left: 4px solid var(--accent-gold);
   background: #FFF9DD;
@@ -930,6 +944,25 @@ table th {
   padding: 10px 14px;
   box-shadow: var(--shadow-card);
   margin-top: 16px;
+}
+
+.policy-card {
+  display: grid;
+  gap: 16px;
+}
+
+.policy-section {
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--border);
+}
+
+.policy-section:last-child {
+  padding-bottom: 0;
+  border-bottom: 0;
+}
+
+.pricing-single-grid {
+  grid-template-columns: minmax(0, 520px);
 }
 
 .invest-landing {
