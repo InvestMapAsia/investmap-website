@@ -31,12 +31,25 @@ type UploadMediaResponse = {
 };
 
 const MAX_MEDIA_UPLOAD_BYTES = 4 * 1024 * 1024; // 4 MB safe limit for Vercel function upload
+const PANORAMA_MARKER = "#panorama360";
 
 function parseNumberValue(value: string) {
   const normalized = value.trim().replace(",", ".");
   if (!normalized) return undefined;
   const next = Number(normalized);
   return Number.isFinite(next) ? next : undefined;
+}
+
+function markPanoramaUrl(url: string) {
+  return url.includes(PANORAMA_MARKER) ? url : `${url}${PANORAMA_MARKER}`;
+}
+
+function cleanMediaUrl(url: string) {
+  return url.replace(PANORAMA_MARKER, "");
+}
+
+function isPanoramaUrl(url: string, contentType?: string) {
+  return url.includes(PANORAMA_MARKER) || contentType === "image/panorama360";
 }
 
 export function OwnerAddPlotForm() {
@@ -86,6 +99,8 @@ export function OwnerAddPlotForm() {
       mapHint: `Alatau bounds: lat ${ALATAU_BOUNDS.minLat}..${ALATAU_BOUNDS.maxLat}, lng ${ALATAU_BOUNDS.minLng}..${ALATAU_BOUNDS.maxLng}.`,
       mediaSection: "Plot media (photo/video)",
       mediaHint: "Upload files to Vercel Blob. Public links will be saved to this listing.",
+      panoramaSection: "360 panorama photos",
+      panoramaHint: "Upload equirectangular 360 photos. They will appear separately on the plot page.",
       mediaUploading: "Uploading files...",
       mediaUploaded: "Uploaded files",
       removeMedia: "Remove",
@@ -141,6 +156,8 @@ export function OwnerAddPlotForm() {
       mapHint: `Границы Алатау: широта ${ALATAU_BOUNDS.minLat}..${ALATAU_BOUNDS.maxLat}, долгота ${ALATAU_BOUNDS.minLng}..${ALATAU_BOUNDS.maxLng}.`,
       mediaSection: "Медиа участка (фото/видео)",
       mediaHint: "Файлы загружаются в Vercel Blob. В листинге сохраняются публичные ссылки.",
+      panoramaSection: "360-панорамы участка",
+      panoramaHint: "Загрузите equirectangular 360 фото. Они будут отдельно показаны на странице участка.",
       mediaUploading: "Загрузка файлов...",
       mediaUploaded: "Загруженные файлы",
       removeMedia: "Удалить",
@@ -196,6 +213,8 @@ export function OwnerAddPlotForm() {
       mapHint: `Alatau шекарасы: ендік ${ALATAU_BOUNDS.minLat}..${ALATAU_BOUNDS.maxLat}, бойлық ${ALATAU_BOUNDS.minLng}..${ALATAU_BOUNDS.maxLng}.`,
       mediaSection: "Учаске медиасы (фото/видео)",
       mediaHint: "Файлдар Vercel Blob-қа жүктеледі. Листингте ашық сілтемелер сақталады.",
+      panoramaSection: "Учаскенің 360 панорамалары",
+      panoramaHint: "Equirectangular 360 фото жүктеңіз. Олар учаске бетінде бөлек көрсетіледі.",
       mediaUploading: "Файлдар жүктелуде...",
       mediaUploaded: "Жүктелген файлдар",
       removeMedia: "Өшіру",
@@ -266,7 +285,7 @@ export function OwnerAddPlotForm() {
   const isAllowedMediaType = (file: File) =>
     file.type.startsWith("image/") || file.type.startsWith("video/");
 
-  const handleMediaUpload = async (event: ChangeEvent<HTMLInputElement>) => {
+  const handleMediaUpload = async (event: ChangeEvent<HTMLInputElement>, panorama = false) => {
     const files = Array.from(event.target.files ?? []);
     if (!files.length) return;
 
@@ -275,7 +294,12 @@ export function OwnerAddPlotForm() {
     const uploaded: UploadedMedia[] = [];
 
     for (const file of files) {
-      if (!isAllowedMediaType(file)) {
+      if (panorama && !file.type.startsWith("image/")) {
+        failed.push(`${file.name}: ${t.uploadInvalidType}`);
+        continue;
+      }
+
+      if (!panorama && !isAllowedMediaType(file)) {
         failed.push(`${file.name}: ${t.uploadInvalidType}`);
         continue;
       }
@@ -301,7 +325,15 @@ export function OwnerAddPlotForm() {
           continue;
         }
 
-        uploaded.push(body.data);
+        uploaded.push(
+          panorama
+            ? {
+                ...body.data,
+                url: markPanoramaUrl(body.data.url),
+                contentType: "image/panorama360",
+              }
+            : body.data
+        );
       } catch {
         failed.push(`${file.name}: network error`);
       }
@@ -581,6 +613,15 @@ export function OwnerAddPlotForm() {
                 onChange={handleMediaUpload}
               />
               <p className="muted">{t.mediaHint}</p>
+              <label style={{ marginTop: 10 }}>{t.panoramaSection}</label>
+              <input
+                type="file"
+                accept="image/*"
+                multiple
+                disabled={uploadingMedia}
+                onChange={(event) => handleMediaUpload(event, true)}
+              />
+              <p className="muted">{t.panoramaHint}</p>
               {uploadingMedia ? <p className="muted">{t.mediaUploading}</p> : null}
 
               {uploadedMedia.length ? (
@@ -589,17 +630,23 @@ export function OwnerAddPlotForm() {
                   <div className="uploaded-media-grid">
                     {uploadedMedia.map((item, index) => {
                       const isVideo = isVideoUrl(item.url, item.contentType);
+                      const cleanUrl = cleanMediaUrl(item.url);
+                      const isPanorama = isPanoramaUrl(item.url, item.contentType);
                       return (
                         <div className="uploaded-media-item" key={`${item.url}-${index}`}>
                           <div className="uploaded-media-preview">
                             {isVideo ? (
-                              <video src={item.url} controls preload="metadata" />
+                              <video src={cleanUrl} controls preload="metadata" />
                             ) : (
-                              <img src={item.url} alt={item.originalName || `media-${index + 1}`} />
+                              <img
+                                src={cleanUrl}
+                                alt={item.originalName || `media-${index + 1}`}
+                                className={isPanorama ? "panorama-thumb" : undefined}
+                              />
                             )}
                           </div>
                           <div className="uploaded-media-actions">
-                            <a href={item.url} target="_blank" rel="noreferrer" className="btn btn-ghost">
+                            <a href={cleanUrl} target="_blank" rel="noreferrer" className="btn btn-ghost">
                               {t.openMedia}
                             </a>
                             <button

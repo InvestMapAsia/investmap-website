@@ -594,10 +594,50 @@ input[type="submit"] {
   display: block;
 }
 
+.panorama-thumb {
+  object-position: center;
+}
+
 .uploaded-media-actions {
   display: flex;
   gap: 8px;
   padding: 8px;
+}
+
+.panorama-section {
+  display: grid;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.panorama-grid {
+  display: grid;
+  gap: 12px;
+}
+
+.panorama-viewer {
+  display: grid;
+  gap: 10px;
+  overflow-x: auto;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: #081A2D;
+  padding: 10px;
+  scrollbar-color: var(--accent-green) rgba(255, 255, 255, 0.18);
+}
+
+.panorama-viewer img {
+  width: 180%;
+  min-width: 980px;
+  height: 340px;
+  object-fit: cover;
+  border-radius: 8px;
+  display: block;
+}
+
+.panorama-viewer .btn {
+  width: fit-content;
+  background: #fff;
 }
 
 .map-explorer-layout {
