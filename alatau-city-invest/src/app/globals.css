@@ -807,6 +807,12 @@ input[type="submit"] {
   background: #EAEFEF;
 }
 
+.plot-mini-map-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
 .tabs {
   display: flex;
   flex-wrap: wrap;

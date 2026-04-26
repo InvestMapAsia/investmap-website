@@ -23,7 +23,6 @@ export function PlotPageView({ plot, similar }: { plot: Plot; similar: Plot[] })
       openAi: "Open AI analysis",
       backToCatalog: "Back to catalog",
       aiRiskSummary: "AI risk summary",
-      aiNotice: "AI output is assistive only and does not replace legal and financial advice.",
       similarOpportunities: "Similar opportunities",
       similarSub: "Based on matching purpose and investment profile.",
       noSimilar: "No similar plots found.",
@@ -46,8 +45,6 @@ export function PlotPageView({ plot, similar }: { plot: Plot; similar: Plot[] })
       openAi: "Открыть AI-анализ",
       backToCatalog: "Назад в каталог",
       aiRiskSummary: "AI-сводка рисков",
-      aiNotice:
-        "AI-выводы носят вспомогательный характер и не заменяют юридическую и финансовую консультацию.",
       similarOpportunities: "Похожие возможности",
       similarSub: "Подбор на основе совпадения назначения и инвестиционного профиля.",
       noSimilar: "Похожие участки не найдены.",
@@ -70,8 +67,6 @@ export function PlotPageView({ plot, similar }: { plot: Plot; similar: Plot[] })
       openAi: "AI талдауын ашу",
       backToCatalog: "Каталогқа қайту",
       aiRiskSummary: "AI тәуекел қорытындысы",
-      aiNotice:
-        "AI нәтижелері тек көмекші сипатта және заңдық не қаржылық кеңесті алмастырмайды.",
       similarOpportunities: "Ұқсас мүмкіндіктер",
       similarSub: "Мақсаты мен инвестициялық профилі ұқсас учаскелер негізінде.",
       noSimilar: "Ұқсас учаскелер табылмады.",
@@ -109,16 +104,19 @@ export function PlotPageView({ plot, similar }: { plot: Plot; similar: Plot[] })
     EN: {
       locationMap: "Location on map",
       openInGoogle: "Open in Google Maps",
+      openInAmap: "Open in Amap / Gaode Maps (高德地图)",
       noLocation: "Coordinates are not available for this plot.",
     },
     RU: {
       locationMap: "Точка на карте",
       openInGoogle: "Открыть в Google Maps",
+      openInAmap: "Открыть в Amap / Gaode Maps (高德地图)",
       noLocation: "Для этого участка пока нет координат.",
     },
     KZ: {
       locationMap: "Картадағы нүкте",
       openInGoogle: "Google Maps-те ашу",
+      openInAmap: "Amap / Gaode Maps (高德地图)-те ашу",
       noLocation: "Бұл учаске үшін координаттар әлі енгізілмеген.",
     },
   });
@@ -150,6 +148,11 @@ export function PlotPageView({ plot, similar }: { plot: Plot; similar: Plot[] })
   const mapOpenUrl = mapQuery
     ? `https://www.google.com/maps?q=${encodeURIComponent(mapQuery)}`
     : null;
+  const amapOpenUrl = hasCoordinates
+    ? `https://uri.amap.com/marker?position=${plot.mapLng},${plot.mapLat}&name=${encodeURIComponent(plot.title)}`
+    : plot.mapAddress?.trim()
+      ? `https://uri.amap.com/search?keyword=${encodeURIComponent(plot.mapAddress.trim())}`
+      : null;
 
   const handleShare = async () => {
     const shareUrl = typeof window !== "undefined" ? window.location.href : "";
@@ -239,9 +242,6 @@ export function PlotPageView({ plot, similar }: { plot: Plot; similar: Plot[] })
         <aside className="card">
           <h3 className="card-title">{t.aiRiskSummary}</h3>
           <p className="muted">{riskNote}</p>
-          <div className="notice" style={{ marginTop: 12 }}>
-            {t.aiNotice}
-          </div>
           <div className="plot-mini-map-wrap">
             <h4 className="plot-mini-map-title">{mapT.locationMap}</h4>
             {mapEmbedUrl ? (
@@ -253,11 +253,18 @@ export function PlotPageView({ plot, similar }: { plot: Plot; similar: Plot[] })
                   referrerPolicy="no-referrer-when-downgrade"
                   title={`${plot.title} map`}
                 />
-                {mapOpenUrl ? (
-                  <a className="btn btn-ghost" href={mapOpenUrl} target="_blank" rel="noreferrer">
-                    {mapT.openInGoogle}
-                  </a>
-                ) : null}
+                <div className="plot-mini-map-actions">
+                  {mapOpenUrl ? (
+                    <a className="btn btn-ghost" href={mapOpenUrl} target="_blank" rel="noreferrer">
+                      {mapT.openInGoogle}
+                    </a>
+                  ) : null}
+                  {amapOpenUrl ? (
+                    <a className="btn btn-ghost" href={amapOpenUrl} target="_blank" rel="noreferrer">
+                      {mapT.openInAmap}
+                    </a>
+                  ) : null}
+                </div>
               </>
             ) : (
               <p className="muted">{mapT.noLocation}</p>
