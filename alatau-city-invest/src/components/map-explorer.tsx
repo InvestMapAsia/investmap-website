@@ -165,7 +165,8 @@ export function MapExplorer() {
   }, [query]);
 
   return (
-    <section className="map-layout">
+    <div className="map-explorer-layout">
+      <section className="map-layout">
       <aside className="map-panel">
         <h3 className="card-title">{t.mapFilters}</h3>
         <div className="form-field">
@@ -291,8 +292,9 @@ export function MapExplorer() {
           )}
         </div>
       </section>
+      </section>
 
-      <section className="card" style={{ gridColumn: "1 / -1" }}>
+      <section className="card map-selection-card">
         {selected ? (
           <>
             <h3 className="card-title">{selected.title}</h3>
@@ -324,6 +326,6 @@ export function MapExplorer() {
           <div className="empty-state">{t.selectMarker}</div>
         )}
       </section>
-    </section>
+    </div>
   );
 }
