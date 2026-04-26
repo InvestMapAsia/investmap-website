@@ -74,6 +74,7 @@ export function ProjectsCabinet() {
       reviewedEvent: "Latest moderation update",
       emptyRight: "Select a project from the list.",
       viewProjectsBoard: "View projects board",
+      openProjectPage: "Open project page",
     },
     RU: {
       unauthorized: "Войдите, чтобы увидеть кабинет проектов.",
@@ -120,6 +121,7 @@ export function ProjectsCabinet() {
       reviewedEvent: "Последнее обновление модерации",
       emptyRight: "Выберите проект из списка.",
       viewProjectsBoard: "Смотреть витрину проектов",
+      openProjectPage: "Открыть страницу проекта",
     },
     KZ: {
       unauthorized: "Жоба кабинетін көру үшін жүйеге кіріңіз.",
@@ -166,6 +168,7 @@ export function ProjectsCabinet() {
       reviewedEvent: "Соңғы модерация жаңартуы",
       emptyRight: "Тізімнен жобаны таңдаңыз.",
       viewProjectsBoard: "Жобалар витринасын қарау",
+      openProjectPage: "Жоба парағын ашу",
     },
   });
 
@@ -459,6 +462,11 @@ export function ProjectsCabinet() {
           )}
 
           <div className="plot-actions" style={{ marginTop: 12 }}>
+            {selected ? (
+              <Link className="btn btn-primary" href={`/projects/${selected.id}`}>
+                {t.openProjectPage}
+              </Link>
+            ) : null}
             <Link className="btn btn-ghost" href="/projects">
               {t.viewProjectsBoard}
             </Link>

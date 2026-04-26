@@ -1,12 +1,19 @@
 ﻿"use client";
 
-import { FormEvent, useState } from "react";
+import { FormEvent, useEffect, useState } from "react";
 import { useCurrentLanguage } from "@/lib/i18n-client";
 import { pickLang } from "@/lib/i18n";
 
 export function ContactForm() {
   const { lang } = useCurrentLanguage();
   const [ticket, setTicket] = useState<string | null>(null);
+  const [form, setForm] = useState({
+    name: "",
+    email: "",
+    phone: "",
+    category: "",
+    message: "",
+  });
 
   const t = pickLang(lang, {
     EN: {
@@ -24,6 +31,7 @@ export function ContactForm() {
       ticket: "Support ticket",
       registered: "registered.",
       sla: "SLA: response within 2 business hours.",
+      projectInterest: "I want to invest in project",
     },
     RU: {
       title: "Форма обращения",
@@ -40,6 +48,7 @@ export function ContactForm() {
       ticket: "Тикет поддержки",
       registered: "зарегистрирован.",
       sla: "SLA: ответ в течение 2 рабочих часов.",
+      projectInterest: "Хочу инвестировать в проект",
     },
     KZ: {
       title: "Байланыс формасы",
@@ -56,45 +65,90 @@ export function ContactForm() {
       ticket: "Қолдау тикеті",
       registered: "тіркелді.",
       sla: "SLA: 2 жұмыс сағаты ішінде жауап.",
+      projectInterest: "Жобаға инвестиция салғым келеді",
     },
   });
+
+  useEffect(() => {
+    const projectId = new URLSearchParams(window.location.search).get("project");
+    if (!projectId) return;
+
+    setForm((prev) => {
+      if (prev.message) return prev;
+      return {
+        ...prev,
+        category: t.investment,
+        message: `${t.projectInterest}: ${projectId}`,
+      };
+    });
+  }, [t.investment, t.projectInterest]);
 
   const submit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setTicket(`T-${Math.floor(Math.random() * 90000 + 10000)}`);
-    event.currentTarget.reset();
+    setForm({
+      name: "",
+      email: "",
+      phone: "",
+      category: "",
+      message: "",
+    });
   };
 
   return (
     <>
-      <section className="section card">
+      <section className="section card" id="contact-form">
         <h3 className="card-title">{t.title}</h3>
         <form onSubmit={submit} style={{ marginTop: 12 }}>
           <div className="form-grid">
             <div className="form-field">
               <label>{t.name}</label>
-              <input required />
+              <input
+                required
+                value={form.name}
+                onChange={(event) => setForm((prev) => ({ ...prev, name: event.target.value }))}
+              />
             </div>
             <div className="form-field">
               <label>{t.email}</label>
-              <input required type="email" />
+              <input
+                required
+                type="email"
+                value={form.email}
+                onChange={(event) => setForm((prev) => ({ ...prev, email: event.target.value }))}
+              />
             </div>
             <div className="form-field">
               <label>{t.phone}</label>
-              <input required />
+              <input
+                required
+                value={form.phone}
+                onChange={(event) => setForm((prev) => ({ ...prev, phone: event.target.value }))}
+              />
             </div>
             <div className="form-field">
               <label>{t.category}</label>
-              <select required>
-                <option>{t.investment}</option>
-                <option>{t.legalSupport}</option>
-                <option>{t.ownerListing}</option>
-                <option>{t.techSupport}</option>
+              <select
+                required
+                value={form.category}
+                onChange={(event) => setForm((prev) => ({ ...prev, category: event.target.value }))}
+              >
+                <option value="" disabled>
+                  {t.category}
+                </option>
+                <option value={t.investment}>{t.investment}</option>
+                <option value={t.legalSupport}>{t.legalSupport}</option>
+                <option value={t.ownerListing}>{t.ownerListing}</option>
+                <option value={t.techSupport}>{t.techSupport}</option>
               </select>
             </div>
             <div className="form-field" style={{ gridColumn: "1 / -1" }}>
               <label>{t.message}</label>
-              <textarea required />
+              <textarea
+                required
+                value={form.message}
+                onChange={(event) => setForm((prev) => ({ ...prev, message: event.target.value }))}
+              />
             </div>
           </div>
 

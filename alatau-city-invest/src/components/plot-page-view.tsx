@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { ListingQrCode } from "@/components/listing-qr-code";
 import { PlotCard } from "@/components/plot-card";
 import { PlotDetailTabs } from "@/components/plot-detail-tabs";
 import { StatusBadge } from "@/components/status-badge";
@@ -285,6 +286,7 @@ export function PlotPageView({ plot, similar }: { plot: Plot; similar: Plot[] })
               <p className="muted">{mapT.noLocation}</p>
             )}
           </div>
+          <ListingQrCode title={plot.title} path={`/plots/${plot.id}`} kind="plot" />
         </aside>
       </section>
 

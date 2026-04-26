@@ -828,6 +828,107 @@ input[type="submit"] {
   gap: 8px;
 }
 
+.qr-panel {
+  margin-top: 16px;
+  display: grid;
+  gap: 12px;
+  padding: 14px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: #F7FBFF;
+}
+
+.qr-copy {
+  display: grid;
+  gap: 4px;
+}
+
+.qr-body {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 12px;
+  align-items: center;
+}
+
+.qr-canvas {
+  width: 158px;
+  height: 158px;
+  display: grid;
+  place-items: center;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: #fff;
+}
+
+.qr-canvas canvas {
+  display: block;
+}
+
+.qr-link {
+  min-width: 0;
+  font-size: 0.74rem;
+  color: var(--muted);
+  word-break: break-word;
+}
+
+.project-detail-layout {
+  align-items: start;
+}
+
+.project-detail-main {
+  display: grid;
+  gap: 16px;
+}
+
+.project-detail-aside {
+  position: sticky;
+  top: 92px;
+  display: grid;
+  gap: 12px;
+}
+
+.project-lead {
+  color: var(--muted);
+  font-size: 1.02rem;
+  max-width: 78ch;
+}
+
+.project-metrics {
+  margin-top: 2px;
+}
+
+.project-detail-section {
+  border-top: 1px solid var(--border);
+  padding-top: 14px;
+}
+
+.project-detail-section h2 {
+  font-size: 1.04rem;
+  margin-bottom: 8px;
+}
+
+.project-media-list {
+  display: grid;
+  gap: 8px;
+  font-size: 0.86rem;
+  word-break: break-all;
+}
+
+.project-media-list a {
+  color: var(--secondary);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.project-contact-box {
+  display: grid;
+  gap: 4px;
+  padding: 12px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--surface-alt);
+}
+
 .tabs {
   display: flex;
   flex-wrap: wrap;
@@ -1636,6 +1737,10 @@ table th {
   .uploaded-media-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
+
+  .project-detail-aside {
+    position: static;
+  }
 }
 
 @media (max-width: 900px) {
@@ -1755,5 +1860,14 @@ table th {
 
   .inline-actions {
     flex-direction: column;
+  }
+
+  .qr-body {
+    grid-template-columns: 1fr;
+  }
+
+  .qr-canvas {
+    width: 100%;
+    min-height: 166px;
   }
 }

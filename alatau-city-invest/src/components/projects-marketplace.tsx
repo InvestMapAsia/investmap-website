@@ -62,6 +62,8 @@ export function ProjectsMarketplace() {
       noData: "No projects found for selected filters.",
       loadError: "Failed to load projects.",
       openSubmit: "Open submit form",
+      details: "Details",
+      invest: "Invest",
       searchBtn: "Search",
       resetBtn: "Reset",
       share: "Share",
@@ -98,6 +100,8 @@ export function ProjectsMarketplace() {
       noData: "По выбранным фильтрам проектов не найдено.",
       loadError: "Не удалось загрузить проекты.",
       openSubmit: "Открыть форму подачи",
+      details: "Детали",
+      invest: "Инвестировать",
       searchBtn: "Поиск",
       resetBtn: "Сброс",
       share: "Поделиться",
@@ -134,6 +138,8 @@ export function ProjectsMarketplace() {
       noData: "Таңдалған сүзгі бойынша жоба табылмады.",
       loadError: "Жобаларды жүктеу мүмкін болмады.",
       openSubmit: "Жіберу формасын ашу",
+      details: "Толығырақ",
+      invest: "Инвестициялау",
       searchBtn: "Іздеу",
       resetBtn: "Тазарту",
       share: "Бөлісу",
@@ -199,7 +205,7 @@ export function ProjectsMarketplace() {
     sessionStatus === "authenticated" ? "/projects/submit" : "/login?callbackUrl=/projects/submit";
 
   const handleShare = async (project: ProjectRow) => {
-    const shareUrl = `${window.location.origin}/projects#project-${project.id}`;
+    const shareUrl = `${window.location.origin}/projects/${project.id}`;
     const shareData = {
       title: project.companyName,
       text: project.businessOverview,
@@ -372,6 +378,15 @@ export function ProjectsMarketplace() {
                 {project.moderationNote ? <div className="notice">{project.moderationNote}</div> : null}
 
                 <div className="plot-actions" style={{ marginTop: 12 }}>
+                  <Link className="btn btn-primary" href={`/projects/${project.id}`}>
+                    {t.details}
+                  </Link>
+                  <Link
+                    className="btn btn-accent"
+                    href={`/contacts?project=${encodeURIComponent(project.id)}#contact-form`}
+                  >
+                    {t.invest}
+                  </Link>
                   <button className="btn btn-ghost" type="button" onClick={() => void handleShare(project)}>
                     {t.share}
                   </button>
