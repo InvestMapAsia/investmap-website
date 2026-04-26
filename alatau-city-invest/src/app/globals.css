@@ -831,23 +831,16 @@ input[type="submit"] {
 .qr-panel {
   margin-top: 16px;
   display: grid;
-  gap: 12px;
+  justify-items: center;
   padding: 14px;
   border: 1px solid var(--border);
   border-radius: 12px;
   background: #F7FBFF;
 }
 
-.qr-copy {
-  display: grid;
-  gap: 4px;
-}
-
 .qr-body {
-  display: grid;
-  grid-template-columns: auto minmax(0, 1fr);
-  gap: 12px;
-  align-items: center;
+  display: flex;
+  justify-content: center;
 }
 
 .qr-canvas {
@@ -862,13 +855,6 @@ input[type="submit"] {
 
 .qr-canvas canvas {
   display: block;
-}
-
-.qr-link {
-  min-width: 0;
-  font-size: 0.74rem;
-  color: var(--muted);
-  word-break: break-word;
 }
 
 .project-detail-layout {
@@ -1862,12 +1848,8 @@ table th {
     flex-direction: column;
   }
 
-  .qr-body {
-    grid-template-columns: 1fr;
-  }
-
   .qr-canvas {
-    width: 100%;
-    min-height: 166px;
+    width: 158px;
+    min-height: 158px;
   }
 }
