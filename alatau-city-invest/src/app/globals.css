@@ -807,18 +807,18 @@ input[type="submit"] {
   background: #EAEFEF;
 }
 
-.plot-amap-window {
+.plot-baidu-window {
   display: grid;
   gap: 8px;
 }
 
-.plot-amap-window-label {
+.plot-baidu-window-label {
   font-size: 0.78rem;
   font-weight: 700;
   color: var(--primary-strong);
 }
 
-.plot-amap-frame {
+.plot-baidu-frame {
   height: 170px;
 }
 

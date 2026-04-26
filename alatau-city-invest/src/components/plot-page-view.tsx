@@ -104,22 +104,22 @@ export function PlotPageView({ plot, similar }: { plot: Plot; similar: Plot[] })
     EN: {
       locationMap: "Location on map",
       openInGoogle: "Open in Google Maps",
-      openInAmap: "Open in Amap / Gaode Maps (高德地图)",
-      amapMiniWindow: "Amap / Gaode Maps (高德地图)",
+      openInBaidu: "Open in Baidu Maps (百度地图)",
+      baiduMiniWindow: "Baidu Maps (百度地图)",
       noLocation: "Coordinates are not available for this plot.",
     },
     RU: {
       locationMap: "Точка на карте",
       openInGoogle: "Открыть в Google Maps",
-      openInAmap: "Открыть в Amap / Gaode Maps (高德地图)",
-      amapMiniWindow: "Amap / Gaode Maps (高德地图)",
+      openInBaidu: "Открыть в Baidu Maps (百度地图)",
+      baiduMiniWindow: "Baidu Maps (百度地图)",
       noLocation: "Для этого участка пока нет координат.",
     },
     KZ: {
       locationMap: "Картадағы нүкте",
       openInGoogle: "Google Maps-те ашу",
-      openInAmap: "Amap / Gaode Maps (高德地图)-те ашу",
-      amapMiniWindow: "Amap / Gaode Maps (高德地图)",
+      openInBaidu: "Baidu Maps (百度地图)-те ашу",
+      baiduMiniWindow: "Baidu Maps (百度地图)",
       noLocation: "Бұл учаске үшін координаттар әлі енгізілмеген.",
     },
   });
@@ -151,10 +151,10 @@ export function PlotPageView({ plot, similar }: { plot: Plot; similar: Plot[] })
   const mapOpenUrl = mapQuery
     ? `https://www.google.com/maps?q=${encodeURIComponent(mapQuery)}`
     : null;
-  const amapOpenUrl = hasCoordinates
-    ? `https://uri.amap.com/marker?position=${plot.mapLng},${plot.mapLat}&name=${encodeURIComponent(plot.title)}&src=investmap&callnative=0`
+  const baiduOpenUrl = hasCoordinates
+    ? `https://api.map.baidu.com/marker?location=${plot.mapLat},${plot.mapLng}&title=${encodeURIComponent(plot.title)}&content=${encodeURIComponent(plot.mapAddress?.trim() || plot.title)}&output=html&coord_type=wgs84&src=webapp.investmap.website`
     : plot.mapAddress?.trim()
-      ? `https://uri.amap.com/search?keyword=${encodeURIComponent(plot.mapAddress.trim())}&src=investmap&callnative=0`
+      ? `https://api.map.baidu.com/geocoder?address=${encodeURIComponent(plot.mapAddress.trim())}&output=html&src=webapp.investmap.website`
       : null;
 
   const handleShare = async () => {
@@ -256,15 +256,15 @@ export function PlotPageView({ plot, similar }: { plot: Plot; similar: Plot[] })
                   referrerPolicy="no-referrer-when-downgrade"
                   title={`${plot.title} map`}
                 />
-                {amapOpenUrl ? (
-                  <div className="plot-amap-window">
-                    <div className="plot-amap-window-label">{mapT.amapMiniWindow}</div>
+                {baiduOpenUrl ? (
+                  <div className="plot-baidu-window">
+                    <div className="plot-baidu-window-label">{mapT.baiduMiniWindow}</div>
                     <iframe
-                      className="plot-mini-map-frame plot-amap-frame"
-                      src={amapOpenUrl}
+                      className="plot-mini-map-frame plot-baidu-frame"
+                      src={baiduOpenUrl}
                       loading="lazy"
                       referrerPolicy="no-referrer-when-downgrade"
-                      title={`${plot.title} Amap / Gaode Maps`}
+                      title={`${plot.title} Baidu Maps`}
                     />
                   </div>
                 ) : null}
@@ -274,9 +274,9 @@ export function PlotPageView({ plot, similar }: { plot: Plot; similar: Plot[] })
                       {mapT.openInGoogle}
                     </a>
                   ) : null}
-                  {amapOpenUrl ? (
-                    <a className="btn btn-ghost" href={amapOpenUrl} target="_blank" rel="noreferrer">
-                      {mapT.openInAmap}
+                  {baiduOpenUrl ? (
+                    <a className="btn btn-ghost" href={baiduOpenUrl} target="_blank" rel="noreferrer">
+                      {mapT.openInBaidu}
                     </a>
                   ) : null}
                 </div>
