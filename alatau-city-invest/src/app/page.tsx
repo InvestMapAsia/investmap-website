@@ -1,9 +1,11 @@
 "use client";
 
 import Link from "next/link";
+import { useSession } from "next-auth/react";
 import { useCurrentLanguage } from "@/lib/i18n-client";
 import { pickLang } from "@/lib/i18n";
 import { listPlots } from "@/lib/mock-db";
+import { currency } from "@/lib/ui";
 
 type RailItem = {
   title: string;
@@ -14,8 +16,10 @@ type RailItem = {
 
 export default function HomePage() {
   const { lang } = useCurrentLanguage();
+  const { status: sessionStatus } = useSession();
   const plots = listPlots({ sort: "roi_desc" });
   const availablePlots = plots.filter((plot) => plot.status === "available");
+  const topLand = availablePlots.slice(0, 3);
   const avgRoi = Math.round(plots.reduce((sum, plot) => sum + plot.roi, 0) / Math.max(plots.length, 1));
 
   const t = pickLang(lang, {
@@ -177,6 +181,57 @@ export default function HomePage() {
     },
   });
 
+  const land = pickLang(lang, {
+    EN: {
+      kicker: "Land opportunities",
+      title: "Verified land can become the foundation of the next big business",
+      text:
+        "InvestMap is not only about business projects. Investors can explore land plots by ROI, legal grade, infrastructure momentum and risk. Owners can register land separately and pass moderation before it appears in the catalog.",
+      browse: "Explore land catalog",
+      register: "Register your land",
+      loginRegister: "Sign in to register land",
+      map: "Open Alatau City map",
+      available: "Available land plots",
+      legal: "Legal checks",
+      roi: "Average ROI",
+      featured: "Featured land",
+    },
+    RU: {
+      kicker: "Земельные возможности",
+      title: "Проверенная земля может стать фундаментом следующего большого бизнеса",
+      text:
+        "InvestMap - это не только бизнес-проекты. Инвесторы изучают участки по ROI, юридическому статусу, инфраструктурному росту и риску. Владельцы могут отдельно зарегистрировать землю и пройти модерацию перед публикацией в каталоге.",
+      browse: "Открыть каталог земель",
+      register: "Зарегистрировать землю",
+      loginRegister: "Войти для регистрации земли",
+      map: "Открыть карту Alatau City",
+      available: "Доступные участки",
+      legal: "Юридические проверки",
+      roi: "Средний ROI",
+      featured: "Избранные участки",
+    },
+    KZ: {
+      kicker: "Жер мүмкіндіктері",
+      title: "Тексерілген жер келесі үлкен бизнестің негізі бола алады",
+      text:
+        "InvestMap тек бизнес-жобалар туралы емес. Инвесторлар жерді ROI, заңдық статус, инфрақұрылым өсімі және тәуекел бойынша қарайды. Иелер жерді бөлек тіркеп, каталогқа шықпас бұрын модерациядан өтеді.",
+      browse: "Жер каталогын ашу",
+      register: "Жерді тіркеу",
+      loginRegister: "Жер тіркеу үшін кіру",
+      map: "Alatau City картасын ашу",
+      available: "Қолжетімді учаскелер",
+      legal: "Заңдық тексеріс",
+      roi: "Орташа ROI",
+      featured: "Таңдаулы учаскелер",
+    },
+  });
+
+  const projectSubmitHref =
+    sessionStatus === "authenticated" ? "/projects/submit" : "/login?callbackUrl=/projects/submit";
+  const landSubmitHref =
+    sessionStatus === "authenticated" ? "/owner/add-plot" : "/login?callbackUrl=/owner/add-plot";
+  const landSubmitLabel = sessionStatus === "authenticated" ? land.register : land.loginRegister;
+
   const showcaseItems: RailItem[] = [
     {
       title: "Alatau City",
@@ -251,12 +306,60 @@ export default function HomePage() {
           <span className="landing-kicker">{t.ownerTitle}</span>
           <p>{t.ownerText}</p>
           <div className="inline-actions">
-            <Link className="btn btn-primary" href="/projects/submit">
+            <Link className="btn btn-primary" href={projectSubmitHref}>
               {t.ownerCta}
             </Link>
             <Link className="btn btn-ghost" href="/projects">
               {t.investorCta}
             </Link>
+          </div>
+        </div>
+      </section>
+
+      <section className="container land-signal">
+        <div className="land-copy">
+          <span className="landing-kicker">{land.kicker}</span>
+          <h2>{land.title}</h2>
+          <p>{land.text}</p>
+          <div className="inline-actions">
+            <Link className="btn btn-accent" href="/catalog">
+              {land.browse}
+            </Link>
+            <Link className="btn btn-primary" href={landSubmitHref}>
+              {landSubmitLabel}
+            </Link>
+            <Link className="btn btn-ghost on-dark" href="/alatau-city#alatau-map">
+              {land.map}
+            </Link>
+          </div>
+        </div>
+
+        <div className="land-dashboard">
+          <div className="land-metrics">
+            <div>
+              <span>{land.available}</span>
+              <strong>{availablePlots.length}</strong>
+            </div>
+            <div>
+              <span>{land.legal}</span>
+              <strong>81%</strong>
+            </div>
+            <div>
+              <span>{land.roi}</span>
+              <strong>{avgRoi}%</strong>
+            </div>
+          </div>
+          <div className="land-list">
+            <span className="landing-kicker">{land.featured}</span>
+            {topLand.map((plot) => (
+              <Link className="land-mini-card" href={`/plots/${plot.id}`} key={plot.id}>
+                <span>{plot.id}</span>
+                <strong>{plot.title}</strong>
+                <small>
+                  {currency(plot.price, plot.currency)} / ROI {plot.roi}%
+                </small>
+              </Link>
+            ))}
           </div>
         </div>
       </section>
@@ -355,8 +458,8 @@ export default function HomePage() {
           <h2>{t.finalCta}</h2>
           <p>{t.finalText}</p>
         </div>
-        <div className="inline-actions">
-          <Link className="btn btn-accent" href="/projects/submit">
+          <div className="inline-actions">
+          <Link className="btn btn-accent" href={projectSubmitHref}>
             {t.ownerCta}
           </Link>
           <Link className="btn btn-primary" href="/projects">

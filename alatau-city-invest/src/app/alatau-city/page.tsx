@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useSession } from "next-auth/react";
 import { PlotCard } from "@/components/plot-card";
 import { MapExplorer } from "@/components/map-explorer";
 import { useCurrentLanguage } from "@/lib/i18n-client";
@@ -9,6 +10,7 @@ import { listPlots } from "@/lib/mock-db";
 
 export default function AlatauCityPage() {
   const { lang } = useCurrentLanguage();
+  const { status: sessionStatus } = useSession();
   const all = listPlots({ sort: "roi_desc" });
   const available = all.filter((plot) => plot.status === "available");
   const topPlots = available.slice(0, 3);
@@ -136,6 +138,8 @@ export default function AlatauCityPage() {
       startInvest: "Инвестицияны бастау",
     },
   });
+  const addLandHref =
+    sessionStatus === "authenticated" ? "/owner/add-plot" : "/login?callbackUrl=/owner/add-plot";
 
   return (
     <div className="container">
@@ -151,7 +155,7 @@ export default function AlatauCityPage() {
               <Link className="btn btn-ghost" href="/catalog">
                 {t.browseCatalog}
               </Link>
-              <Link className="btn btn-accent" href="/owner/add-plot">
+              <Link className="btn btn-accent" href={addLandHref}>
                 {t.addLand}
               </Link>
               <Link className="btn btn-ghost" href="/projects">

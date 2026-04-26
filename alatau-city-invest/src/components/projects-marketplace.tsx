@@ -195,6 +195,8 @@ export function ProjectsMarketplace() {
       requested: rows.reduce((sum, item) => sum + Number(item.requestedAmount ?? 0), 0),
     };
   }, [rows]);
+  const submitHref =
+    sessionStatus === "authenticated" ? "/projects/submit" : "/login?callbackUrl=/projects/submit";
 
   const handleShare = async (project: ProjectRow) => {
     const shareUrl = `${window.location.origin}/projects#project-${project.id}`;
@@ -226,7 +228,7 @@ export function ProjectsMarketplace() {
             <p>{t.sub}</p>
           </div>
           <div className="plot-actions">
-            <Link href="/projects/submit" className="btn btn-primary">
+            <Link href={submitHref} className="btn btn-primary">
               {sessionStatus === "authenticated" ? t.create : t.loginToSubmit}
             </Link>
             {sessionStatus === "authenticated" ? (
@@ -298,7 +300,7 @@ export function ProjectsMarketplace() {
           >
             {t.resetBtn}
           </button>
-          <Link href="/projects/submit" className="btn btn-primary">
+          <Link href={submitHref} className="btn btn-primary">
             {t.openSubmit}
           </Link>
         </div>

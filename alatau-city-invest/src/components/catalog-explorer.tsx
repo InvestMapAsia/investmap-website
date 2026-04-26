@@ -1,5 +1,7 @@
 ﻿"use client";
 
+import Link from "next/link";
+import { useSession } from "next-auth/react";
 import { useEffect, useMemo, useState } from "react";
 import { useCurrentLanguage } from "@/lib/i18n-client";
 import { pickLang } from "@/lib/i18n";
@@ -20,6 +22,7 @@ const COMPARE_KEY = "aci_compare";
 
 export function CatalogExplorer() {
   const { lang } = useCurrentLanguage();
+  const { status: sessionStatus } = useSession();
   const [filters, setFilters] = useState({
     purpose: "all",
     status: "all",
@@ -62,6 +65,12 @@ export function CatalogExplorer() {
       openCompare: "Open compare",
       comparePlots: "Compare plots",
       close: "Close",
+      submitTitle: "Register land on InvestMap",
+      submitText:
+        "Have a plot ready for investors? Add cadastral data, price, media, legal details and send it to moderation as a separate land listing.",
+      submitLand: "Register land",
+      loginSubmitLand: "Sign in to register land",
+      openMap: "Open map",
     },
     RU: {
       purpose: "Назначение",
@@ -91,6 +100,12 @@ export function CatalogExplorer() {
       openCompare: "Открыть сравнение",
       comparePlots: "Сравнение участков",
       close: "Закрыть",
+      submitTitle: "Зарегистрировать землю на InvestMap",
+      submitText:
+        "Есть участок для инвесторов? Добавьте кадастровые данные, цену, медиа, юридические детали и отправьте землю на модерацию отдельным листингом.",
+      submitLand: "Зарегистрировать землю",
+      loginSubmitLand: "Войти для регистрации земли",
+      openMap: "Открыть карту",
     },
     KZ: {
       purpose: "Мақсаты",
@@ -120,6 +135,12 @@ export function CatalogExplorer() {
       openCompare: "Салыстыруды ашу",
       comparePlots: "Учаскелерді салыстыру",
       close: "Жабу",
+      submitTitle: "Жерді InvestMap-та тіркеу",
+      submitText:
+        "Инвесторларға дайын учаскеңіз бар ма? Кадастр деректерін, бағаны, медиа және заңдық мәліметтерді қосып, жерді бөлек листинг ретінде модерацияға жіберіңіз.",
+      submitLand: "Жерді тіркеу",
+      loginSubmitLand: "Жер тіркеу үшін кіру",
+      openMap: "Картаны ашу",
     },
   });
 
@@ -172,9 +193,26 @@ export function CatalogExplorer() {
     setShowCompare(false);
     emitClientEvent(COMPARE_CHANGE_EVENT);
   };
+  const submitLandHref =
+    sessionStatus === "authenticated" ? "/owner/add-plot" : "/login?callbackUrl=/owner/add-plot";
 
   return (
     <>
+      <section className="catalog-submit-card">
+        <div>
+          <span className="landing-kicker">{t.submitTitle}</span>
+          <p>{t.submitText}</p>
+        </div>
+        <div className="plot-actions">
+          <Link className="btn btn-primary" href={submitLandHref}>
+            {sessionStatus === "authenticated" ? t.submitLand : t.loginSubmitLand}
+          </Link>
+          <Link className="btn btn-ghost" href="/alatau-city#alatau-map">
+            {t.openMap}
+          </Link>
+        </div>
+      </section>
+
       <section className="card">
         <div className="form-grid">
           <div className="form-field">

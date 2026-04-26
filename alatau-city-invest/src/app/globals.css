@@ -1048,6 +1048,151 @@ table th {
   font-size: 1rem;
 }
 
+.land-signal {
+  display: grid;
+  grid-template-columns: 1fr 0.92fr;
+  gap: 18px;
+  min-height: 430px;
+  padding: 32px;
+  border-radius: 8px;
+  color: #fff;
+  overflow: hidden;
+  background:
+    linear-gradient(90deg, rgba(0, 31, 69, 0.94), rgba(3, 96, 164, 0.7)),
+    url("https://images.unsplash.com/photo-1500382017468-9049fed747ef?auto=format&fit=crop&w=1600&q=80") center / cover;
+  box-shadow: var(--shadow-card);
+}
+
+.land-copy {
+  display: grid;
+  align-content: center;
+  gap: 14px;
+}
+
+.land-copy h2 {
+  max-width: 760px;
+  font-size: clamp(2rem, 4vw, 4rem);
+}
+
+.land-copy p {
+  max-width: 72ch;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.land-dashboard {
+  display: grid;
+  align-content: stretch;
+  gap: 12px;
+}
+
+.land-metrics {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.land-metrics div,
+.land-list {
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.24);
+  background: rgba(255, 255, 255, 0.14);
+  backdrop-filter: blur(8px);
+}
+
+.land-metrics div {
+  min-height: 96px;
+  display: grid;
+  align-content: center;
+  gap: 4px;
+  padding: 14px;
+}
+
+.land-metrics span,
+.land-mini-card span,
+.land-mini-card small {
+  color: rgba(255, 255, 255, 0.78);
+  font-size: 0.78rem;
+}
+
+.land-metrics strong {
+  font-size: 1.55rem;
+}
+
+.land-list {
+  display: grid;
+  gap: 8px;
+  padding: 14px;
+}
+
+.land-mini-card {
+  display: grid;
+  gap: 3px;
+  padding: 12px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+}
+
+.land-mini-card strong {
+  color: #fff;
+}
+
+.catalog-submit-card,
+.auth-gate {
+  border-radius: 8px;
+  border: 1px solid #C7D8E6;
+  background: #fff;
+  box-shadow: var(--shadow-soft);
+}
+
+.catalog-submit-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  padding: 22px;
+  margin-bottom: 18px;
+}
+
+.catalog-submit-card .landing-kicker,
+.auth-gate .landing-kicker {
+  color: #0360A4;
+}
+
+.catalog-submit-card p {
+  max-width: 74ch;
+  margin-top: 8px;
+  color: #243f58;
+}
+
+.auth-gate {
+  min-height: 340px;
+  display: grid;
+  align-content: center;
+  justify-items: start;
+  gap: 14px;
+  padding: 34px;
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, 0.94), rgba(244, 248, 251, 0.9)),
+    url("https://images.unsplash.com/photo-1554224155-6726b3ff858f?auto=format&fit=crop&w=1400&q=80") center / cover;
+}
+
+.auth-gate h2 {
+  max-width: 680px;
+  font-size: clamp(1.8rem, 3vw, 2.8rem);
+}
+
+.auth-gate p {
+  max-width: 70ch;
+  color: #243f58;
+}
+
+.land-auth-gate {
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, 0.94), rgba(244, 248, 251, 0.9)),
+    url("https://images.unsplash.com/photo-1500382017468-9049fed747ef?auto=format&fit=crop&w=1400&q=80") center / cover;
+}
+
 .why-band {
   padding: 28px;
   border: 1px solid #C7D8E6;
@@ -1361,7 +1506,8 @@ table th {
   .split,
   .landing-hero,
   .intro-grid,
-  .ai-partner-grid {
+  .ai-partner-grid,
+  .land-signal {
     grid-template-columns: 1fr;
   }
 
@@ -1396,6 +1542,11 @@ table th {
   .landing-hero {
     min-height: 620px;
     padding: 34px;
+  }
+
+  .catalog-submit-card {
+    align-items: flex-start;
+    flex-direction: column;
   }
 
   .final-cta {
@@ -1442,6 +1593,7 @@ table th {
   .landing-hero,
   .image-statement,
   .owner-door,
+  .land-signal,
   .why-band,
   .ai-strip,
   .partners-overview,
@@ -1460,7 +1612,8 @@ table th {
   }
 
   .why-list,
-  .journey-steps {
+  .journey-steps,
+  .land-metrics {
     grid-template-columns: 1fr;
   }
 
