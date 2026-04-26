@@ -157,6 +157,14 @@ export function PlotPageView({ plot, similar }: { plot: Plot; similar: Plot[] })
     : plot.mapAddress?.trim()
       ? `https://api.map.baidu.com/geocoder?address=${encodeURIComponent(plot.mapAddress.trim())}&output=html&src=webapp.investmap.website`
       : null;
+  const baiduStaticCenter = hasCoordinates
+    ? `${plot.mapLng},${plot.mapLat}`
+    : plot.mapAddress?.trim()
+      ? plot.mapAddress.trim()
+      : null;
+  const baiduStaticMapUrl = baiduStaticCenter
+    ? `https://api.map.baidu.com/staticimage?center=${encodeURIComponent(baiduStaticCenter)}&width=512&height=170&zoom=15`
+    : null;
 
   const handleShare = async () => {
     const shareUrl = typeof window !== "undefined" ? window.location.href : "";
@@ -257,15 +265,14 @@ export function PlotPageView({ plot, similar }: { plot: Plot; similar: Plot[] })
                   referrerPolicy="no-referrer-when-downgrade"
                   title={`${plot.title} map`}
                 />
-                {baiduOpenUrl ? (
+                {baiduStaticMapUrl ? (
                   <div className="plot-baidu-window">
                     <div className="plot-baidu-window-label">{mapT.baiduMiniWindow}</div>
-                    <iframe
-                      className="plot-mini-map-frame plot-baidu-frame"
-                      src={baiduOpenUrl}
-                      loading="lazy"
-                      referrerPolicy="no-referrer-when-downgrade"
-                      title={`${plot.title} Baidu Maps`}
+                    <div
+                      className="plot-mini-map-frame plot-baidu-static-map"
+                      role="img"
+                      aria-label={`${plot.title} Baidu Maps`}
+                      style={{ backgroundImage: `url("${baiduStaticMapUrl}")` }}
                     />
                   </div>
                 ) : null}

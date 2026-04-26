@@ -818,8 +818,11 @@ input[type="submit"] {
   color: var(--primary-strong);
 }
 
-.plot-baidu-frame {
+.plot-baidu-static-map {
   height: 170px;
+  background-position: center;
+  background-size: cover;
+  background-repeat: no-repeat;
 }
 
 .plot-mini-map-actions {
