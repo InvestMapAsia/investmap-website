@@ -105,18 +105,21 @@ export function PlotPageView({ plot, similar }: { plot: Plot; similar: Plot[] })
       locationMap: "Location on map",
       openInGoogle: "Open in Google Maps",
       openInAmap: "Open in Amap / Gaode Maps (高德地图)",
+      amapMiniWindow: "Amap / Gaode Maps (高德地图)",
       noLocation: "Coordinates are not available for this plot.",
     },
     RU: {
       locationMap: "Точка на карте",
       openInGoogle: "Открыть в Google Maps",
       openInAmap: "Открыть в Amap / Gaode Maps (高德地图)",
+      amapMiniWindow: "Amap / Gaode Maps (高德地图)",
       noLocation: "Для этого участка пока нет координат.",
     },
     KZ: {
       locationMap: "Картадағы нүкте",
       openInGoogle: "Google Maps-те ашу",
       openInAmap: "Amap / Gaode Maps (高德地图)-те ашу",
+      amapMiniWindow: "Amap / Gaode Maps (高德地图)",
       noLocation: "Бұл учаске үшін координаттар әлі енгізілмеген.",
     },
   });
@@ -149,9 +152,9 @@ export function PlotPageView({ plot, similar }: { plot: Plot; similar: Plot[] })
     ? `https://www.google.com/maps?q=${encodeURIComponent(mapQuery)}`
     : null;
   const amapOpenUrl = hasCoordinates
-    ? `https://uri.amap.com/marker?position=${plot.mapLng},${plot.mapLat}&name=${encodeURIComponent(plot.title)}`
+    ? `https://uri.amap.com/marker?position=${plot.mapLng},${plot.mapLat}&name=${encodeURIComponent(plot.title)}&src=investmap&callnative=0`
     : plot.mapAddress?.trim()
-      ? `https://uri.amap.com/search?keyword=${encodeURIComponent(plot.mapAddress.trim())}`
+      ? `https://uri.amap.com/search?keyword=${encodeURIComponent(plot.mapAddress.trim())}&src=investmap&callnative=0`
       : null;
 
   const handleShare = async () => {
@@ -253,6 +256,18 @@ export function PlotPageView({ plot, similar }: { plot: Plot; similar: Plot[] })
                   referrerPolicy="no-referrer-when-downgrade"
                   title={`${plot.title} map`}
                 />
+                {amapOpenUrl ? (
+                  <div className="plot-amap-window">
+                    <div className="plot-amap-window-label">{mapT.amapMiniWindow}</div>
+                    <iframe
+                      className="plot-mini-map-frame plot-amap-frame"
+                      src={amapOpenUrl}
+                      loading="lazy"
+                      referrerPolicy="no-referrer-when-downgrade"
+                      title={`${plot.title} Amap / Gaode Maps`}
+                    />
+                  </div>
+                ) : null}
                 <div className="plot-mini-map-actions">
                   {mapOpenUrl ? (
                     <a className="btn btn-ghost" href={mapOpenUrl} target="_blank" rel="noreferrer">

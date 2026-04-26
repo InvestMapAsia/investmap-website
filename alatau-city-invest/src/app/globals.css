@@ -807,6 +807,21 @@ input[type="submit"] {
   background: #EAEFEF;
 }
 
+.plot-amap-window {
+  display: grid;
+  gap: 8px;
+}
+
+.plot-amap-window-label {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--primary-strong);
+}
+
+.plot-amap-frame {
+  height: 170px;
+}
+
 .plot-mini-map-actions {
   display: flex;
   flex-wrap: wrap;
