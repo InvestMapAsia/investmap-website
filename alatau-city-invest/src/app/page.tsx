@@ -275,6 +275,9 @@ export default function HomePage() {
             <Link className="btn btn-ghost on-dark" href="/alatau-city">
               {t.secondaryCta}
             </Link>
+            <Link className="btn btn-primary" href="/catalog">
+              {land.browse}
+            </Link>
           </div>
         </div>
         <div className="landing-hero-proof" aria-label="InvestMap metrics">
@@ -311,6 +314,9 @@ export default function HomePage() {
             </Link>
             <Link className="btn btn-ghost" href="/projects">
               {t.investorCta}
+            </Link>
+            <Link className="btn btn-accent" href={landSubmitHref}>
+              {landSubmitLabel}
             </Link>
           </div>
         </div>
@@ -458,12 +464,15 @@ export default function HomePage() {
           <h2>{t.finalCta}</h2>
           <p>{t.finalText}</p>
         </div>
-          <div className="inline-actions">
+        <div className="inline-actions">
           <Link className="btn btn-accent" href={projectSubmitHref}>
             {t.ownerCta}
           </Link>
           <Link className="btn btn-primary" href="/projects">
             {t.investorCta}
+          </Link>
+          <Link className="btn btn-ghost on-dark" href={landSubmitHref}>
+            {landSubmitLabel}
           </Link>
         </div>
       </section>
