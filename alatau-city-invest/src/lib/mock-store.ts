@@ -12,6 +12,7 @@ import {
   listBusinessProjects,
   listPlots,
   updateBusinessProjectStatus,
+  updateOwnerPlot,
   updatePlotStatus,
 } from "@/lib/mock-db";
 import {
@@ -232,6 +233,14 @@ export function getMockPlotById(id: string) {
 
 export function updateMockPlotStatus(id: string, status: PlotStatus) {
   return updatePlotStatus(id, status);
+}
+
+export function updateMockOwnerPlot(payload: {
+  id: string;
+  ownerId?: string;
+  data: OwnerDraftPlotInput;
+}) {
+  return updateOwnerPlot(payload.id, payload.data, payload.ownerId);
 }
 
 export function listMockAdminQueue() {

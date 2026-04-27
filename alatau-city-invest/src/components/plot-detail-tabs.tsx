@@ -6,13 +6,18 @@ import { pickLang } from "@/lib/i18n";
 import { Plot } from "@/lib/types";
 
 const PANORAMA_MARKER = "#panorama360";
+const COVER_MARKER = "#cover16x9";
 
 function cleanMediaUrl(url: string) {
-  return url.replace(PANORAMA_MARKER, "");
+  return url.replace(PANORAMA_MARKER, "").replace(COVER_MARKER, "");
 }
 
 function isPanoramaUrl(url: string) {
   return url.includes(PANORAMA_MARKER);
+}
+
+function isCoverUrl(url: string) {
+  return url.includes(COVER_MARKER);
 }
 
 export function PlotDetailTabs({ plot }: { plot: Plot }) {
@@ -172,9 +177,10 @@ export function PlotDetailTabs({ plot }: { plot: Plot }) {
               <div className="uploaded-media-grid">
                 {standardMediaUrls.map((url, index) => {
                   const cleanUrl = cleanMediaUrl(url);
+                  const isCover = isCoverUrl(url);
                   return (
                     <div className="uploaded-media-item" key={`${url}-${index}`}>
-                      <div className="uploaded-media-preview">
+                      <div className={isCover ? "uploaded-media-preview uploaded-cover-preview" : "uploaded-media-preview"}>
                         {isVideoUrl(cleanUrl) ? (
                           <video src={cleanUrl} controls preload="metadata" />
                         ) : (

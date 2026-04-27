@@ -32,6 +32,7 @@ type UploadMediaResponse = {
 
 const MAX_MEDIA_UPLOAD_BYTES = 4 * 1024 * 1024; // 4 MB safe limit for Vercel function upload
 const PANORAMA_MARKER = "#panorama360";
+const COVER_MARKER = "#cover16x9";
 
 function parseNumberValue(value: string) {
   const normalized = value.trim().replace(",", ".");
@@ -44,8 +45,12 @@ function markPanoramaUrl(url: string) {
   return url.includes(PANORAMA_MARKER) ? url : `${url}${PANORAMA_MARKER}`;
 }
 
+function markCoverUrl(url: string) {
+  return url.includes(COVER_MARKER) ? url : `${url}${COVER_MARKER}`;
+}
+
 function cleanMediaUrl(url: string) {
-  return url.replace(PANORAMA_MARKER, "");
+  return url.replace(PANORAMA_MARKER, "").replace(COVER_MARKER, "");
 }
 
 function isPanoramaUrl(url: string, contentType?: string) {
@@ -75,6 +80,7 @@ export function OwnerAddPlotForm() {
   const [result, setResult] = useState<CreateResult | null>(null);
   const [saving, setSaving] = useState(false);
   const [uploadedMedia, setUploadedMedia] = useState<UploadedMedia[]>([]);
+  const [coverMedia, setCoverMedia] = useState<UploadedMedia | null>(null);
   const [uploadingMedia, setUploadingMedia] = useState(false);
 
   const t = pickLang(lang, {
@@ -99,6 +105,8 @@ export function OwnerAddPlotForm() {
       mapHint: `Alatau bounds: lat ${ALATAU_BOUNDS.minLat}..${ALATAU_BOUNDS.maxLat}, lng ${ALATAU_BOUNDS.minLng}..${ALATAU_BOUNDS.maxLng}.`,
       mediaSection: "Plot media (photo/video)",
       mediaHint: "Upload files to Vercel Blob. Public links will be saved to this listing.",
+      coverSection: "Cover photo 16:9 (optional)",
+      coverHint: "Upload one horizontal image for the listing cover. Recommended ratio: 16:9.",
       panoramaSection: "360 panorama photos",
       panoramaHint: "Upload equirectangular 360 photos. They will appear separately on the plot page.",
       mediaUploading: "Uploading files...",
@@ -156,6 +164,8 @@ export function OwnerAddPlotForm() {
       mapHint: `Границы Алатау: широта ${ALATAU_BOUNDS.minLat}..${ALATAU_BOUNDS.maxLat}, долгота ${ALATAU_BOUNDS.minLng}..${ALATAU_BOUNDS.maxLng}.`,
       mediaSection: "Медиа участка (фото/видео)",
       mediaHint: "Файлы загружаются в Vercel Blob. В листинге сохраняются публичные ссылки.",
+      coverSection: "Фото обложки 16:9 (необязательно)",
+      coverHint: "Загрузите одно горизонтальное изображение для обложки листинга. Рекомендуемое соотношение: 16:9.",
       panoramaSection: "360-панорамы участка",
       panoramaHint: "Загрузите equirectangular 360 фото. Они будут отдельно показаны на странице участка.",
       mediaUploading: "Загрузка файлов...",
@@ -213,6 +223,8 @@ export function OwnerAddPlotForm() {
       mapHint: `Alatau шекарасы: ендік ${ALATAU_BOUNDS.minLat}..${ALATAU_BOUNDS.maxLat}, бойлық ${ALATAU_BOUNDS.minLng}..${ALATAU_BOUNDS.maxLng}.`,
       mediaSection: "Учаске медиасы (фото/видео)",
       mediaHint: "Файлдар Vercel Blob-қа жүктеледі. Листингте ашық сілтемелер сақталады.",
+      coverSection: "16:9 мұқаба фотосы (міндетті емес)",
+      coverHint: "Листинг мұқабасына бір көлденең сурет жүктеңіз. Ұсынылатын қатынас: 16:9.",
       panoramaSection: "Учаскенің 360 панорамалары",
       panoramaHint: "Equirectangular 360 фото жүктеңіз. Олар учаске бетінде бөлек көрсетіледі.",
       mediaUploading: "Файлдар жүктелуде...",
@@ -263,9 +275,9 @@ export function OwnerAddPlotForm() {
     if (form.hasUtilities) next += 10;
     if (form.description.trim().length > 120) next += 16;
     if (form.mapLat.trim().length > 0 && form.mapLng.trim().length > 0) next += 2;
-    if (uploadedMedia.length > 0) next += 2;
+    if (uploadedMedia.length > 0 || coverMedia) next += 2;
     return Math.min(100, next);
-  }, [form, uploadedMedia.length]);
+  }, [coverMedia, form, uploadedMedia.length]);
 
   const googleMapUrl = useMemo(() => {
     if (form.mapLat && form.mapLng) {
@@ -351,6 +363,52 @@ export function OwnerAddPlotForm() {
     }
   };
 
+  const handleCoverUpload = async (event: ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    if (!file.type.startsWith("image/")) {
+      window.alert(t.uploadInvalidType);
+      event.target.value = "";
+      return;
+    }
+
+    if (file.size > MAX_MEDIA_UPLOAD_BYTES) {
+      window.alert(t.uploadTooLarge);
+      event.target.value = "";
+      return;
+    }
+
+    setUploadingMedia(true);
+
+    try {
+      const payload = new FormData();
+      payload.append("file", file);
+
+      const response = await fetch("/api/uploads/plot-media", {
+        method: "POST",
+        body: payload,
+      });
+
+      const body = (await response.json()) as UploadMediaResponse;
+      if (!response.ok || !body.data?.url) {
+        const reason = [body.error, body.detail].filter(Boolean).join(" | ");
+        window.alert(reason ? `${t.uploadFailed}\n${reason}` : t.uploadFailed);
+        return;
+      }
+
+      setCoverMedia({
+        ...body.data,
+        url: markCoverUrl(body.data.url),
+      });
+    } catch {
+      window.alert(t.uploadFailed);
+    } finally {
+      setUploadingMedia(false);
+      event.target.value = "";
+    }
+  };
+
   const submit = async (event: FormEvent) => {
     event.preventDefault();
     if (uploadingMedia) {
@@ -409,7 +467,7 @@ export function OwnerAddPlotForm() {
         legalOwnerType: form.legalOwnerType,
         hasUtilities: form.hasUtilities,
         description: form.description,
-        mediaUrls: uploadedMedia.map((item) => item.url),
+        mediaUrls: [...(coverMedia ? [coverMedia.url] : []), ...uploadedMedia.map((item) => item.url)],
         mapAddress: form.mapAddress || undefined,
         mapLat,
         mapLng,
@@ -468,6 +526,7 @@ export function OwnerAddPlotForm() {
       mapLng: "",
     });
     setUploadedMedia([]);
+    setCoverMedia(null);
   };
 
   return (
@@ -604,7 +663,38 @@ export function OwnerAddPlotForm() {
               />
             </div>
             <div className="form-field" style={{ gridColumn: "1 / -1" }}>
-              <label>{t.mediaSection}</label>
+              <label>{t.coverSection}</label>
+              <input
+                type="file"
+                accept="image/*"
+                disabled={uploadingMedia}
+                onChange={handleCoverUpload}
+              />
+              <p className="muted">{t.coverHint}</p>
+              {coverMedia ? (
+                <div className="uploaded-media-grid uploaded-cover-grid">
+                  <div className="uploaded-media-item">
+                    <div className="uploaded-media-preview uploaded-cover-preview">
+                      <img src={cleanMediaUrl(coverMedia.url)} alt={coverMedia.originalName || "cover"} />
+                    </div>
+                    <div className="uploaded-media-actions">
+                      <a
+                        href={cleanMediaUrl(coverMedia.url)}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="btn btn-ghost"
+                      >
+                        {t.openMedia}
+                      </a>
+                      <button className="btn btn-ghost" type="button" onClick={() => setCoverMedia(null)}>
+                        {t.removeMedia}
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              ) : null}
+
+              <label style={{ marginTop: 10 }}>{t.mediaSection}</label>
               <input
                 type="file"
                 accept="image/*,video/*"

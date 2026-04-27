@@ -421,6 +421,7 @@ export function PlotPageView({ plot, similar }: { plot: Plot; similar: Plot[] })
                         aria-label={`${plot.title} Baidu Maps`}
                         style={{ backgroundImage: `url("${baiduStaticMapUrl}")` }}
                       />
+                      <div className="plot-baidu-center-pin" aria-hidden="true" />
                       <div className="plot-baidu-zoom" aria-label="Baidu map zoom">
                         <button
                           type="button"
@@ -435,6 +436,15 @@ export function PlotPageView({ plot, similar }: { plot: Plot; similar: Plot[] })
                           onClick={() => setBaiduZoom((current) => Math.max(3, current - 1))}
                         >
                           -
+                        </button>
+                        <button
+                          type="button"
+                          aria-label="Reset Baidu map to listing location"
+                          onClick={() => setBaiduZoom(15)}
+                        >
+                          <svg viewBox="0 0 24 24" aria-hidden="true">
+                            <path d="M12 21s7-6.2 7-12a7 7 0 0 0-14 0c0 5.8 7 12 7 12Zm0-9a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z" />
+                          </svg>
                         </button>
                       </div>
                     </div>

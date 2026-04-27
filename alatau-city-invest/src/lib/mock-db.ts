@@ -619,6 +619,51 @@ export function updatePlotStatus(id: string, status: PlotStatus) {
   return updated;
 }
 
+export function updateOwnerPlot(id: string, payload: OwnerDraftPlotInput, ownerId?: string) {
+  const qualityScore = calculateOwnerPlotQualityScore(payload);
+  const mapPoint = latLngToMapPoint(payload.mapLat, payload.mapLng);
+  let updated: Plot | undefined;
+
+  plots = plots.map((plot) => {
+    if (plot.id !== id || plot.source !== "owner") {
+      return plot;
+    }
+
+    if (ownerId && plot.ownerId !== ownerId) {
+      return plot;
+    }
+
+    updated = {
+      ...plot,
+      title: payload.title,
+      district: payload.district,
+      purpose: payload.purpose,
+      area: payload.area,
+      price: payload.price,
+      roi: payload.roi ?? plot.roi,
+      irr: payload.irr ?? plot.irr,
+      riskScore: qualityScore >= 80 ? 34 : 47,
+      legalGrade: qualityScore >= 80 ? "b" : "c",
+      status: "moderation",
+      x: mapPoint?.x ?? plot.x,
+      y: mapPoint?.y ?? plot.y,
+      distanceCenterKm: payload.distanceCenterKm ?? plot.distanceCenterKm,
+      utilities: payload.hasUtilities ? ["Electricity", "Water"] : ["Not verified"],
+      ownerType: payload.legalOwnerType,
+      updatedAt: new Date().toISOString().slice(0, 10),
+      timeline: ["Owner edits submitted for moderation"],
+      mediaUrls: payload.mediaUrls ?? plot.mediaUrls,
+      mapAddress: payload.mapAddress,
+      mapLat: payload.mapLat,
+      mapLng: payload.mapLng,
+    };
+
+    return updated;
+  });
+
+  return updated;
+}
+
 export function listAdminQueue() {
   return plots.filter((plot) => plot.status === "moderation" || plot.status === "legal_issue");
 }

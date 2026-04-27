@@ -709,6 +709,14 @@ input[type="submit"] {
   background: #EAEFEF;
 }
 
+.uploaded-cover-grid {
+  grid-template-columns: minmax(0, 420px);
+}
+
+.uploaded-cover-preview {
+  aspect-ratio: 16 / 9;
+}
+
 .uploaded-media-preview img,
 .uploaded-media-preview video {
   width: 100%;
@@ -952,6 +960,29 @@ input[type="submit"] {
   background-repeat: no-repeat;
 }
 
+.plot-baidu-center-pin {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 22px;
+  height: 22px;
+  transform: translate(-50%, -90%) rotate(45deg);
+  border: 3px solid #fff;
+  border-radius: 50% 50% 50% 0;
+  background: #D92D20;
+  box-shadow: 0 8px 20px rgba(15, 34, 56, 0.28);
+}
+
+.plot-baidu-center-pin::after {
+  content: "";
+  position: absolute;
+  width: 6px;
+  height: 6px;
+  inset: 5px;
+  border-radius: 50%;
+  background: #fff;
+}
+
 .plot-baidu-zoom {
   position: absolute;
   top: 10px;
@@ -979,6 +1010,13 @@ input[type="submit"] {
 
 .plot-baidu-zoom button:hover {
   background: #F4F8FB;
+}
+
+.plot-baidu-zoom svg {
+  width: 16px;
+  height: 16px;
+  display: block;
+  fill: currentColor;
 }
 
 .plot-mini-map-actions {
