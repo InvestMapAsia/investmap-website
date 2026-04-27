@@ -33,6 +33,14 @@ export function StatusBadge({ status }: { status: PlotStatus }) {
       sold: "Сатылған",
       legal_issue: "Заңдық мәселе",
     },
+    CN: {
+      available: "可用",
+      reserved: "已预留",
+      deal: "交易中",
+      moderation: "审核中",
+      sold: "已售出",
+      legal_issue: "法律问题",
+    },
   });
 
   return (

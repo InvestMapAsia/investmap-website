@@ -87,6 +87,27 @@ export function PlotCard({ plot, mode = "catalog" }: { plot: Plot; mode?: Mode }
       legalB: "B Жартылай",
       legalC: "C Иесінің мәліметі",
     },
+    CN: {
+      area: "面积",
+      risk: "风险",
+      legal: "法律状态",
+      details: "详情",
+      inFav: "已收藏",
+      favorite: "收藏",
+      removeCompare: "移出对比",
+      compare: "对比",
+      invest: "投资",
+      share: "分享",
+      shareSuccess: "地块链接已复制。",
+      shareFail: "无法分享地块链接。",
+      removeFavError: "无法从收藏中移除。",
+      saveFavError: "无法加入收藏。",
+      compareLimit: "最多可对比 4 个地块。",
+      legalAPlus: "A+ 完整核验",
+      legalA: "A 已核验",
+      legalB: "B 部分核验",
+      legalC: "C 业主声明",
+    },
   });
 
   const legalLabel = {

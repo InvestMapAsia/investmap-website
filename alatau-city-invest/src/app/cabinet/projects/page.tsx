@@ -19,6 +19,10 @@ export default function ProjectsCabinetPage() {
       title: "Жоба кабинеті",
       sub: "Өтінімдеріңіз, модерация статустары және тексеруші пікірлері бір жерде.",
     },
+    CN: {
+      title: "项目柜台",
+      sub: "集中查看您的提交、审核状态和审核意见。",
+    },
   });
 
   return (

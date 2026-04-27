@@ -179,6 +179,58 @@ export default function HomePage() {
       aiSupport: "AI қолдау",
       ownerReady: "Иеге дайын",
     },
+    CN: {
+      heroKicker: "面向创业者与投资者的 InvestMap",
+      heroTitle: "让企业找到资本，让投资者发现机会的明亮平台",
+      heroText:
+        "InvestMap 连接需要外部投资的企业主，以及重视透明度、法律清晰度和 AI 辅助决策的投资者。",
+      primaryCta: "开始旅程",
+      secondaryCta: "查看 Alatau City",
+      ownerCta: "发布企业",
+      investorCta: "浏览机会",
+      activeProjects: "活跃机会",
+      verifiedPipeline: "已核验流程",
+      averageRoi: "土地平均 ROI",
+      whatTitle: "什么是 InvestMap？",
+      whatLead: "为你的企业寻找投资，比以往更简单。",
+      whatText:
+        "平台帮助企业展示业务、准备面向投资者的信息，并连接能够支持下一阶段增长的人。",
+      ownerTitle: "面向企业主",
+      ownerText:
+        "我们是你打开外部投资之门的钥匙：梳理商业故事、准备法律检查点、发布清晰的投资提案，并在一个平台上开启投资者对话。",
+      whyTitle: "为什么选择我们？",
+      whyItems: [
+        "从项目资料到投资申请的全流程透明",
+        "发布前的法律支持与文件准备",
+        "用于风险、ROI 和下一步问题的 AI 助手",
+        "项目、土地、创始人数据和投资者流程集中在一处",
+      ],
+      showcaseTitle: "InvestMap 上的重点项目",
+      showcaseSub: "旗舰机会的动态展示栏。每个项目都可打开独立页面。",
+      aiTitle: "服务交易双方的 AI 助手",
+      aiText:
+        "让助手比较 ROI、解释法律风险、准备候选清单，或帮助企业主在发布前提升投资者资料。",
+      aiCta: "打开 AI",
+      partnersTitle: "合作伙伴与平台概览",
+      partnersText:
+        "InvestMap 围绕合作伙伴网络构建，支持核验、法律准备、分析和投资者信任。",
+      partnerItems: ["法律顾问", "财务分析师", "KYC/AML 服务商", "城市与基础设施数据"],
+      tutorialTitle: "平台如何运作",
+      ownersFlow: "企业主",
+      investorsFlow: "投资者",
+      ownerSteps: ["注册", "完善企业资料", "寻找投资"],
+      investorSteps: ["注册", "寻找感兴趣的企业", "投资"],
+      importanceTitle: "为什么寻找投资者很重要？",
+      importanceText:
+        "外部投资可以释放库存、招聘、营销、设备、技术和更快扩张的能力。优秀投资者不仅带来资金，也带来信任、纪律、资源连接，以及从本地企业走向可规模化公司的清晰路径。",
+      finalCta: "现在开始你的投资旅程！",
+      finalText:
+        "创建资料、探索已核验机会，或打开 Alatau City 页面，了解 InvestMap 如何把复杂的投资决策变成清晰的数字流程。",
+      legalSupport: "法律准备",
+      transparency: "透明度",
+      aiSupport: "AI 支持",
+      ownerReady: "业主就绪",
+    },
   });
 
   const land = pickLang(lang, {
@@ -223,6 +275,20 @@ export default function HomePage() {
       legal: "Заңдық тексеріс",
       roi: "Орташа ROI",
       featured: "Таңдаулы учаскелер",
+    },
+    CN: {
+      kicker: "土地机会",
+      title: "已核验土地可以成为下一个大生意的基础",
+      text:
+        "InvestMap 不只服务商业项目。投资者可以按 ROI、法律等级、基础设施动能和风险筛选土地；业主也可以单独登记土地，并在进入目录前通过审核。",
+      browse: "浏览土地目录",
+      register: "登记土地",
+      loginRegister: "登录后登记土地",
+      map: "打开 Alatau City 地图",
+      available: "可投资地块",
+      legal: "法律核查",
+      roi: "平均 ROI",
+      featured: "精选土地",
     },
   });
 

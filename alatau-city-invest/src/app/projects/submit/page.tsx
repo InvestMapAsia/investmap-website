@@ -40,6 +40,16 @@ export default function ProjectSubmitPage() {
       back: "Жобаларға оралу",
       loading: "Сессия тексерілуде...",
     },
+    CN: {
+      title: "提交项目",
+      sub: "请完整填写各项标准，帮助投资人快速评估业务质量、法律准备度和投资条款。",
+      loginTitle: "登录后提交您的项目",
+      loginText:
+        "创建项目需要先登录，以便每个投资机会都关联到已验证账户和审核历史。",
+      login: "登录",
+      back: "返回项目",
+      loading: "正在检查会话...",
+    },
   });
 
   if (status === "loading") {

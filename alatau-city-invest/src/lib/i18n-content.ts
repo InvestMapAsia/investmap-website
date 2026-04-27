@@ -26,6 +26,12 @@ export const newsPageText: Record<
     related: "Байланысты учаскелерді ашу",
     locale: "kk-KZ",
   },
+  CN: {
+    title: "新闻与市场简报",
+    sub: "基础设施、投资和法律更新，帮助提升市场透明度。",
+    related: "查看相关地块",
+    locale: "zh-CN",
+  },
 };
 
 export const newsLocalizedByLang: Record<Lang, NewsOverride> = {
@@ -70,6 +76,26 @@ export const newsLocalizedByLang: Record<Lang, NewsOverride> = {
         "Кадастр деректерін және ауыртпалықтар тарихын тексеруге арналған қосымша кезең енгізілді.",
     },
   },
+  CN: {
+    "N-1": {
+      category: "基础设施",
+      title: "Alatau City 新交通枢纽已获批",
+      excerpt:
+        "新枢纽将前往中心区域的时间缩短 18 分钟，并提升北部集群的商业吸引力。",
+    },
+    "N-2": {
+      category: "投资",
+      title: "商业地块需求本季度增长 22%",
+      excerpt:
+        "平台分析显示，投资者在零售和混合用途板块的活跃度持续上升。",
+    },
+    "N-3": {
+      category: "法律",
+      title: "新版法律核验标准上线",
+      excerpt:
+        "流程新增了地籍数据核查和权利负担历史检查阶段。",
+    },
+  },
 };
 
 export const pricingPageText: Record<Lang, { title: string; sub: string }> = {
@@ -84,6 +110,10 @@ export const pricingPageText: Record<Lang, { title: string; sub: string }> = {
   KZ: {
     title: "Орналастыруға арналған бір нақты тариф",
     sub: "Әр жоба немесе жер листингі үшін бір реттік төлем.",
+  },
+  CN: {
+    title: "清晰的一次性发布费用",
+    sub: "每提交一个项目或土地挂牌，仅需支付一次发布费用。",
   },
 };
 
@@ -104,6 +134,17 @@ export const pricingPlanOverridesByLang: Record<Lang, PlanOverride> = {
     placement: {
       name: "Бір орналастыру",
       features: ["1 жоба немесе жер листингі", "Модерация тексерісі", "Заңдық дайындық чеклисті", "Мақұлданғаннан кейін жариялау"],
+    },
+  },
+  CN: {
+    placement: {
+      name: "单次发布",
+      features: [
+        "1 个项目或土地挂牌",
+        "审核流程",
+        "法律准备清单",
+        "批准后发布",
+      ],
     },
   },
 };
@@ -135,6 +176,14 @@ export const faqPageText: Record<
     helpSub: "Қолдауға жазыңыз немесе жылдам нұсқаулық үшін AI-ассистентті қолданыңыз.",
     contact: "Қолдауға жазу",
     openAi: "AI-ассистентті ашу",
+  },
+  CN: {
+    title: "FAQ",
+    sub: "关于投资流程、法律核查和业主挂牌的常见问题。",
+    help: "还需要帮助？",
+    helpSub: "联系支持团队，或使用 AI 助手获得快速指引。",
+    contact: "联系支持",
+    openAi: "打开 AI 助手",
   },
 };
 
@@ -180,6 +229,27 @@ export const faqItemsByLang: Record<Lang, FaqItem[] | null> = {
       question: "AI тәуекел талдауы қалай жұмыс істейді?",
       answer:
         "AI заңдық, инфрақұрылымдық және нарықтық параметрлерді бағалап, түсіндірмелі тәуекел қорытындысын береді.",
+    },
+  ],
+  CN: [
+    {
+      question: "如何核查地块的法律清晰度？",
+      answer:
+        "每个地块卡片都包含法律信息：核验等级、最近核验日期和文件清单。",
+    },
+    {
+      question: "可以以公司身份投资吗？",
+      answer: "可以。平台支持自然人和法人主体提交投资申请。",
+    },
+    {
+      question: "业主地块审核需要多久？",
+      answer:
+        "标准审核 SLA 为 24-72 小时，具体取决于数据质量和文件完整度。",
+    },
+    {
+      question: "AI 风险分析如何工作？",
+      answer:
+        "AI 会评估法律、基础设施和市场参数，并生成可解释的风险提示。",
     },
   ],
 };
@@ -247,6 +317,21 @@ export const pricingSelectorText: Record<
     activate: "Орналастыруды іске қосу",
     activated: "іске қосылды",
   },
+  CN: {
+    days: "天",
+    perPlacement: "每次发布",
+    checkout: "发布结算",
+    selected: "已选择：",
+    planWord: "发布",
+    payer: "付款方类型",
+    individual: "个人",
+    company: "公司",
+    invoice: "发票邮箱",
+    tax: "税号 / BIN",
+    promo: "优惠码",
+    activate: "激活发布",
+    activated: "已激活",
+  },
 };
 
 const purposeLabelByLang: Record<Lang, Record<string, string>> = {
@@ -272,6 +357,17 @@ const purposeLabelByLang: Record<Lang, Record<string, string>> = {
     Retail: "Ритейл",
     Education: "Білім беру",
     "Social infrastructure": "Әлеуметтік инфрақұрылым",
+  },
+  CN: {
+    Commercial: "商业",
+    "Mixed-use": "混合用途",
+    Residential: "住宅",
+    Logistics: "物流",
+    Industrial: "工业",
+    Hospitality: "酒店及文旅",
+    Retail: "零售",
+    Education: "教育",
+    "Social infrastructure": "社会基础设施",
   },
 };
 
@@ -307,6 +403,21 @@ const plotTagByLang: Record<Lang, Record<string, string>> = {
     "Long-term horizon": "Ұзақ мерзімді горизонт",
     "Self-service": "Өзіндік орналастыру",
   },
+  CN: {
+    "Top ROI": "高 ROI",
+    "Full verification": "完整核验",
+    "Urgent sale": "急售",
+    "Large lot": "大面积地块",
+    "Family cluster": "家庭生活集群",
+    Premium: "高端",
+    "Growth leader": "增长领先",
+    "Energy cluster": "能源集群",
+    "Stable demand": "需求稳定",
+    "High traffic": "高客流",
+    "High potential": "高潜力",
+    "Long-term horizon": "长期周期",
+    "Self-service": "自助发布",
+  },
 };
 
 const pricePresetLabelByLang: Record<Lang, Record<string, string>> = {
@@ -328,6 +439,12 @@ const pricePresetLabelByLang: Record<Lang, Record<string, string>> = {
     "300to600": "300k - 600k USD",
     gt600: "600k USD жоғары",
   },
+  CN: {
+    all: "不限",
+    lt300: "低于 300k USD",
+    "300to600": "300k - 600k USD",
+    gt600: "高于 600k USD",
+  },
 };
 
 export function translatePurpose(lang: Lang, purpose: string) {
@@ -345,5 +462,6 @@ export function localizePricePresetLabel(lang: Lang, key: string, fallback: stri
 export function localeByLang(lang: Lang) {
   if (lang === "RU") return "ru-RU";
   if (lang === "KZ") return "kk-KZ";
+  if (lang === "CN") return "zh-CN";
   return "en-US";
 }

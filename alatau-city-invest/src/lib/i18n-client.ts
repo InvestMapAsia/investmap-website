@@ -12,7 +12,8 @@ import {
 export function applyDocumentLanguage(lang: Lang) {
   if (typeof document === "undefined") return;
   document.documentElement.setAttribute("data-lang", lang);
-  document.documentElement.lang = lang === "RU" ? "ru" : lang === "KZ" ? "kk" : "en";
+  document.documentElement.lang =
+    lang === "RU" ? "ru" : lang === "KZ" ? "kk" : lang === "CN" ? "zh-CN" : "en";
 }
 
 export function readStoredLanguage() {

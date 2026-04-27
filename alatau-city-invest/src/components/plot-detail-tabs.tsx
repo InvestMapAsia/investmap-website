@@ -79,6 +79,24 @@ export function PlotDetailTabs({ plot }: { plot: Plot }) {
       noMedia: "Бұл учаске үшін медиа әлі жүктелмеген.",
       openMedia: "Медианы ашу",
     },
+    CN: {
+      legalBlock: "法律资料",
+      analysis: "投资分析",
+      roadmap: "基础设施路线图",
+      legalDocs: "法律文件",
+      lastUpdate: "最后法律更新：",
+      verifyLevel: "核验等级取决于文件完整度。",
+      scenario: "情景模型",
+      conservative: "保守",
+      base: "基准",
+      optimistic: "乐观",
+      assumptions: "模型综合基础设施周期、流动性画像和法律可信度。",
+      milestones: "关键里程碑",
+      media: "媒体图库",
+      panoramas: "360 全景",
+      noMedia: "该地块暂未上传媒体。",
+      openMedia: "打开媒体",
+    },
   });
 
   const isVideoUrl = (url: string) => /\.(mp4|webm|ogg|mov|m4v)(\?.*)?$/i.test(url);

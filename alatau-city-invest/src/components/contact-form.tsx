@@ -67,6 +67,23 @@ export function ContactForm() {
       sla: "SLA: 2 жұмыс сағаты ішінде жауап.",
       projectInterest: "Жобаға инвестиция салғым келеді",
     },
+    CN: {
+      title: "联系表单",
+      name: "姓名",
+      email: "邮箱",
+      phone: "电话",
+      category: "类别",
+      investment: "投资",
+      legalSupport: "法律支持",
+      ownerListing: "业主发布",
+      techSupport: "技术支持",
+      message: "消息",
+      send: "发送请求",
+      ticket: "支持工单",
+      registered: "已登记。",
+      sla: "SLA：2 个工作小时内回复。",
+      projectInterest: "我想投资项目",
+    },
   });
 
   useEffect(() => {

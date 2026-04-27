@@ -26,6 +26,11 @@ export function FaqSearchList({ items }: { items: FaqItem[] }) {
       placeholder: "Мысалы: заңдық тексеріс",
       empty: "Сұрауыңыз бойынша FAQ табылмады.",
     },
+    CN: {
+      label: "搜索 FAQ",
+      placeholder: "例如：法律核验",
+      empty: "没有匹配的 FAQ 内容。",
+    },
   });
 
   const filtered = useMemo(() => {

@@ -40,6 +40,16 @@ export default function OwnerAddPlotPage() {
       back: "Каталогқа оралу",
       loading: "Сессия тексерілуде...",
     },
+    CN: {
+      title: "自助地块发布",
+      sub: "面向业主的入驻流程，包含质量评分、法律数据和审核提交。",
+      loginTitle: "登录后登记土地",
+      loginText:
+        "土地登记需要先登录，这样挂牌才能绑定到业主账户、进入审核，并在个人柜台中追踪状态。",
+      login: "登录",
+      back: "返回目录",
+      loading: "正在检查会话...",
+    },
   });
 
   if (status === "loading") {

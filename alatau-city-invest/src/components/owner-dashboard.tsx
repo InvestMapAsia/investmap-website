@@ -260,6 +260,64 @@ export function OwnerDashboard() {
       no: "Жоқ",
       noPlots: "Әзірге жер иесі учаскелері жоқ.",
     },
+    CN: {
+      ownerStatus: "业主状态",
+      verification: "认证",
+      verified: "已认证",
+      activePlots: "活跃地块",
+      moderationQueue: "审核队列",
+      addPlot: "添加地块",
+      addProject: "添加项目",
+      pricing: "收费方案",
+      analytics: "业主分析",
+      views: "总浏览量",
+      leads: "生成线索",
+      conversion: "线索转对话率",
+      tips: "提升标题清晰度和文件完整度，可加快审核并提高线索质量。",
+      listings: "业主 listing",
+      listingsSub: "带审核状态和表现指标的自助 listing。",
+      title: "标题",
+      price: "价格",
+      status: "状态",
+      action: "操作",
+      open: "打开",
+      edit: "编辑",
+      editTitle: "编辑土地 listing",
+      editSub: "修改会重新提交审核，管理员批准后才会生效。",
+      saveChanges: "提交修改",
+      cancel: "取消",
+      changesSubmitted: "修改已提交给管理员审核。",
+      editError: "提交修改失败。",
+      district: "区域",
+      purpose: "用途",
+      area: "面积 (ha)",
+      roi: "ROI (%)",
+      irr: "IRR (%)",
+      distance: "到中心距离 (km)",
+      ownerType: "业主类型",
+      utilities: "公用设施已确认",
+      description: "修改说明 / 描述",
+      mapAddress: "地图地址",
+      mapLat: "纬度",
+      mapLng: "经度",
+      coverSection: "16:9 封面照片",
+      coverHint: "替换或删除土地 listing 封面。推荐比例：16:9。",
+      mediaSection: "土地照片和视频",
+      mediaHint: "添加新的照片或视频。如需旧文件消失，请在提交前移除。",
+      panoramaSection: "360 全景照片",
+      panoramaHint: "为土地详情页添加 equirectangular 360 照片。",
+      mediaUploading: "媒体上传中...",
+      uploadedMedia: "当前媒体",
+      openMedia: "打开",
+      removeMedia: "移除",
+      uploadFailed: "部分媒体上传失败。",
+      uploadTooLarge: "文件过大，当前上传模式每个文件最大 4 MB。",
+      uploadInvalidType: "仅允许图片/视频文件。",
+      waitMediaUpload: "请等待媒体上传完成。",
+      yes: "是",
+      no: "否",
+      noPlots: "暂无业主地块。",
+    },
   });
 
   const loadOwnerPlots = async () => {
@@ -460,7 +518,13 @@ export function OwnerDashboard() {
               {t.addProject}
             </Link>
             <Link className="btn btn-ghost" href="/cabinet/projects">
-              {lang === "RU" ? "Кабинет проектов" : lang === "KZ" ? "Жоба кабинеті" : "Project cabinet"}
+              {lang === "RU"
+                ? "Кабинет проектов"
+                : lang === "KZ"
+                  ? "Жоба кабинеті"
+                  : lang === "CN"
+                    ? "项目柜台"
+                    : "Project cabinet"}
             </Link>
             <Link className="btn btn-ghost" href="/pricing">
               {t.pricing}

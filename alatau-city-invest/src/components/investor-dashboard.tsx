@@ -146,9 +146,50 @@ export function InvestorDashboard() {
       typeCompany: "Компания",
       typeFund: "Қор",
     },
+    CN: {
+      applicationsTotal: "申请总数",
+      submittedNow: "当前已提交",
+      pipelineAmount: "管道金额",
+      favorites: "收藏",
+      compliance: "合规",
+      complianceSub: "最终交易执行前请启动 KYC 会话。",
+      startKyc: "启动 KYC",
+      starting: "启动中...",
+      noProfile: "请先使用完整资料登录。",
+      startKycFailed: "KYC 会话启动失败。",
+      kycStarted: "KYC 会话已启动。",
+      provider: "服务商",
+      session: "会话",
+      notificationsTitle: "通知和邮件模板",
+      notificationsSub: "关键流程更新的站内提醒和生成邮件正文。",
+      previewEmail: "预览邮件",
+      noNotifications: "暂无通知。",
+      emailPreview: "邮件模板预览",
+      close: "关闭",
+      appHistory: "申请历史",
+      appHistorySub: "从提交到关闭的状态时间线。",
+      date: "日期",
+      amount: "金额",
+      plot: "地块",
+      investorType: "投资人类型",
+      status: "状态",
+      noApplications: "暂无申请。",
+      favoritePlots: "收藏地块",
+      favoriteSub: "保存的候选清单，便于快速对比和投资。",
+      noFavorites: "暂无收藏地块。",
+      statusDraft: "草稿",
+      statusSubmitted: "已提交",
+      statusKyc: "KYC/AML",
+      statusLegal: "法律审核",
+      statusApproved: "已批准",
+      statusRejected: "已拒绝",
+      typeIndividual: "个人",
+      typeCompany: "公司",
+      typeFund: "基金",
+    },
   });
 
-  const locale = lang === "RU" ? "ru-RU" : lang === "KZ" ? "kk-KZ" : "en-US";
+  const locale = lang === "RU" ? "ru-RU" : lang === "KZ" ? "kk-KZ" : lang === "CN" ? "zh-CN" : "en-US";
 
   const appStatusLabel: Record<Application["status"], string> = {
     draft: t.statusDraft,
@@ -309,10 +350,22 @@ export function InvestorDashboard() {
             {kycLoading ? t.starting : t.startKyc}
           </button>
           <Link className="btn btn-ghost" href="/cabinet/projects">
-            {lang === "RU" ? "Кабинет проектов" : lang === "KZ" ? "Жоба кабинеті" : "Project cabinet"}
+            {lang === "RU"
+              ? "Кабинет проектов"
+              : lang === "KZ"
+                ? "Жоба кабинеті"
+                : lang === "CN"
+                  ? "项目柜台"
+                  : "Project cabinet"}
           </Link>
           <Link className="btn btn-ghost" href="/projects/submit">
-            {lang === "RU" ? "Подать проект" : lang === "KZ" ? "Жоба жіберу" : "Submit project"}
+            {lang === "RU"
+              ? "Подать проект"
+              : lang === "KZ"
+                ? "Жоба жіберу"
+                : lang === "CN"
+                  ? "提交项目"
+                  : "Submit project"}
           </Link>
         </div>
         {kycMessage ? (

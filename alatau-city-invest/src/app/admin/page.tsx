@@ -49,6 +49,20 @@ export default function AdminPage() {
       controlsText:
         "Кадастр қайталануын тексеру, баға аномалияларын анықтау, күмәнді өтінім үлгілері және құжат сәйкессіздіктері.",
     },
+    CN: {
+      title: "管理面板",
+      sub: "在一个工作区中处理审核、法律事件、业主挂牌、项目和库存控制。",
+      sla: "运营 SLA",
+      firstResponse: "申请首次响应",
+      in2h: "2 小时内",
+      kycReview: "KYC/AML 审核",
+      in24h: "24 小时内",
+      legalModeration: "法律审核",
+      in2472h: "24-72 小时",
+      controls: "风险控制",
+      controlsText:
+        "地籍重复检查、价格异常检测、可疑申请模式和文件不一致标记。",
+    },
   });
 
   return (

@@ -19,6 +19,10 @@ export default function AIAssistantPage() {
       title: "AI-ассистент",
       sub: "ROI, тәуекел профилі, заңдық дайындық және жер иесі сценарийі бойынша ұсыныстар алыңыз.",
     },
+    CN: {
+      title: "AI 助手",
+      sub: "获取关于 ROI、风险画像、法律准备度和业主流程的建议。",
+    },
   });
 
   return (

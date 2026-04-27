@@ -71,6 +71,22 @@ export function AIAssistantPanel() {
       openCatalog: "Каталогты ашу",
       startApplication: "Өтінімді бастау",
     },
+    CN: {
+      greeting:
+        "您好，我是 InvestMap AI 助手。告诉我您的目标，我会按 ROI、法律画像和风险筛选合适地块。",
+      tempError: "AI 暂时出错。请重试或联系支持团队。",
+      thinking: "正在思考...",
+      placeholder: "例如：显示 60 万以下的中等风险地块",
+      send: "发送",
+      quickPrompts: "快速问题",
+      promptRoi: "显示 ROI 最高的地块",
+      promptRisk: "寻找风险较低的选项",
+      promptLogistics: "哪些地块适合物流策略？",
+      promptOwner: "业主如何在平台添加土地？",
+      aiNotice: "AI 回答仅作辅助参考。最终决策仍需法律和财务尽调。",
+      openCatalog: "打开目录",
+      startApplication: "开始申请",
+    },
   });
 
   useEffect(() => {

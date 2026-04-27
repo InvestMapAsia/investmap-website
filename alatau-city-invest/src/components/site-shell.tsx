@@ -106,12 +106,38 @@ const uiText: Record<
     faq: "FAQ",
     support: "Қолдау",
   },
+  CN: {
+    brandSubtitle: "投资平台",
+    nav: {
+      "/": "首页",
+      "/alatau-city": "Alatau City",
+      "/catalog": "土地目录",
+      "/projects": "项目",
+      "/pricing": "价格",
+      "/news": "新闻",
+      "/faq": "FAQ",
+      "/contacts": "联系",
+    },
+    moreMenu: "更多",
+    accountMenu: "账户",
+    investor: "投资者",
+    owner: "业主",
+    projects: "项目",
+    admin: "管理",
+    moderator: "审核",
+    signOut: "退出",
+    login: "登录",
+    footerDescription:
+      "面向寻找外部投资的企业，以及寻找透明机会的投资者的数字平台。",
+    faq: "FAQ",
+    support: "支持",
+  },
 };
 
 function LangSwitch({ lang, onChange }: { lang: Lang; onChange: (lang: Lang) => void }) {
   return (
     <div className="lang-switch">
-      {(["EN", "RU", "KZ"] as Lang[]).map((item) => (
+      {(["EN", "RU", "KZ", "CN"] as Lang[]).map((item) => (
         <button
           key={item}
           className={item === lang ? "lang-btn active" : "lang-btn"}

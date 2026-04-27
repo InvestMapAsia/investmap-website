@@ -39,6 +39,12 @@ export function NotificationsBell() {
       noItems: "Әзірге хабарлама жоқ.",
       markAll: "Барлығын оқу",
     },
+    CN: {
+      title: "通知",
+      markRead: "标记已读",
+      noItems: "暂无通知。",
+      markAll: "全部标记已读",
+    },
   });
 
   const unread = useMemo(() => items.filter((item) => !item.readAt), [items]);

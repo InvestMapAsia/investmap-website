@@ -28,6 +28,13 @@ export default function ContactsPage() {
       legalDesk: "Заң бөлімі",
       supportDesk: "Платформа қолдауы",
     },
+    CN: {
+      title: "联系与支持",
+      sub: "投资、法律和平台运营团队的直接联系渠道。",
+      investDesk: "投资部门",
+      legalDesk: "法律部门",
+      supportDesk: "平台支持",
+    },
   });
 
   return (

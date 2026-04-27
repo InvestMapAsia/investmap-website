@@ -44,6 +44,16 @@ export function LegalAcceptPanel() {
       c3: "Инвестициялық тәуекелдерді түсінемін.",
       save: "Келісімді тіркеу",
     },
+    CN: {
+      notRecorded: "尚未记录同意。",
+      lastConsent: "上次同意：",
+      alert: "请确认所有必需的法律同意项。",
+      title: "同意确认",
+      c1: "我接受平台使用条款。",
+      c2: "我接受隐私政策和 AML/KYC 政策。",
+      c3: "我理解投资风险披露。",
+      save: "记录同意",
+    },
   });
 
   useEffect(() => {

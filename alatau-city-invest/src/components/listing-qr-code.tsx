@@ -48,6 +48,15 @@ export function ListingQrCode({
       copied: "Сілтеме көшірілді.",
       copyFail: "Сілтемені көшіру мүмкін болмады.",
     },
+    CN: {
+      title: "二维码",
+      plotHint: "扫描打开该土地 listing。",
+      projectHint: "扫描打开该项目页面。",
+      download: "下载 PNG",
+      copy: "复制链接",
+      copied: "链接已复制。",
+      copyFail: "无法复制链接。",
+    },
   });
 
   useEffect(() => {

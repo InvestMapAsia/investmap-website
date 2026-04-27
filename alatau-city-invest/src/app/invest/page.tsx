@@ -27,6 +27,10 @@ export default function InvestPage() {
       title: "Инвестициялық өтінім",
       sub: "Заңдық растаулар мен KYC/AML деректерін жинайтын қадамдық процесс.",
     },
+    CN: {
+      title: "投资申请",
+      sub: "包含法律确认和 KYC/AML 数据采集的分步流程。",
+    },
   });
 
   return (

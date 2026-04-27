@@ -84,6 +84,26 @@ export function PlotPageView({ plot, similar }: { plot: Plot; similar: Plot[] })
       riskHigh:
         "Жоғары тәуекел. Кеңейтілген заңдық due diligence және стресс-тестілеу ұсынылады.",
     },
+    CN: {
+      price: "价格",
+      area: "面积",
+      riskScore: "风险评分",
+      distanceToCenter: "到中心距离",
+      invest: "投资此地块",
+      openAi: "打开 AI 分析",
+      backToCatalog: "返回目录",
+      aiRiskSummary: "AI 风险摘要",
+      similarOpportunities: "相似机会",
+      similarSub: "基于用途和投资画像匹配推荐。",
+      noSimilar: "未找到相似地块。",
+      legalAPlus: "A+ 完整核验",
+      legalA: "A 已核验",
+      legalB: "B 部分核验",
+      legalC: "C 业主声明",
+      riskLow: "低风险画像，法律和基础设施匹配度较强。",
+      riskMedium: "中等风险。签署最终条款前请复核基础设施计划和法律假设。",
+      riskHigh: "高风险画像。建议扩大法律尽调并进行情景压力测试。",
+    },
   });
 
   const shareT = pickLang(lang, {
@@ -101,6 +121,11 @@ export function PlotPageView({ plot, similar }: { plot: Plot; similar: Plot[] })
       share: "Бөлісу",
       shareSuccess: "Сілтеме көшірілді. Енді жіберуге болады.",
       shareFail: "Бұл бетті бөлісу мүмкін болмады.",
+    },
+    CN: {
+      share: "分享",
+      shareSuccess: "链接已复制，可以发送。",
+      shareFail: "无法分享此页面。",
     },
   });
 
@@ -125,6 +150,13 @@ export function PlotPageView({ plot, similar }: { plot: Plot; similar: Plot[] })
       openInBaidu: "Baidu Maps (百度地图)-те ашу",
       baiduMiniWindow: "Baidu Maps (百度地图)",
       noLocation: "Бұл учаске үшін координаттар әлі енгізілмеген.",
+    },
+    CN: {
+      locationMap: "地图位置",
+      openInGoogle: "在 Google Maps 中打开",
+      openInBaidu: "在 Baidu Maps (百度地图) 中打开",
+      baiduMiniWindow: "Baidu Maps (百度地图)",
+      noLocation: "该地块暂未提供坐标。",
     },
   });
 
@@ -152,6 +184,14 @@ export function PlotPageView({ plot, similar }: { plot: Plot; similar: Plot[] })
       year: "Жыл",
       cumulative: "Жинақталған ROI",
       years: "Жылдар",
+    },
+    CN: {
+      title: "收益率图表 (ROI projection)",
+      expectedIrr: "预期 IRR",
+      breakEven: "盈亏平衡点",
+      year: "年份",
+      cumulative: "累计 ROI",
+      years: "年",
     },
   });
 
