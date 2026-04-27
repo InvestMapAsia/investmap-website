@@ -81,7 +81,7 @@ p {
   align-items: center;
   justify-content: space-between;
   min-height: 74px;
-  gap: 24px;
+  gap: 18px;
 }
 
 .brand {
@@ -89,6 +89,7 @@ p {
   align-items: center;
   gap: 10px;
   font-weight: 700;
+  flex: 0 0 auto;
 }
 
 .brand-logo {
@@ -101,6 +102,7 @@ p {
 .brand-text {
   display: flex;
   flex-direction: column;
+  min-width: 0;
 }
 
 .brand-title {
@@ -112,20 +114,26 @@ p {
 .brand-subtitle {
   font-size: 0.7rem;
   color: var(--muted);
+  max-width: 190px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .main-nav {
   display: flex;
   align-items: center;
-  gap: 18px;
-  flex-wrap: wrap;
+  gap: clamp(6px, 1vw, 14px);
+  flex: 1 1 auto;
+  min-width: 0;
+  flex-wrap: nowrap;
 }
 
 .main-nav a,
 .main-nav .dropdown-summary {
   font-size: 0.9rem;
   color: #274560;
-  padding: 8px 12px;
+  padding: 8px clamp(8px, 0.8vw, 12px);
   border-radius: 999px;
   transition: 0.2s;
   border: 0;
@@ -134,6 +142,8 @@ p {
   display: inline-flex;
   align-items: center;
   gap: 6px;
+  flex: 0 0 auto;
+  white-space: nowrap;
 }
 
 .main-nav a.active,
@@ -176,6 +186,10 @@ p {
   left: auto;
   right: 0;
   min-width: 230px;
+}
+
+.header-actions {
+  flex: 0 0 auto;
 }
 
 .dropdown-menu a,
@@ -472,6 +486,46 @@ input[type="submit"] {
 .plot-card {
   display: grid;
   gap: 10px;
+}
+
+.plot-card-cover,
+.plot-cover-frame {
+  display: block;
+  overflow: hidden;
+  border-radius: 10px;
+  background: #DCE7EE;
+}
+
+.plot-card-cover {
+  aspect-ratio: 16 / 9;
+  border: 1px solid var(--border);
+}
+
+.plot-card-cover img,
+.plot-cover-frame img {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: cover;
+}
+
+.plot-detail-summary {
+  display: grid;
+  grid-template-columns: minmax(0, 1.35fr) minmax(220px, 0.75fr);
+  gap: 16px;
+  align-items: stretch;
+  margin-top: 16px;
+}
+
+.plot-cover-frame {
+  aspect-ratio: 16 / 9;
+  min-height: 220px;
+}
+
+.plot-detail-metrics {
+  display: grid;
+  align-content: center;
+  gap: 2px;
 }
 
 .plot-top {
@@ -1951,8 +2005,13 @@ table th {
   .grid-3,
   .form-grid,
   .roi-milestones,
-  .journey-grid {
+  .journey-grid,
+  .plot-detail-summary {
     grid-template-columns: 1fr;
+  }
+
+  .plot-cover-frame {
+    min-height: auto;
   }
 
   .landing-hero {
@@ -1983,9 +2042,22 @@ table th {
   .main-nav {
     order: 3;
     width: 100%;
-    overflow: visible;
+    overflow-x: auto;
+    overflow-y: hidden;
     padding-bottom: 3px;
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
+    scrollbar-width: none;
+  }
+
+  .main-nav::-webkit-scrollbar {
+    display: none;
+  }
+
+  .nav-dropdown .dropdown-menu {
+    position: fixed;
+    top: 112px;
+    left: auto;
+    right: 4vw;
   }
 }
 

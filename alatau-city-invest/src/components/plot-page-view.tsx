@@ -9,6 +9,7 @@ import { StatusBadge } from "@/components/status-badge";
 import { pickLang } from "@/lib/i18n";
 import { translatePurpose } from "@/lib/i18n-content";
 import { useCurrentLanguage } from "@/lib/i18n-client";
+import { getPlotCoverUrl } from "@/lib/plot-media";
 import { currency } from "@/lib/ui";
 import { Plot } from "@/lib/types";
 
@@ -160,6 +161,7 @@ export function PlotPageView({ plot, similar }: { plot: Plot; similar: Plot[] })
     b: t.legalB,
     c: t.legalC,
   };
+  const coverUrl = getPlotCoverUrl(plot);
 
   let riskNote = t.riskMedium;
   if (plot.riskScore <= 30) {
@@ -269,30 +271,35 @@ export function PlotPageView({ plot, similar }: { plot: Plot; similar: Plot[] })
             <span className="badge">{legalGradeLabel[plot.legalGrade]}</span>
           </div>
 
-          <div className="section">
-            <div className="metric-line">
-              <span className="muted">{t.price}</span>
-              <strong>{currency(plot.price)}</strong>
+          <div className="plot-detail-summary">
+            <div className="plot-cover-frame">
+              <img src={coverUrl} alt={plot.title} />
             </div>
-            <div className="metric-line">
-              <span className="muted">{t.area}</span>
-              <strong>{plot.area} ha</strong>
-            </div>
-            <div className="metric-line">
-              <span className="muted">ROI</span>
-              <strong>{plot.roi}%</strong>
-            </div>
-            <div className="metric-line">
-              <span className="muted">IRR</span>
-              <strong>{plot.irr}%</strong>
-            </div>
-            <div className="metric-line">
-              <span className="muted">{t.riskScore}</span>
-              <strong>{plot.riskScore}/100</strong>
-            </div>
-            <div className="metric-line">
-              <span className="muted">{t.distanceToCenter}</span>
-              <strong>{plot.distanceCenterKm} km</strong>
+            <div className="plot-detail-metrics">
+              <div className="metric-line">
+                <span className="muted">{t.price}</span>
+                <strong>{currency(plot.price)}</strong>
+              </div>
+              <div className="metric-line">
+                <span className="muted">{t.area}</span>
+                <strong>{plot.area} ha</strong>
+              </div>
+              <div className="metric-line">
+                <span className="muted">ROI</span>
+                <strong>{plot.roi}%</strong>
+              </div>
+              <div className="metric-line">
+                <span className="muted">IRR</span>
+                <strong>{plot.irr}%</strong>
+              </div>
+              <div className="metric-line">
+                <span className="muted">{t.riskScore}</span>
+                <strong>{plot.riskScore}/100</strong>
+              </div>
+              <div className="metric-line">
+                <span className="muted">{t.distanceToCenter}</span>
+                <strong>{plot.distanceCenterKm} km</strong>
+              </div>
             </div>
           </div>
 

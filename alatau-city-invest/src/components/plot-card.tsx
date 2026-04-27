@@ -7,6 +7,7 @@ import { useCurrentLanguage } from "@/lib/i18n-client";
 import { pickLang } from "@/lib/i18n";
 import { emitClientEvent, COMPARE_CHANGE_EVENT, FAVORITES_CHANGE_EVENT } from "@/lib/client-events";
 import { translatePlotTag } from "@/lib/i18n-content";
+import { getPlotCoverUrl } from "@/lib/plot-media";
 import { currency } from "@/lib/ui";
 import { Plot } from "@/lib/types";
 import { StatusBadge } from "@/components/status-badge";
@@ -118,6 +119,7 @@ export function PlotCard({ plot, mode = "catalog" }: { plot: Plot; mode?: Mode }
 
   const isFav = useMemo(() => favorites.includes(plot.id), [favorites, plot.id]);
   const inCompare = useMemo(() => compare.includes(plot.id), [compare, plot.id]);
+  const coverUrl = useMemo(() => getPlotCoverUrl(plot), [plot]);
 
   const toggleFavorite = async () => {
     if (status === "authenticated") {
@@ -186,6 +188,10 @@ export function PlotCard({ plot, mode = "catalog" }: { plot: Plot; mode?: Mode }
 
   return (
     <article className="card plot-card">
+      <Link className="plot-card-cover" href={`/plots/${plot.id}`} aria-label={plot.title}>
+        <img src={coverUrl} alt={plot.title} loading="lazy" />
+      </Link>
+
       <div className="plot-top">
         <div>
           <div className="plot-id">
