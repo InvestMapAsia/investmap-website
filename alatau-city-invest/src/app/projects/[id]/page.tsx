@@ -4,7 +4,7 @@ import { getServerSession } from "next-auth";
 import { ProjectPageView } from "@/components/project-page-view";
 import { authOptions } from "@/lib/auth";
 import { isMockMode } from "@/lib/data-mode";
-import { normalizeBusinessProject } from "@/lib/db-mappers";
+import { normalizeBusinessProject, toPublicBusinessProject } from "@/lib/db-mappers";
 import { getMockBusinessProjectById, getMockBusinessProjectUser } from "@/lib/mock-store";
 import { prisma } from "@/lib/prisma";
 import { BusinessProject, BusinessProjectStatus } from "@/lib/types";
@@ -34,7 +34,9 @@ async function loadProject(id: string): Promise<BusinessProject | null> {
       return null;
     }
 
-    return project;
+    return project.status === "approved" && owner?.id !== userId && role !== "ADMIN" && role !== "MODERATOR"
+      ? toPublicBusinessProject(project)
+      : project;
   }
 
   try {
@@ -47,10 +49,15 @@ async function loadProject(id: string): Promise<BusinessProject | null> {
         return null;
       }
 
-      return normalizeBusinessProject(row);
+      const project = normalizeBusinessProject(row);
+      return row.status === "approved" && row.userId !== userId && role !== "ADMIN" && role !== "MODERATOR"
+        ? toPublicBusinessProject(project)
+        : project;
     }
   } catch {
-    // Fallback to mock data below.
+    if (process.env.NODE_ENV === "production") {
+      return null;
+    }
   }
 
   const fallback = getMockBusinessProjectById(id);
@@ -61,7 +68,9 @@ async function loadProject(id: string): Promise<BusinessProject | null> {
     return null;
   }
 
-  return fallback;
+  return fallback.status === "approved" && owner?.id !== userId && role !== "ADMIN" && role !== "MODERATOR"
+    ? toPublicBusinessProject(fallback)
+    : fallback;
 }
 
 export default async function ProjectPage({ params }: { params: Promise<{ id: string }> }) {

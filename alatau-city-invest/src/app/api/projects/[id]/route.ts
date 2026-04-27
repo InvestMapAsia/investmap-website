@@ -2,6 +2,7 @@ import { Role } from "@prisma/client";
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { writeAuditLog } from "@/lib/audit";
+import { checkRateLimit, enforceSameOrigin, getClientIp } from "@/lib/api-security";
 import { authOptions } from "@/lib/auth";
 import { isMockMode } from "@/lib/data-mode";
 import { normalizeBusinessProject } from "@/lib/db-mappers";
@@ -81,6 +82,9 @@ function calculateReadinessScore(payload: {
 }
 
 export async function PATCH(request: NextRequest, context: { params: Promise<{ id: string }> }) {
+  const blocked = enforceSameOrigin(request) ?? checkRateLimit(`projects:update:${getClientIp(request)}`, 30);
+  if (blocked) return blocked;
+
   const session = await getServerSession(authOptions);
   if (!session?.user?.id || !session.user.role) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });

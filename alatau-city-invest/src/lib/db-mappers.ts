@@ -55,6 +55,13 @@ export function normalizePlot(row: PrismaPlot): Plot {
   };
 }
 
+export function toPublicPlot(plot: Plot): Plot {
+  return {
+    ...plot,
+    ownerId: undefined,
+  };
+}
+
 export function normalizeApplication(row: PrismaApplication): Application {
   return {
     id: row.id,
@@ -124,5 +131,19 @@ export function normalizeBusinessProject(row: PrismaBusinessProject): BusinessPr
     mapAddress: row.mapAddress ?? undefined,
     mapLat: row.mapLat ?? undefined,
     mapLng: row.mapLng ?? undefined,
+  };
+}
+
+export function toPublicBusinessProject(project: BusinessProject): BusinessProject {
+  return {
+    ...project,
+    founderEmail: "",
+    founderPhone: "",
+    moderationNote: null,
+    legalReadiness: "Verified by InvestMap. Full legal details are shared with verified investors.",
+    financialForecasts:
+      "Detailed financial forecasts are available after investor verification and owner approval.",
+    investmentTerms:
+      "Investment terms are shared through the InvestMap contact flow after investor verification.",
   };
 }

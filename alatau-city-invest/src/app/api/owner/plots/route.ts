@@ -2,6 +2,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { writeAuditLog } from "@/lib/audit";
+import { checkRateLimit, enforceSameOrigin, getClientIp } from "@/lib/api-security";
 import { authOptions } from "@/lib/auth";
 import { isMockMode } from "@/lib/data-mode";
 import { normalizePlot } from "@/lib/db-mappers";
@@ -98,6 +99,9 @@ export async function GET() {
 }
 
 export async function POST(request: NextRequest) {
+  const blocked = enforceSameOrigin(request) ?? checkRateLimit(`owner:plots:create:${getClientIp(request)}`, 20);
+  if (blocked) return blocked;
+
   const session = await getServerSession(authOptions);
   if (!session?.user?.id || !session.user.role) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });

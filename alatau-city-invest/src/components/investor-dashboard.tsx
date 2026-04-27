@@ -419,9 +419,17 @@ export function InvestorDashboard() {
               {t.close}
             </button>
           </div>
-          <div
-            style={{ border: "1px solid var(--border)", borderRadius: 10, overflow: "hidden" }}
-            dangerouslySetInnerHTML={{ __html: emailPreview }}
+          <iframe
+            title={t.emailPreview}
+            sandbox=""
+            srcDoc={emailPreview}
+            style={{
+              width: "100%",
+              minHeight: 420,
+              border: "1px solid var(--border)",
+              borderRadius: 10,
+              background: "#fff",
+            }}
           />
         </section>
       ) : null}

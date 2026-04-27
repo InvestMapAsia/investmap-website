@@ -1,5 +1,6 @@
 ﻿import "server-only";
 
+import crypto from "node:crypto";
 import { Role } from "@prisma/client";
 import {
   createApplication,
@@ -43,12 +44,16 @@ type MockBusinessProjectRecord = BusinessProject & {
   userId?: string;
 };
 
+function mockPassword(envKey: string) {
+  return process.env[envKey] ?? crypto.randomUUID();
+}
+
 const mockUsers: MockAuthUser[] = [
   {
     id: "mock-admin",
     email: "admin@alatau.city",
     name: "Admin User",
-    password: "Admin#2026",
+    password: mockPassword("MOCK_ADMIN_PASSWORD"),
     role: "ADMIN",
     emailVerifiedAt: new Date().toISOString(),
   },
@@ -56,7 +61,7 @@ const mockUsers: MockAuthUser[] = [
     id: "mock-investor",
     email: "investor@alatau.city",
     name: "Investor User",
-    password: "Investor#2026",
+    password: mockPassword("MOCK_INVESTOR_PASSWORD"),
     role: "INVESTOR",
     emailVerifiedAt: new Date().toISOString(),
   },
@@ -64,7 +69,7 @@ const mockUsers: MockAuthUser[] = [
     id: "mock-owner",
     email: "owner@alatau.city",
     name: "Owner User",
-    password: "Owner#2026",
+    password: mockPassword("MOCK_OWNER_PASSWORD"),
     role: "OWNER",
     emailVerifiedAt: new Date().toISOString(),
   },
@@ -72,7 +77,7 @@ const mockUsers: MockAuthUser[] = [
     id: "mock-moderator",
     email: "moderator@alatau.city",
     name: "Moderator User",
-    password: "Moderator#2026",
+    password: mockPassword("MOCK_MODERATOR_PASSWORD"),
     role: "MODERATOR",
     emailVerifiedAt: new Date().toISOString(),
   },

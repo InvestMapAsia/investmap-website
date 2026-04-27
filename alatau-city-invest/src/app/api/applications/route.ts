@@ -1,7 +1,9 @@
 ﻿import { InvestorType, Role } from "@prisma/client";
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
+import { z } from "zod";
 import { writeAuditLog } from "@/lib/audit";
+import { checkRateLimit, enforceSameOrigin, getClientIp } from "@/lib/api-security";
 import { authOptions } from "@/lib/auth";
 import { isMockMode } from "@/lib/data-mode";
 import { normalizeApplication } from "@/lib/db-mappers";
@@ -12,6 +14,17 @@ import {
 } from "@/lib/mock-store";
 import { createApplicationStatusNotifications } from "@/lib/notifications";
 import { prisma } from "@/lib/prisma";
+
+const publicInvestmentStatuses = ["available", "reserved", "deal"];
+const applicationSchema = z.object({
+  plotId: z.string().min(1).max(120),
+  investorName: z.string().min(2).max(120),
+  investorType: z.enum(["individual", "company", "fund"]),
+  amount: z.coerce.number().int().min(10_000).max(100_000_000),
+  phone: z.string().min(6).max(40),
+  email: z.string().email().max(120),
+  sourceOfFunds: z.string().min(2).max(1_000),
+});
 
 export async function GET() {
   const session = await getServerSession(authOptions);
@@ -44,44 +57,34 @@ export async function GET() {
 }
 
 export async function POST(request: NextRequest) {
+  const blocked =
+    enforceSameOrigin(request) ?? checkRateLimit(`applications:create:${getClientIp(request)}`, 20);
+  if (blocked) return blocked;
+
   const session = await getServerSession(authOptions);
   if (!session?.user?.id || !session.user.email) {
     return NextResponse.json({ error: "Unauthorized. Please sign in first." }, { status: 401 });
   }
 
-  const body = (await request.json()) as {
-    plotId?: string;
-    investorName?: string;
-    investorType?: InvestorType;
-    amount?: number;
-    phone?: string;
-    email?: string;
-    sourceOfFunds?: string;
-  };
+  const parsed = applicationSchema.safeParse(await request.json().catch(() => null));
 
-  if (
-    !body.plotId ||
-    !body.investorName ||
-    !body.investorType ||
-    !body.amount ||
-    !body.phone ||
-    !body.email ||
-    !body.sourceOfFunds
-  ) {
-    return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
+  if (!parsed.success) {
+    return NextResponse.json({ error: "Invalid input" }, { status: 400 });
   }
+
+  const body = parsed.data;
 
   if (isMockMode()) {
     const plot = getMockPlotById(body.plotId);
-    if (!plot) {
+    if (!plot || !publicInvestmentStatuses.includes(plot.status)) {
       return NextResponse.json({ error: "Plot not found" }, { status: 404 });
     }
 
     const created = createMockApplication({
       plotId: body.plotId,
       investorName: body.investorName,
-      investorType: body.investorType,
-      amount: Number(body.amount),
+      investorType: body.investorType as InvestorType,
+      amount: body.amount,
       phone: body.phone,
       email: body.email,
       sourceOfFunds: body.sourceOfFunds,
@@ -114,7 +117,7 @@ export async function POST(request: NextRequest) {
   }
 
   const plot = await prisma.plot.findUnique({ where: { id: body.plotId } });
-  if (!plot) {
+  if (!plot || !publicInvestmentStatuses.includes(plot.status)) {
     return NextResponse.json({ error: "Plot not found" }, { status: 404 });
   }
 
@@ -123,7 +126,7 @@ export async function POST(request: NextRequest) {
       plotId: body.plotId,
       investorName: body.investorName,
       investorType: body.investorType,
-      amount: Number(body.amount),
+      amount: body.amount,
       phone: body.phone,
       email: body.email,
       sourceOfFunds: body.sourceOfFunds,

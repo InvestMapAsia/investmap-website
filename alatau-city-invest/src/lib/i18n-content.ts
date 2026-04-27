@@ -691,7 +691,21 @@ export function hasPlotTranslation(lang: Lang, plot: Plot) {
 
 export function localizeBusinessProject(lang: Lang, project: BusinessProject): BusinessProject {
   const override = businessProjectTextByLang[lang][project.id];
-  return override ? { ...project, ...override } : project;
+  if (!override) return project;
+
+  if (!project.founderEmail && !project.founderPhone) {
+    return {
+      ...project,
+      companyName: override.companyName ?? project.companyName,
+      businessOverview: override.businessOverview ?? project.businessOverview,
+      market: override.market ?? project.market,
+      businessModel: override.businessModel ?? project.businessModel,
+      traction: override.traction ?? project.traction,
+      city: override.city ?? project.city,
+    };
+  }
+
+  return { ...project, ...override };
 }
 
 export function hasBusinessProjectTranslation(lang: Lang, project: BusinessProject) {

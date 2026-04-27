@@ -9,13 +9,9 @@ export async function GET() {
     Array.from(new Set(listMockPlots().map((item) => item.purpose))).sort((a, b) =>
       a.localeCompare(b)
     );
-  const mockQueueCount = () =>
-    listMockPlots().filter((item) => item.status === "moderation" || item.status === "legal_issue")
-      .length;
 
   if (isMockMode()) {
     const purposes = mockPurposes();
-    const queueCount = mockQueueCount();
 
     return NextResponse.json({
       data: {
@@ -23,16 +19,12 @@ export async function GET() {
         news: listNews(),
         faqs: listFaqs(),
         pricingPlans: listPricingPlans(),
-        adminQueueCount: queueCount,
       },
     });
   }
 
   try {
-    const [purposeRows, queueCount] = await Promise.all([
-      prisma.plot.findMany({ select: { purpose: true }, distinct: ["purpose"] }),
-      prisma.plot.count({ where: { OR: [{ status: "moderation" }, { status: "legal_issue" }] } }),
-    ]);
+    const purposeRows = await prisma.plot.findMany({ select: { purpose: true }, distinct: ["purpose"] });
 
     const purposes = purposeRows.map((row) => row.purpose);
     return NextResponse.json({
@@ -41,7 +33,6 @@ export async function GET() {
         news: listNews(),
         faqs: listFaqs(),
         pricingPlans: listPricingPlans(),
-        adminQueueCount: purposes.length ? queueCount : mockQueueCount(),
       },
     });
   } catch {
@@ -51,7 +42,6 @@ export async function GET() {
         news: listNews(),
         faqs: listFaqs(),
         pricingPlans: listPricingPlans(),
-        adminQueueCount: mockQueueCount(),
       },
     });
   }

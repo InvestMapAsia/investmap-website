@@ -1,56 +1,84 @@
-﻿import { NextRequest, NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
-import { createPaymentCheckout } from "@/lib/integrations/adapters";
-import { createInAppNotification } from "@/lib/notifications";
+import { z } from "zod";
 import { writeAuditLog } from "@/lib/audit";
+import { checkRateLimit, enforceSameOrigin, getClientIp } from "@/lib/api-security";
+import { authOptions } from "@/lib/auth";
+import { isMockMode } from "@/lib/data-mode";
+import { createPaymentCheckout } from "@/lib/integrations/adapters";
+import { listMockApplications } from "@/lib/mock-store";
+import { createInAppNotification } from "@/lib/notifications";
+import { prisma } from "@/lib/prisma";
+
+const checkoutSchema = z.object({
+  applicationId: z.string().min(1).max(120),
+});
 
 export async function POST(request: NextRequest) {
+  const blocked =
+    enforceSameOrigin(request) ?? checkRateLimit(`payment:checkout:${getClientIp(request)}`, 12);
+  if (blocked) return blocked;
+
   const session = await getServerSession(authOptions);
-  if (!session?.user?.email) {
+  if (!session?.user?.id || !session.user.email) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const body = (await request.json()) as { amountUsd?: number; applicationId?: string };
-  if (!body.amountUsd || !body.applicationId) {
-    return NextResponse.json({ error: "amountUsd and applicationId are required" }, { status: 400 });
+  const parsed = checkoutSchema.safeParse(await request.json().catch(() => null));
+  if (!parsed.success) {
+    return NextResponse.json({ error: "Invalid input" }, { status: 400 });
+  }
+
+  const { applicationId } = parsed.data;
+  const application = isMockMode()
+    ? listMockApplications({
+        userId: session.user.id,
+        role: session.user.role === "ADMIN" || session.user.role === "MODERATOR" ? session.user.role : "INVESTOR",
+      }).find((item) => item.id === applicationId)
+    : await prisma.application.findFirst({
+        where: {
+          id: applicationId,
+          userId: session.user.id,
+        },
+      });
+
+  if (!application) {
+    return NextResponse.json({ error: "Application not found" }, { status: 404 });
   }
 
   try {
     const data = await createPaymentCheckout({
-      amountUsd: body.amountUsd,
-      applicationId: body.applicationId,
+      amountUsd: application.amount,
+      applicationId,
       email: session.user.email,
     });
 
-    if (session.user.id) {
-      await createInAppNotification({
-        userId: session.user.id,
-        title: "Payment checkout created",
-        message: `Checkout prepared for application ${body.applicationId}.`,
-        type: "payment_checkout",
-        metadata: {
-          applicationId: body.applicationId,
-          amountUsd: body.amountUsd,
-          provider: data.provider,
-        },
-      });
+    await createInAppNotification({
+      userId: session.user.id,
+      title: "Payment checkout created",
+      message: `Checkout prepared for application ${applicationId}.`,
+      type: "payment_checkout",
+      metadata: {
+        applicationId,
+        amountUsd: application.amount,
+        provider: data.provider,
+      },
+    });
 
-      await writeAuditLog({
-        action: "PAYMENT_CHECKOUT_CREATED",
-        entityType: "Payment",
-        entityId: body.applicationId,
-        actorUserId: session.user.id,
-        actorRole: session.user.role ?? null,
-        details: {
-          provider: data.provider,
-          amountUsd: body.amountUsd,
-        },
-      });
-    }
+    await writeAuditLog({
+      action: "PAYMENT_CHECKOUT_CREATED",
+      entityType: "Payment",
+      entityId: applicationId,
+      actorUserId: session.user.id,
+      actorRole: session.user.role ?? null,
+      details: {
+        provider: data.provider,
+        amountUsd: application.amount,
+      },
+    });
 
     return NextResponse.json({ data });
-  } catch (error) {
-    return NextResponse.json({ error: (error as Error).message }, { status: 500 });
+  } catch {
+    return NextResponse.json({ error: "Could not create payment checkout" }, { status: 500 });
   }
 }

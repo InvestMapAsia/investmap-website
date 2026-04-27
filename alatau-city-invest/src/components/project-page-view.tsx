@@ -142,6 +142,7 @@ export function ProjectPageView({ project }: { project: BusinessProject }) {
     KZ: "Бастапқы дерек",
     CN: "原始数据",
   });
+  const hasFounderContacts = Boolean(project.founderEmail || project.founderPhone);
   const projectUrl = `/projects/${project.id}`;
   const contactHref = `/contacts?project=${encodeURIComponent(project.id)}#contact-form`;
 
@@ -258,11 +259,13 @@ export function ProjectPageView({ project }: { project: BusinessProject }) {
             <strong>{project.website || "-"}</strong>
           </div>
 
-          <div className="project-contact-box">
-            <h3 className="card-title">{t.contacts}</h3>
-            <p className="muted">{project.founderEmail}</p>
-            <p className="muted">{project.founderPhone}</p>
-          </div>
+          {hasFounderContacts ? (
+            <div className="project-contact-box">
+              <h3 className="card-title">{t.contacts}</h3>
+              {project.founderEmail ? <p className="muted">{project.founderEmail}</p> : null}
+              {project.founderPhone ? <p className="muted">{project.founderPhone}</p> : null}
+            </div>
+          ) : null}
 
           <div className="plot-actions">
             <Link className="btn btn-accent" href={contactHref}>

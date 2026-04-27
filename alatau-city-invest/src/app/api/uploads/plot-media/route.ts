@@ -1,26 +1,85 @@
 import { Role } from "@prisma/client";
 import { put } from "@vercel/blob";
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
+import { checkRateLimit, enforceSameOrigin, getClientIp } from "@/lib/api-security";
 import { authOptions } from "@/lib/auth";
 
 export const runtime = "nodejs";
 
-const MAX_FILE_SIZE_BYTES = 4 * 1024 * 1024; // 4 MB safe for server upload on Vercel
+const MAX_FILE_SIZE_BYTES = 4 * 1024 * 1024;
+const allowedTypes = {
+  "image/jpeg": [".jpg", ".jpeg"],
+  "image/png": [".png"],
+  "image/webp": [".webp"],
+  "image/gif": [".gif"],
+  "video/mp4": [".mp4", ".m4v"],
+  "video/quicktime": [".mov"],
+  "video/webm": [".webm"],
+  "video/ogg": [".ogg"],
+} as const;
+
+type AllowedMime = keyof typeof allowedTypes;
 
 function sanitizeFilename(input: string) {
-  return input.replace(/[^a-zA-Z0-9._-]/g, "-").replace(/-+/g, "-");
+  return input
+    .replace(/\.[^.]+$/g, "")
+    .replace(/[^a-zA-Z0-9_-]/g, "-")
+    .replace(/-+/g, "-")
+    .replace(/^-|-$/g, "");
 }
 
-function isAllowedMediaType(mimeType: string, fileName: string) {
-  if (mimeType.startsWith("image/") || mimeType.startsWith("video/")) {
-    return true;
+function getExtension(fileName: string) {
+  const match = fileName.toLowerCase().match(/\.[a-z0-9]+$/);
+  return match?.[0] ?? "";
+}
+
+function hasMagicBytes(bytes: Buffer, mimeType: AllowedMime) {
+  if (mimeType === "image/jpeg") {
+    return bytes.length > 3 && bytes[0] === 0xff && bytes[1] === 0xd8 && bytes[2] === 0xff;
+  }
+  if (mimeType === "image/png") {
+    return bytes.subarray(0, 8).equals(Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]));
+  }
+  if (mimeType === "image/gif") {
+    const header = bytes.subarray(0, 6).toString("ascii");
+    return header === "GIF87a" || header === "GIF89a";
+  }
+  if (mimeType === "image/webp") {
+    return bytes.subarray(0, 4).toString("ascii") === "RIFF" && bytes.subarray(8, 12).toString("ascii") === "WEBP";
+  }
+  if (mimeType === "video/webm") {
+    return bytes.subarray(0, 4).equals(Buffer.from([0x1a, 0x45, 0xdf, 0xa3]));
+  }
+  if (mimeType === "video/ogg") {
+    return bytes.subarray(0, 4).toString("ascii") === "OggS";
+  }
+  if (mimeType === "video/mp4" || mimeType === "video/quicktime") {
+    return bytes.length > 12 && bytes.subarray(4, 8).toString("ascii") === "ftyp";
+  }
+  return false;
+}
+
+function validateFile(file: File, bytes: Buffer) {
+  const mimeType = file.type as AllowedMime;
+  const extension = getExtension(file.name);
+  const allowedExtensions = allowedTypes[mimeType];
+
+  if (!allowedExtensions || !allowedExtensions.includes(extension as never)) {
+    return null;
   }
 
-  return /\.(jpg|jpeg|png|webp|gif|mp4|webm|mov|m4v|ogg)$/i.test(fileName);
+  if (!hasMagicBytes(bytes, mimeType)) {
+    return null;
+  }
+
+  return { extension, mimeType };
 }
 
-export async function POST(request: Request) {
+export async function POST(request: NextRequest) {
+  const blocked = enforceSameOrigin(request) ?? checkRateLimit(`upload:plot-media:${getClientIp(request)}`, 30);
+  if (blocked) return blocked;
+
   const session = await getServerSession(authOptions);
   if (!session?.user?.id || !session.user.role) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -49,19 +108,23 @@ export async function POST(request: Request) {
     );
   }
 
-  if (!isAllowedMediaType(file.type, file.name)) {
-    return NextResponse.json({ error: "Only image and video files are allowed" }, { status: 400 });
+  const bytes = Buffer.from(await file.arrayBuffer());
+  const validation = validateFile(file, bytes);
+  if (!validation) {
+    return NextResponse.json(
+      { error: "Only verified JPG, PNG, WEBP, GIF, MP4, MOV, WEBM and OGG files are allowed" },
+      { status: 400 }
+    );
   }
 
-  const extension = file.name.includes(".") ? file.name.slice(file.name.lastIndexOf(".")) : "";
-  const safeBase = sanitizeFilename(file.name.replace(/\.[^/.]+$/, "")) || "media";
-  const path = `plots/${session.user.id}/${Date.now()}-${safeBase}${extension}`;
+  const safeBase = sanitizeFilename(file.name) || "media";
+  const path = `plots/${session.user.id}/${Date.now()}-${safeBase}${validation.extension}`;
 
   try {
-    const blob = await put(path, file, {
+    const blob = await put(path, bytes, {
       access: "public",
       addRandomSuffix: true,
-      contentType: file.type || undefined,
+      contentType: validation.mimeType,
       token: process.env.BLOB_READ_WRITE_TOKEN,
     });
 
@@ -70,15 +133,11 @@ export async function POST(request: Request) {
         url: blob.url,
         pathname: blob.pathname,
         size: file.size,
-        contentType: file.type || "application/octet-stream",
+        contentType: validation.mimeType,
         originalName: file.name,
       },
     });
-  } catch (error) {
-    const detail = error instanceof Error ? error.message : "Upload failed";
-    return NextResponse.json(
-      { error: "Could not upload media to Blob. Check BLOB_READ_WRITE_TOKEN in Vercel.", detail },
-      { status: 500 }
-    );
+  } catch {
+    return NextResponse.json({ error: "Could not upload media" }, { status: 500 });
   }
 }

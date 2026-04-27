@@ -1,23 +1,32 @@
-﻿import { NextRequest, NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
+import { z } from "zod";
+import { writeAuditLog } from "@/lib/audit";
+import { checkRateLimit, enforceSameOrigin, getClientIp } from "@/lib/api-security";
 import { authOptions } from "@/lib/auth";
 import { createKycSession } from "@/lib/integrations/adapters";
 import { createInAppNotification } from "@/lib/notifications";
-import { writeAuditLog } from "@/lib/audit";
+
+const kycSchema = z.object({
+  fullName: z.string().min(2).max(120),
+});
 
 export async function POST(request: NextRequest) {
+  const blocked = enforceSameOrigin(request) ?? checkRateLimit(`kyc:${getClientIp(request)}`, 8);
+  if (blocked) return blocked;
+
   const session = await getServerSession(authOptions);
   if (!session?.user?.id) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const body = (await request.json()) as { fullName?: string };
-  if (!body.fullName) {
-    return NextResponse.json({ error: "fullName is required" }, { status: 400 });
+  const parsed = kycSchema.safeParse(await request.json().catch(() => null));
+  if (!parsed.success) {
+    return NextResponse.json({ error: "Invalid input" }, { status: 400 });
   }
 
   try {
-    const data = await createKycSession({ userId: session.user.id, fullName: body.fullName });
+    const data = await createKycSession({ userId: session.user.id, fullName: parsed.data.fullName });
 
     await createInAppNotification({
       userId: session.user.id,
@@ -40,7 +49,7 @@ export async function POST(request: NextRequest) {
     });
 
     return NextResponse.json({ data });
-  } catch (error) {
-    return NextResponse.json({ error: (error as Error).message }, { status: 500 });
+  } catch {
+    return NextResponse.json({ error: "Could not start KYC session" }, { status: 500 });
   }
 }

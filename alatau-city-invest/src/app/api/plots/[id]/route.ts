@@ -2,22 +2,41 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { writeAuditLog } from "@/lib/audit";
+import { checkRateLimit, enforceSameOrigin, getClientIp } from "@/lib/api-security";
 import { authOptions } from "@/lib/auth";
 import { isMockMode } from "@/lib/data-mode";
-import { normalizePlot } from "@/lib/db-mappers";
+import { normalizePlot, toPublicPlot } from "@/lib/db-mappers";
 import { getMockPlotById, updateMockPlotStatus } from "@/lib/mock-store";
 import { createInAppNotification } from "@/lib/notifications";
 import { prisma } from "@/lib/prisma";
 
+const plotStatuses = new Set<PlotStatus>([
+  "available",
+  "reserved",
+  "deal",
+  "moderation",
+  "sold",
+  "legal_issue",
+]);
+const publicPlotStatuses: PlotStatus[] = ["available", "reserved", "deal"];
+
 export async function GET(_request: NextRequest, context: { params: Promise<{ id: string }> }) {
   const { id } = await context.params;
+  const session = await getServerSession(authOptions);
+  const role = session?.user?.role;
+  const userId = session?.user?.id;
+  const isPrivileged = role === "ADMIN" || role === "MODERATOR";
 
   if (isMockMode()) {
     const plot = getMockPlotById(id);
     if (!plot) {
       return NextResponse.json({ error: "Plot not found" }, { status: 404 });
     }
-    return NextResponse.json({ data: plot });
+    const canView = isPrivileged || publicPlotStatuses.includes(plot.status) || plot.ownerId === userId;
+    if (!canView) {
+      return NextResponse.json({ error: "Plot not found" }, { status: 404 });
+    }
+    return NextResponse.json({ data: isPrivileged || plot.ownerId === userId ? plot : toPublicPlot(plot) });
   }
 
   try {
@@ -31,17 +50,37 @@ export async function GET(_request: NextRequest, context: { params: Promise<{ id
       return NextResponse.json({ data: fallback });
     }
 
-    return NextResponse.json({ data: normalizePlot(plot) });
+    const normalized = normalizePlot(plot);
+    const canView =
+      isPrivileged || publicPlotStatuses.includes(normalized.status) || normalized.ownerId === userId;
+    if (!canView) {
+      return NextResponse.json({ error: "Plot not found" }, { status: 404 });
+    }
+
+    return NextResponse.json({
+      data: isPrivileged || normalized.ownerId === userId ? normalized : toPublicPlot(normalized),
+    });
   } catch {
+    if (process.env.NODE_ENV === "production") {
+      return NextResponse.json({ error: "Plot not found" }, { status: 404 });
+    }
+
     const fallback = getMockPlotById(id);
     if (!fallback) {
       return NextResponse.json({ error: "Plot not found" }, { status: 404 });
     }
-    return NextResponse.json({ data: fallback });
+    const canView = isPrivileged || publicPlotStatuses.includes(fallback.status) || fallback.ownerId === userId;
+    if (!canView) {
+      return NextResponse.json({ error: "Plot not found" }, { status: 404 });
+    }
+    return NextResponse.json({ data: isPrivileged || fallback.ownerId === userId ? fallback : toPublicPlot(fallback) });
   }
 }
 
 export async function PATCH(request: NextRequest, context: { params: Promise<{ id: string }> }) {
+  const blocked = enforceSameOrigin(request) ?? checkRateLimit(`plots:status:${getClientIp(request)}`, 60);
+  if (blocked) return blocked;
+
   const session = await getServerSession(authOptions);
   const role = session?.user?.role;
 
@@ -52,6 +91,9 @@ export async function PATCH(request: NextRequest, context: { params: Promise<{ i
   const body = (await request.json()) as { status?: PlotStatus };
   if (!body.status) {
     return NextResponse.json({ error: "status is required" }, { status: 400 });
+  }
+  if (!plotStatuses.has(body.status)) {
+    return NextResponse.json({ error: "Invalid status" }, { status: 400 });
   }
 
   const { id } = await context.params;

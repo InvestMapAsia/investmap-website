@@ -3,6 +3,7 @@ import bcrypt from "bcryptjs";
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { writeAuditLog } from "@/lib/audit";
+import { checkRateLimit, enforceSameOrigin, getClientIp } from "@/lib/api-security";
 import { isMockMode } from "@/lib/data-mode";
 import { sendEmail } from "@/lib/email/sender";
 import { buildEmailVerificationTemplate } from "@/lib/email/templates";
@@ -13,12 +14,22 @@ import { prisma } from "@/lib/prisma";
 const registerSchema = z.object({
   name: z.string().min(2).max(80),
   email: z.string().email(),
-  password: z.string().min(8).max(128),
+  password: z
+    .string()
+    .min(12)
+    .max(128)
+    .regex(/[a-z]/)
+    .regex(/[A-Z]/)
+    .regex(/[0-9]/)
+    .regex(/[^a-zA-Z0-9]/),
   role: z.enum(["INVESTOR", "OWNER"]),
   policyAccepted: z.literal(true),
 });
 
 export async function POST(request: NextRequest) {
+  const blocked = enforceSameOrigin(request) ?? checkRateLimit(`auth:register:${getClientIp(request)}`, 10);
+  if (blocked) return blocked;
+
   const body = (await request.json()) as unknown;
   const parsed = registerSchema.safeParse(body);
 
@@ -39,7 +50,7 @@ export async function POST(request: NextRequest) {
     });
 
     if (!user) {
-      return NextResponse.json({ error: "Email already registered" }, { status: 409 });
+      return NextResponse.json({ error: "Registration could not be completed" }, { status: 409 });
     }
 
     await writeAuditLog({
@@ -106,7 +117,7 @@ export async function POST(request: NextRequest) {
   });
 
   if (exists) {
-    return NextResponse.json({ error: "Email already registered" }, { status: 409 });
+    return NextResponse.json({ error: "Registration could not be completed" }, { status: 409 });
   }
 
   const passwordHash = await bcrypt.hash(password, 10);

@@ -12,7 +12,25 @@ const credentialsSchema = z.object({
   password: z.string().min(8),
 });
 
+function getAuthSecret() {
+  const secret = process.env.NEXTAUTH_SECRET;
+  const unsafe =
+    !secret ||
+    secret === "change-this-to-a-long-random-secret" ||
+    secret.length < 32;
+
+  if (
+    unsafe &&
+    (process.env.VERCEL_ENV === "production" || process.env.ENFORCE_STRONG_AUTH_SECRET === "true")
+  ) {
+    throw new Error("A strong NEXTAUTH_SECRET is required in production.");
+  }
+
+  return secret;
+}
+
 export const authOptions: NextAuthOptions = {
+  secret: getAuthSecret(),
   session: {
     strategy: "jwt",
   },

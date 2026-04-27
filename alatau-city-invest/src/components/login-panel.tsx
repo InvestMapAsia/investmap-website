@@ -95,8 +95,6 @@ export function LoginPanel({
           create: "Create account",
           previewLabel: "Verification link preview:",
           open: "Open",
-          demo:
-            "Demo logins: admin@alatau.city / Admin#2026, investor@alatau.city / Investor#2026, owner@alatau.city / Owner#2026",
           loadRoleError: "Could not detect role after login. Opening investor cabinet.",
         },
         RU: {
@@ -138,8 +136,6 @@ export function LoginPanel({
           create: "Создать аккаунт",
           previewLabel: "Превью ссылки подтверждения:",
           open: "Открыть",
-          demo:
-            "Демо вход: admin@alatau.city / Admin#2026, investor@alatau.city / Investor#2026, owner@alatau.city / Owner#2026",
           loadRoleError: "Не удалось определить роль после входа. Открываем кабинет инвестора.",
         },
         KZ: {
@@ -181,8 +177,6 @@ export function LoginPanel({
           create: "Аккаунт ашу",
           previewLabel: "Растау сілтемесінің превьюі:",
           open: "Ашу",
-          demo:
-            "Демо кіру: admin@alatau.city / Admin#2026, investor@alatau.city / Investor#2026, owner@alatau.city / Owner#2026",
           loadRoleError: "Кіруден кейін рөл анықталмады. Инвестор кабинетіне өтеміз.",
         },
         CN: {
@@ -219,8 +213,6 @@ export function LoginPanel({
           create: "创建账户",
           previewLabel: "验证链接预览：",
           open: "打开",
-          demo:
-            "演示登录：admin@alatau.city / Admin#2026，investor@alatau.city / Investor#2026，owner@alatau.city / Owner#2026",
           loadRoleError: "登录后无法识别角色，将打开投资人柜台。",
         },
       }),
@@ -520,9 +512,6 @@ export function LoginPanel({
         </p>
       ) : null}
 
-      <div className="notice" style={{ marginTop: 14 }}>
-        {t.demo}
-      </div>
     </section>
   );
 }

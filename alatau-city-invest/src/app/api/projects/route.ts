@@ -2,12 +2,21 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { writeAuditLog } from "@/lib/audit";
+import { checkRateLimit, enforceSameOrigin, getClientIp } from "@/lib/api-security";
 import { authOptions } from "@/lib/auth";
 import { isMockMode } from "@/lib/data-mode";
-import { normalizeBusinessProject } from "@/lib/db-mappers";
+import { normalizeBusinessProject, toPublicBusinessProject } from "@/lib/db-mappers";
 import { createMockBusinessProject, listMockBusinessProjects } from "@/lib/mock-store";
 import { createInAppNotification } from "@/lib/notifications";
 import { prisma } from "@/lib/prisma";
+
+const businessProjectStatuses = new Set<BusinessProjectStatus>([
+  "submitted",
+  "under_review",
+  "needs_revision",
+  "approved",
+  "rejected",
+]);
 
 function normalizeText(value: unknown) {
   if (typeof value !== "string") return "";
@@ -76,14 +85,23 @@ function calculateReadinessScore(payload: {
 
 export async function GET(request: NextRequest) {
   const searchParams = request.nextUrl.searchParams;
-  const status =
-    (searchParams.get("status") as BusinessProjectStatus | "all" | null) ?? "all";
+  const requestedStatus = searchParams.get("status") ?? "all";
   const search = searchParams.get("search") ?? undefined;
   const scope = (searchParams.get("scope") as "market" | "mine" | null) ?? "market";
+
+  if (
+    requestedStatus !== "all" &&
+    !businessProjectStatuses.has(requestedStatus as BusinessProjectStatus)
+  ) {
+    return NextResponse.json({ error: "Invalid status" }, { status: 400 });
+  }
 
   const session = await getServerSession(authOptions);
   const userId = session?.user?.id;
   const role = (session?.user?.role as Role | undefined) ?? undefined;
+  const isPrivileged = role === "ADMIN" || role === "MODERATOR";
+  const status = requestedStatus as BusinessProjectStatus | "all";
+  const effectivePublicStatus = !userId && !isPrivileged ? "approved" : status;
 
   if (scope === "mine" && !userId) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -93,12 +111,16 @@ export async function GET(request: NextRequest) {
     const rows = listMockBusinessProjects({
       userId,
       role,
-      status,
+      status: effectivePublicStatus,
       search,
       scope,
     });
 
-    return NextResponse.json({ data: rows });
+    const data = scope === "market" && !isPrivileged
+      ? rows.map(toPublicBusinessProject)
+      : rows;
+
+    return NextResponse.json({ data });
   }
 
   const where: Prisma.BusinessProjectWhereInput = {};
@@ -117,7 +139,7 @@ export async function GET(request: NextRequest) {
     if (status !== "all") {
       where.status = status;
     }
-  } else if (role === "ADMIN" || role === "MODERATOR") {
+  } else if (isPrivileged) {
     if (status !== "all") {
       where.status = status;
     }
@@ -132,7 +154,7 @@ export async function GET(request: NextRequest) {
       where.AND.push({ status });
     }
   } else {
-    where.status = status === "all" ? "approved" : status;
+    where.status = "approved";
   }
 
   try {
@@ -141,36 +163,51 @@ export async function GET(request: NextRequest) {
       orderBy: { createdAt: "desc" },
     });
 
-    const normalized = rows.map(normalizeBusinessProject);
+    const normalized = rows.map((row) => {
+      const project = normalizeBusinessProject(row);
+      const canViewPrivate = isPrivileged || Boolean(userId && row.userId === userId);
+      return canViewPrivate ? project : toPublicBusinessProject(project);
+    });
     if (normalized.length) {
       return NextResponse.json({ data: normalized });
     }
 
-    if (scope === "market") {
+    if (scope === "market" && process.env.NODE_ENV !== "production") {
       const fallbackRows = listMockBusinessProjects({
         userId,
         role,
-        status,
+        status: effectivePublicStatus,
         search,
         scope,
       });
-      return NextResponse.json({ data: fallbackRows });
+      return NextResponse.json({
+        data: !isPrivileged ? fallbackRows.map(toPublicBusinessProject) : fallbackRows,
+      });
     }
 
     return NextResponse.json({ data: normalized });
   } catch {
+    if (process.env.NODE_ENV === "production") {
+      return NextResponse.json({ error: "Could not load projects" }, { status: 500 });
+    }
+
     const fallbackRows = listMockBusinessProjects({
       userId,
       role,
-      status,
+      status: effectivePublicStatus,
       search,
       scope,
     });
-    return NextResponse.json({ data: fallbackRows });
+    return NextResponse.json({
+      data: !isPrivileged ? fallbackRows.map(toPublicBusinessProject) : fallbackRows,
+    });
   }
 }
 
 export async function POST(request: NextRequest) {
+  const blocked = enforceSameOrigin(request) ?? checkRateLimit(`projects:create:${getClientIp(request)}`, 20);
+  if (blocked) return blocked;
+
   const session = await getServerSession(authOptions);
   if (!session?.user?.id || !session.user.email || !session.user.role) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });

@@ -1,7 +1,12 @@
 ﻿import { PrismaClient, Role, PlotSource } from "@prisma/client";
 import bcrypt from "bcryptjs";
+import crypto from "node:crypto";
 
 const prisma = new PrismaClient();
+
+if (process.env.NODE_ENV === "production" && process.env.ALLOW_PRODUCTION_DEMO_SEED !== "true") {
+  throw new Error("Demo seed is disabled in production. Use an admin invite/bootstrap flow instead.");
+}
 
 const basePlots = [
   {
@@ -302,9 +307,9 @@ const baseBusinessProjects = [
 ] as const;
 
 async function main() {
-  const adminPassword = await bcrypt.hash("Admin#2026", 10);
-  const investorPassword = await bcrypt.hash("Investor#2026", 10);
-  const ownerPassword = await bcrypt.hash("Owner#2026", 10);
+  const adminPassword = await bcrypt.hash(process.env.SEED_ADMIN_PASSWORD ?? crypto.randomUUID(), 10);
+  const investorPassword = await bcrypt.hash(process.env.SEED_INVESTOR_PASSWORD ?? crypto.randomUUID(), 10);
+  const ownerPassword = await bcrypt.hash(process.env.SEED_OWNER_PASSWORD ?? crypto.randomUUID(), 10);
 
   const admin = await prisma.user.upsert({
     where: { email: "admin@alatau.city" },
@@ -428,9 +433,7 @@ async function main() {
   }
 
   console.log("Seed complete.");
-  console.log("Admin login: admin@alatau.city / Admin#2026");
-  console.log("Investor login: investor@alatau.city / Investor#2026");
-  console.log("Owner login: owner@alatau.city / Owner#2026");
+  console.log("Seeded users. Set SEED_ADMIN_PASSWORD, SEED_INVESTOR_PASSWORD and SEED_OWNER_PASSWORD to use known local passwords.");
 }
 
 main()

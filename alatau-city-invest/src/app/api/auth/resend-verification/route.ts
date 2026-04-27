@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { writeAuditLog } from "@/lib/audit";
+import { checkRateLimit, enforceSameOrigin, getClientIp } from "@/lib/api-security";
 import { isMockMode } from "@/lib/data-mode";
 import { sendEmail } from "@/lib/email/sender";
 import { buildEmailVerificationTemplate } from "@/lib/email/templates";
@@ -13,6 +14,10 @@ const resendSchema = z.object({
 });
 
 export async function POST(request: NextRequest) {
+  const blocked =
+    enforceSameOrigin(request) ?? checkRateLimit(`auth:resend:${getClientIp(request)}`, 5);
+  if (blocked) return blocked;
+
   const body = (await request.json()) as unknown;
   const parsed = resendSchema.safeParse(body);
 
