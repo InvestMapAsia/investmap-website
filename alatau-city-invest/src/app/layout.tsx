@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import { Noto_Sans } from "next/font/google";
+import { Analytics } from "@vercel/analytics/next";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 import "./globals.css";
 import { SiteShell } from "@/components/site-shell";
 import { Providers } from "@/components/providers";
@@ -35,6 +37,8 @@ export default function RootLayout({
         <Providers>
           <SiteShell>{children}</SiteShell>
         </Providers>
+        <Analytics />
+        <SpeedInsights />
       </body>
     </html>
   );
