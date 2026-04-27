@@ -7,7 +7,7 @@ import { PlotCard } from "@/components/plot-card";
 import { PlotDetailTabs } from "@/components/plot-detail-tabs";
 import { StatusBadge } from "@/components/status-badge";
 import { pickLang } from "@/lib/i18n";
-import { translatePurpose } from "@/lib/i18n-content";
+import { localizePlot, translatePurpose } from "@/lib/i18n-content";
 import { useCurrentLanguage } from "@/lib/i18n-client";
 import { getPlotCoverUrl } from "@/lib/plot-media";
 import { currency } from "@/lib/ui";
@@ -201,6 +201,7 @@ export function PlotPageView({ plot, similar }: { plot: Plot; similar: Plot[] })
     b: t.legalB,
     c: t.legalC,
   };
+  const displayPlot = localizePlot(lang, plot);
   const coverUrl = getPlotCoverUrl(plot);
 
   let riskNote = t.riskMedium;
@@ -224,7 +225,7 @@ export function PlotPageView({ plot, similar }: { plot: Plot; similar: Plot[] })
     ? `https://www.google.com/maps?q=${encodeURIComponent(mapQuery)}`
     : null;
   const baiduOpenUrl = hasCoordinates
-    ? `https://api.map.baidu.com/marker?location=${plot.mapLat},${plot.mapLng}&title=${encodeURIComponent(plot.title)}&content=${encodeURIComponent(plot.mapAddress?.trim() || plot.title)}&output=html&coord_type=wgs84&src=webapp.investmap.website`
+    ? `https://api.map.baidu.com/marker?location=${plot.mapLat},${plot.mapLng}&title=${encodeURIComponent(displayPlot.title)}&content=${encodeURIComponent(plot.mapAddress?.trim() || displayPlot.title)}&output=html&coord_type=wgs84&src=webapp.investmap.website`
     : plot.mapAddress?.trim()
       ? `https://api.map.baidu.com/geocoder?address=${encodeURIComponent(plot.mapAddress.trim())}&output=html&src=webapp.investmap.website`
       : null;
@@ -275,8 +276,8 @@ export function PlotPageView({ plot, similar }: { plot: Plot; similar: Plot[] })
     try {
       if (typeof navigator !== "undefined" && navigator.share) {
         await navigator.share({
-          title: plot.title,
-          text: `${plot.title} (${plot.id})`,
+          title: displayPlot.title,
+          text: `${displayPlot.title} (${plot.id})`,
           url: shareUrl,
         });
         return;
@@ -303,9 +304,9 @@ export function PlotPageView({ plot, similar }: { plot: Plot; similar: Plot[] })
       <section className="split">
         <article className="card">
           <p className="muted">
-            {plot.id} · {plot.district} · {translatePurpose(lang, plot.purpose)}
+            {plot.id} · {displayPlot.district} · {translatePurpose(lang, plot.purpose)}
           </p>
-          <h1 style={{ margin: "6px 0 10px" }}>{plot.title}</h1>
+          <h1 style={{ margin: "6px 0 10px" }}>{displayPlot.title}</h1>
           <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
             <StatusBadge status={plot.status} />
             <span className="badge">{legalGradeLabel[plot.legalGrade]}</span>
@@ -313,7 +314,7 @@ export function PlotPageView({ plot, similar }: { plot: Plot; similar: Plot[] })
 
           <div className="plot-detail-summary">
             <div className="plot-cover-frame">
-              <img src={coverUrl} alt={plot.title} />
+              <img src={coverUrl} alt={displayPlot.title} />
             </div>
             <div className="plot-detail-metrics">
               <div className="metric-line">
@@ -456,7 +457,7 @@ export function PlotPageView({ plot, similar }: { plot: Plot; similar: Plot[] })
                   src={mapEmbedUrl}
                   loading="lazy"
                   referrerPolicy="no-referrer-when-downgrade"
-                  title={`${plot.title} map`}
+                  title={`${displayPlot.title} map`}
                 />
                 {baiduStaticMapUrl ? (
                   <div className="plot-baidu-window">
@@ -465,7 +466,7 @@ export function PlotPageView({ plot, similar }: { plot: Plot; similar: Plot[] })
                       <div
                         className="plot-mini-map-frame plot-baidu-static-map"
                         role="img"
-                        aria-label={`${plot.title} Baidu Maps`}
+                        aria-label={`${displayPlot.title} Baidu Maps`}
                         style={{ backgroundImage: `url("${baiduStaticMapUrl}")` }}
                       />
                       <div className="plot-baidu-center-pin" aria-hidden="true" />
@@ -514,7 +515,7 @@ export function PlotPageView({ plot, similar }: { plot: Plot; similar: Plot[] })
               <p className="muted">{mapT.noLocation}</p>
             )}
           </div>
-          <ListingQrCode title={plot.title} path={`/plots/${plot.id}`} kind="plot" />
+          <ListingQrCode title={displayPlot.title} path={`/plots/${plot.id}`} kind="plot" />
         </aside>
       </section>
 

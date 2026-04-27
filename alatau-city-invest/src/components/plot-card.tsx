@@ -6,7 +6,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useCurrentLanguage } from "@/lib/i18n-client";
 import { pickLang } from "@/lib/i18n";
 import { emitClientEvent, COMPARE_CHANGE_EVENT, FAVORITES_CHANGE_EVENT } from "@/lib/client-events";
-import { translatePlotTag } from "@/lib/i18n-content";
+import { localizePlot, translatePlotTag } from "@/lib/i18n-content";
 import { getPlotCoverUrl } from "@/lib/plot-media";
 import { currency } from "@/lib/ui";
 import { Plot } from "@/lib/types";
@@ -141,6 +141,7 @@ export function PlotCard({ plot, mode = "catalog" }: { plot: Plot; mode?: Mode }
   const isFav = useMemo(() => favorites.includes(plot.id), [favorites, plot.id]);
   const inCompare = useMemo(() => compare.includes(plot.id), [compare, plot.id]);
   const coverUrl = useMemo(() => getPlotCoverUrl(plot), [plot]);
+  const displayPlot = localizePlot(lang, plot);
 
   const toggleFavorite = async () => {
     if (status === "authenticated") {
@@ -189,8 +190,8 @@ export function PlotCard({ plot, mode = "catalog" }: { plot: Plot; mode?: Mode }
   const handleShare = async () => {
     const shareUrl = `${window.location.origin}/plots/${plot.id}`;
     const shareData = {
-      title: plot.title,
-      text: `${plot.id} · ${plot.district}`,
+      title: displayPlot.title,
+      text: `${plot.id} · ${displayPlot.district}`,
       url: shareUrl,
     };
 
@@ -209,16 +210,16 @@ export function PlotCard({ plot, mode = "catalog" }: { plot: Plot; mode?: Mode }
 
   return (
     <article className="card plot-card">
-      <Link className="plot-card-cover" href={`/plots/${plot.id}`} aria-label={plot.title}>
-        <img src={coverUrl} alt={plot.title} loading="lazy" />
+      <Link className="plot-card-cover" href={`/plots/${plot.id}`} aria-label={displayPlot.title}>
+        <img src={coverUrl} alt={displayPlot.title} loading="lazy" />
       </Link>
 
       <div className="plot-top">
         <div>
           <div className="plot-id">
-            {plot.id} · {plot.district}
+            {plot.id} · {displayPlot.district}
           </div>
-          <h3 className="card-title">{plot.title}</h3>
+          <h3 className="card-title">{displayPlot.title}</h3>
           <StatusBadge status={plot.status} />
         </div>
         <div className="plot-price">{currency(plot.price, plot.currency)}</div>

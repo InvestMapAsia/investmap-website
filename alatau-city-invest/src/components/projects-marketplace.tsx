@@ -7,6 +7,7 @@ import { pickLang } from "@/lib/i18n";
 import { useCurrentLanguage } from "@/lib/i18n-client";
 import { currency } from "@/lib/ui";
 import { BusinessProject, BusinessProjectStatus } from "@/lib/types";
+import { hasBusinessProjectTranslation, localizeBusinessProject } from "@/lib/i18n-content";
 
 type ProjectStatusFilter = BusinessProjectStatus | "all";
 
@@ -24,6 +25,41 @@ const statusStyles: Record<BusinessProjectStatus, { bg: string; color: string }>
   rejected: { bg: "#FDEBEC", color: "#B4232C" },
 };
 
+const projectCoverFallbacks: Record<string, string> = {
+  "BIZ-101": "https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&w=1200&q=80",
+  "BIZ-102": "https://images.unsplash.com/photo-1581578731548-c64695cc6952?auto=format&fit=crop&w=1200&q=80",
+};
+
+function getProjectCoverUrl(project: ProjectRow) {
+  return (
+    project.mediaUrls?.find((url) => /\.(jpg|jpeg|png|webp|gif)(\?.*)?$/i.test(url) || url.includes("images.unsplash.com")) ??
+    projectCoverFallbacks[project.id] ??
+    "https://images.unsplash.com/photo-1556761175-b413da4baf72?auto=format&fit=crop&w=1200&q=80"
+  );
+}
+
+function ProjectSkeletonGrid() {
+  return (
+    <div className="grid grid-3">
+      {Array.from({ length: 6 }).map((_, index) => (
+        <article className="card skeleton-card" key={`project-skeleton-${index}`}>
+          <div className="skeleton-cover" />
+          <div className="skeleton-body">
+            <div className="skeleton-line short" />
+            <div className="skeleton-line medium" />
+            <div className="skeleton-line" />
+            <div className="project-card-metrics">
+              <div className="skeleton-kpi" />
+              <div className="skeleton-kpi" />
+            </div>
+            <div className="skeleton-line medium" />
+          </div>
+        </article>
+      ))}
+    </div>
+  );
+}
+
 export function ProjectsMarketplace() {
   const { lang } = useCurrentLanguage();
   const { status: sessionStatus } = useSession();
@@ -31,7 +67,7 @@ export function ProjectsMarketplace() {
   const [statusFilter, setStatusFilter] = useState<ProjectStatusFilter>("all");
   const [searchInput, setSearchInput] = useState("");
   const [search, setSearch] = useState("");
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   const t = pickLang(lang, {
     EN: {
@@ -71,6 +107,7 @@ export function ProjectsMarketplace() {
       shareFail: "Could not share project link.",
       media: "Media",
       linksWord: "links",
+      original: "Original",
     },
     RU: {
       title: "Проекты",
@@ -109,6 +146,7 @@ export function ProjectsMarketplace() {
       shareFail: "Не удалось поделиться ссылкой.",
       media: "Медиа",
       linksWord: "ссылок",
+      original: "Оригинал",
     },
     KZ: {
       title: "Жобалар",
@@ -147,6 +185,7 @@ export function ProjectsMarketplace() {
       shareFail: "Сілтемені бөлісу мүмкін болмады.",
       media: "Медиа",
       linksWord: "сілтеме",
+      original: "Түпнұсқа",
     },
     CN: {
       title: "项目",
@@ -185,6 +224,7 @@ export function ProjectsMarketplace() {
       shareFail: "无法分享项目链接。",
       media: "媒体",
       linksWord: "个链接",
+      original: "原文",
     },
   });
 
@@ -206,21 +246,30 @@ export function ProjectsMarketplace() {
         search,
       });
 
-      const response = await fetch(`/api/projects?${params.toString()}`, { cache: "no-store" });
-      if (!response.ok) {
+      try {
+        const response = await fetch(`/api/projects?${params.toString()}`, { cache: "no-store" });
+        if (!response.ok) {
+          if (!ignore) {
+            setRows([]);
+            window.alert(t.loadError);
+          }
+          return;
+        }
+
+        const payload = (await response.json()) as { data?: ProjectRow[] };
+        if (!ignore) {
+          setRows(payload.data ?? []);
+        }
+      } catch {
         if (!ignore) {
           setRows([]);
           window.alert(t.loadError);
         }
-        setLoading(false);
-        return;
+      } finally {
+        if (!ignore) {
+          setLoading(false);
+        }
       }
-
-      const payload = (await response.json()) as { data?: ProjectRow[] };
-      if (!ignore) {
-        setRows(payload.data ?? []);
-      }
-      setLoading(false);
     };
 
     void load();
@@ -265,13 +314,13 @@ export function ProjectsMarketplace() {
 
   return (
     <>
-      <section className="card">
+      <section className="card project-marketplace-card">
         <div className="section-title">
           <div>
             <h2>{t.title}</h2>
             <p>{t.sub}</p>
           </div>
-          <div className="plot-actions">
+          <div className="plot-actions project-submit-actions">
             <Link href={submitHref} className="btn btn-primary">
               {sessionStatus === "authenticated" ? t.create : t.loginToSubmit}
             </Link>
@@ -283,24 +332,32 @@ export function ProjectsMarketplace() {
           </div>
         </div>
 
-        <div className="grid grid-4" style={{ marginTop: 12 }}>
-          <div className="kpi">
-            <span className="muted">{t.total}</span>
-            <strong>{metrics.total}</strong>
+        {loading ? (
+          <div className="grid grid-4" style={{ marginTop: 12 }}>
+            {Array.from({ length: 4 }).map((_, index) => (
+              <div className="skeleton-kpi" key={`project-metric-skeleton-${index}`} />
+            ))}
           </div>
-          <div className="kpi">
-            <span className="muted">{t.approvedCount}</span>
-            <strong>{metrics.approved}</strong>
+        ) : (
+          <div className="grid grid-4" style={{ marginTop: 12 }}>
+            <div className="kpi">
+              <span className="muted">{t.total}</span>
+              <strong>{metrics.total}</strong>
+            </div>
+            <div className="kpi">
+              <span className="muted">{t.approvedCount}</span>
+              <strong>{metrics.approved}</strong>
+            </div>
+            <div className="kpi">
+              <span className="muted">{t.reviewCount}</span>
+              <strong>{metrics.moderation}</strong>
+            </div>
+            <div className="kpi">
+              <span className="muted">{t.requested}</span>
+              <strong>{currency(metrics.requested)}</strong>
+            </div>
           </div>
-          <div className="kpi">
-            <span className="muted">{t.reviewCount}</span>
-            <strong>{metrics.moderation}</strong>
-          </div>
-          <div className="kpi">
-            <span className="muted">{t.requested}</span>
-            <strong>{currency(metrics.requested)}</strong>
-          </div>
-        </div>
+        )}
       </section>
 
       <section className="section card">
@@ -351,88 +408,98 @@ export function ProjectsMarketplace() {
       </section>
 
       <section className="section">
-        <div className="grid grid-3">
-          {!loading && rows.length === 0 ? <div className="empty-state">{t.noData}</div> : null}
-          {rows.map((project) => {
-            const tone = statusStyles[project.status];
-            return (
-              <article className="card plot-card" key={project.id} id={`project-${project.id}`}>
-                <div className="plot-top">
-                  <div>
-                    <div className="plot-id">{project.id}</div>
-                    <h3 className="card-title">{project.companyName}</h3>
+        {loading ? (
+          <ProjectSkeletonGrid />
+        ) : (
+          <div className="grid grid-3">
+            {rows.length === 0 ? <div className="empty-state">{t.noData}</div> : null}
+            {rows.map((project) => {
+              const displayProject = localizeBusinessProject(lang, project);
+              const tone = statusStyles[project.status];
+              const coverUrl = getProjectCoverUrl(project);
+              const translated = lang !== "EN" && hasBusinessProjectTranslation(lang, project);
+
+              return (
+                <article className="card project-card" key={project.id} id={`project-${project.id}`}>
+                  <Link className="project-card-cover" href={`/projects/${project.id}`}>
+                    <img src={coverUrl} alt={displayProject.companyName} loading="lazy" />
+                    <span
+                      className="badge project-card-status"
+                      style={{ background: tone.bg, color: tone.color, border: "1px solid transparent" }}
+                    >
+                      {statusLabels[project.status]}
+                    </span>
+                  </Link>
+
+                  <div className="project-card-body">
+                    <div className="project-card-head">
+                      <div className="project-card-title-row">
+                        <div>
+                          <div className="plot-id">{project.id}</div>
+                          <h3 className="card-title">{displayProject.companyName}</h3>
+                        </div>
+                      </div>
+                      <p className="project-card-pitch">{displayProject.businessOverview}</p>
+                    </div>
+
+                    <div className="project-card-tags">
+                      <span>{displayProject.market}</span>
+                      {displayProject.city ? <span>{displayProject.city}</span> : null}
+                    </div>
+
+                    <div className="project-card-metrics">
+                      <div className="project-card-metric">
+                        <span>{t.requested}</span>
+                        <strong>
+                          {displayProject.requestedAmount ? currency(displayProject.requestedAmount) : "-"}
+                        </strong>
+                      </div>
+                      <div className="project-card-metric">
+                        <span>{t.minTicket}</span>
+                        <strong>
+                          {displayProject.minimumTicket ? currency(displayProject.minimumTicket) : "-"}
+                        </strong>
+                      </div>
+                    </div>
+
+                    <p className="project-card-meta">
+                      <strong>{t.traction}:</strong> {displayProject.traction}
+                    </p>
+
+                    {translated ? (
+                      <p className="project-original-note">
+                        <strong>{t.original}:</strong> {project.businessOverview}
+                      </p>
+                    ) : null}
+
+                    {displayProject.moderationNote ? (
+                      <div className="notice">{displayProject.moderationNote}</div>
+                    ) : null}
+
+                    <div className="plot-actions" style={{ marginTop: 4 }}>
+                      <Link className="btn btn-primary" href={`/projects/${project.id}`}>
+                        {t.details}
+                      </Link>
+                      <Link
+                        className="btn btn-accent"
+                        href={`/contacts?project=${encodeURIComponent(project.id)}#contact-form`}
+                      >
+                        {t.invest}
+                      </Link>
+                      <button
+                        className="btn btn-ghost"
+                        type="button"
+                        onClick={() => void handleShare(displayProject)}
+                      >
+                        {t.share}
+                      </button>
+                    </div>
                   </div>
-                  <span
-                    className="badge"
-                    style={{ background: tone.bg, color: tone.color, border: "1px solid transparent" }}
-                  >
-                    {statusLabels[project.status]}
-                  </span>
-                </div>
-
-                <div className="metric-line">
-                  <span className="muted">{t.requested}</span>
-                  <strong>{project.requestedAmount ? currency(project.requestedAmount) : "-"}</strong>
-                </div>
-                <div className="metric-line">
-                  <span className="muted">{t.minTicket}</span>
-                  <strong>{project.minimumTicket ? currency(project.minimumTicket) : "-"}</strong>
-                </div>
-                <div className="metric-line">
-                  <span className="muted">{t.founder}</span>
-                  <strong>{project.founderName}</strong>
-                </div>
-
-                <p>
-                  <strong>{t.market}:</strong> {project.market}
-                </p>
-                <p>
-                  <strong>{t.model}:</strong> {project.businessModel}
-                </p>
-                <p>
-                  <strong>{t.traction}:</strong> {project.traction}
-                </p>
-                <p>
-                  <strong>{t.legal}:</strong> {project.legalReadiness}
-                </p>
-                <p>
-                  <strong>{t.forecast}:</strong> {project.financialForecasts}
-                </p>
-                <p>
-                  <strong>{t.terms}:</strong> {project.investmentTerms}
-                </p>
-
-                {project.mediaUrls?.length ? (
-                  <p>
-                    <strong>{t.media}:</strong>{" "}
-                    <a href={project.mediaUrls[0]} target="_blank" rel="noreferrer">
-                      {project.mediaUrls.length > 1
-                        ? `${project.mediaUrls.length} ${t.linksWord}`
-                        : project.mediaUrls[0]}
-                    </a>
-                  </p>
-                ) : null}
-
-                {project.moderationNote ? <div className="notice">{project.moderationNote}</div> : null}
-
-                <div className="plot-actions" style={{ marginTop: 12 }}>
-                  <Link className="btn btn-primary" href={`/projects/${project.id}`}>
-                    {t.details}
-                  </Link>
-                  <Link
-                    className="btn btn-accent"
-                    href={`/contacts?project=${encodeURIComponent(project.id)}#contact-form`}
-                  >
-                    {t.invest}
-                  </Link>
-                  <button className="btn btn-ghost" type="button" onClick={() => void handleShare(project)}>
-                    {t.share}
-                  </button>
-                </div>
-              </article>
-            );
-          })}
-        </div>
+                </article>
+              );
+            })}
+          </div>
+        )}
       </section>
     </>
   );

@@ -92,8 +92,15 @@ export function NotificationsBell() {
 
   return (
     <div style={{ position: "relative" }}>
-      <button className="btn btn-ghost" type="button" onClick={() => setOpen((prev) => !prev)}>
-        {t.title} {unreadCount ? `(${unreadCount})` : ""}
+      <button
+        className="btn btn-ghost notification-button"
+        type="button"
+        aria-label={unreadCount ? `${t.title}: ${unreadCount}` : t.title}
+        onClick={() => setOpen((prev) => !prev)}
+      >
+        <span className="notification-dot" aria-hidden="true" />
+        <span className="notification-label">{t.title}</span>
+        {unreadCount ? <span className="notification-count">{unreadCount}</span> : null}
       </button>
 
       {open ? (

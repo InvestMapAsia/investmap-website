@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useCurrentLanguage } from "@/lib/i18n-client";
 import { pickLang } from "@/lib/i18n";
 import { Plot } from "@/lib/types";
+import { translatePlotDetailText } from "@/lib/i18n-content";
 
 const PANORAMA_MARKER = "#panorama360";
 const COVER_MARKER = "#cover16x9";
@@ -42,6 +43,7 @@ export function PlotDetailTabs({ plot }: { plot: Plot }) {
       panoramas: "360 panoramas",
       noMedia: "No media uploaded for this plot yet.",
       openMedia: "Open media",
+      annualized: "annualized",
     },
     RU: {
       legalBlock: "Юридический блок",
@@ -60,6 +62,7 @@ export function PlotDetailTabs({ plot }: { plot: Plot }) {
       panoramas: "360-панорамы",
       noMedia: "Для этого участка пока нет загруженных медиа.",
       openMedia: "Открыть медиа",
+      annualized: "годовых",
     },
     KZ: {
       legalBlock: "Заң блогы",
@@ -78,6 +81,7 @@ export function PlotDetailTabs({ plot }: { plot: Plot }) {
       panoramas: "360 панорамалар",
       noMedia: "Бұл учаске үшін медиа әлі жүктелмеген.",
       openMedia: "Медианы ашу",
+      annualized: "жылдық",
     },
     CN: {
       legalBlock: "法律资料",
@@ -96,6 +100,7 @@ export function PlotDetailTabs({ plot }: { plot: Plot }) {
       panoramas: "360 全景",
       noMedia: "该地块暂未上传媒体。",
       openMedia: "打开媒体",
+      annualized: "年化",
     },
   });
 
@@ -134,7 +139,7 @@ export function PlotDetailTabs({ plot }: { plot: Plot }) {
         <h3 className="card-title">{t.legalDocs}</h3>
         <ul>
           {plot.docs.map((doc) => (
-            <li key={doc}>{doc}</li>
+            <li key={doc}>{translatePlotDetailText(lang, doc)}</li>
           ))}
         </ul>
         <p className="muted">
@@ -146,15 +151,19 @@ export function PlotDetailTabs({ plot }: { plot: Plot }) {
         <h3 className="card-title">{t.scenario}</h3>
         <div className="metric-line">
           <span className="muted">{t.conservative}</span>
-          <strong>11% annualized</strong>
+          <strong>11% {t.annualized}</strong>
         </div>
         <div className="metric-line">
           <span className="muted">{t.base}</span>
-          <strong>{plot.roi}% annualized</strong>
+          <strong>
+            {plot.roi}% {t.annualized}
+          </strong>
         </div>
         <div className="metric-line">
           <span className="muted">{t.optimistic}</span>
-          <strong>{Math.round(plot.roi * 1.25)}% annualized</strong>
+          <strong>
+            {Math.round(plot.roi * 1.25)}% {t.annualized}
+          </strong>
         </div>
         <p className="muted">{t.assumptions}</p>
       </div>
@@ -163,7 +172,7 @@ export function PlotDetailTabs({ plot }: { plot: Plot }) {
         <h3 className="card-title">{t.milestones}</h3>
         <ul>
           {plot.timeline.map((item) => (
-            <li key={item}>{item}</li>
+            <li key={item}>{translatePlotDetailText(lang, item)}</li>
           ))}
         </ul>
       </div>

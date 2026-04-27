@@ -4,6 +4,7 @@ import Link from "next/link";
 import { FormEvent, useEffect, useMemo, useState } from "react";
 import { useCurrentLanguage } from "@/lib/i18n-client";
 import { pickLang } from "@/lib/i18n";
+import { localizePlot } from "@/lib/i18n-content";
 import { Plot } from "@/lib/types";
 
 type Step = 0 | 1 | 2;
@@ -212,11 +213,14 @@ export function InvestForm({ plotId }: { plotId?: string }) {
                     }
                     required
                   >
-                    {plots.map((plot) => (
-                      <option key={plot.id} value={plot.id}>
-                        {plot.id} · {plot.title}
-                      </option>
-                    ))}
+                    {plots.map((plot) => {
+                      const displayPlot = localizePlot(lang, plot);
+                      return (
+                        <option key={plot.id} value={plot.id}>
+                          {plot.id} · {displayPlot.title}
+                        </option>
+                      );
+                    })}
                   </select>
                 </div>
 

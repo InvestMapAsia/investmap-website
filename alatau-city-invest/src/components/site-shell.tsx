@@ -23,6 +23,8 @@ const uiText: Record<
     moderator: string;
     signOut: string;
     login: string;
+    menuLabel: string;
+    closeMenu: string;
     footerDescription: string;
     faq: string;
     support: string;
@@ -49,6 +51,8 @@ const uiText: Record<
     moderator: "Moderator",
     signOut: "Sign out",
     login: "Login",
+    menuLabel: "Open menu",
+    closeMenu: "Close menu",
     footerDescription:
       "Digital platform for businesses seeking external investment and investors looking for transparent opportunities.",
     faq: "FAQ",
@@ -75,6 +79,8 @@ const uiText: Record<
     moderator: "Модератор",
     signOut: "Выйти",
     login: "Войти",
+    menuLabel: "Открыть меню",
+    closeMenu: "Закрыть меню",
     footerDescription:
       "Цифровая платформа для бизнеса, который ищет внешние инвестиции, и инвесторов, которым нужны прозрачные возможности.",
     faq: "FAQ",
@@ -101,6 +107,8 @@ const uiText: Record<
     moderator: "Модератор",
     signOut: "Шығу",
     login: "Кіру",
+    menuLabel: "Мәзірді ашу",
+    closeMenu: "Мәзірді жабу",
     footerDescription:
       "Сыртқы инвестиция іздеген бизнес пен ашық мүмкіндіктер іздеген инвесторларға арналған цифрлық платформа.",
     faq: "FAQ",
@@ -127,6 +135,8 @@ const uiText: Record<
     moderator: "审核",
     signOut: "退出",
     login: "登录",
+    menuLabel: "打开菜单",
+    closeMenu: "关闭菜单",
     footerDescription:
       "面向寻找外部投资的企业，以及寻找透明机会的投资者的数字平台。",
     faq: "FAQ",
@@ -156,8 +166,10 @@ export function SiteShell({ children }: { children: ReactNode }) {
   const { data: session, status } = useSession();
   const { lang, setLanguage } = useCurrentLanguage();
   const [moreOpen, setMoreOpen] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
   const primaryNav = ["/", "/alatau-city", "/catalog", "/projects"] as const;
   const secondaryNav = ["/pricing", "/news", "/faq", "/contacts"] as const;
+  const mobileNav = [...primaryNav, ...secondaryNav] as const;
 
   const t = useMemo(() => uiText[lang], [lang]);
   const role = session?.user?.role;
@@ -179,6 +191,7 @@ export function SiteShell({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     setMoreOpen(false);
+    setMenuOpen(false);
   }, [pathname]);
 
   return (
@@ -242,6 +255,7 @@ export function SiteShell({ children }: { children: ReactNode }) {
               lang={lang}
               onChange={(nextLang) => {
                 setMoreOpen(false);
+                setMenuOpen(false);
                 setLanguage(nextLang);
               }}
             />
@@ -273,12 +287,48 @@ export function SiteShell({ children }: { children: ReactNode }) {
                 </div>
               </details>
             ) : (
-              <Link href="/login" className="btn btn-primary" onClick={() => setMoreOpen(false)}>
+              <Link
+                href="/login"
+                className="btn btn-primary"
+                onClick={() => {
+                  setMoreOpen(false);
+                  setMenuOpen(false);
+                }}
+              >
                 {t.login}
               </Link>
             )}
+            <button
+              className={menuOpen ? "mobile-menu-button active" : "mobile-menu-button"}
+              type="button"
+              aria-label={menuOpen ? t.closeMenu : t.menuLabel}
+              aria-expanded={menuOpen}
+              onClick={(event) => {
+                event.stopPropagation();
+                setMoreOpen(false);
+                setMenuOpen((prev) => !prev);
+              }}
+            >
+              <span />
+              <span />
+              <span />
+            </button>
           </div>
         </div>
+        <nav className={menuOpen ? "mobile-nav-panel open" : "mobile-nav-panel"} aria-label={t.menuLabel}>
+          <div className="container mobile-nav-inner">
+            {mobileNav.map((href) => (
+              <Link
+                key={href}
+                className={isActive(href) ? "active" : ""}
+                href={href}
+                onClick={() => setMenuOpen(false)}
+              >
+                {t.nav[href]}
+              </Link>
+            ))}
+          </div>
+        </nav>
       </header>
 
       <main className="page">{children}</main>

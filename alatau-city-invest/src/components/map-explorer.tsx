@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { useCurrentLanguage } from "@/lib/i18n-client";
 import { pickLang } from "@/lib/i18n";
-import { localizePricePresetLabel, translatePurpose } from "@/lib/i18n-content";
+import { localizePlot, localizePricePresetLabel, translatePurpose } from "@/lib/i18n-content";
 import { statusColor, currency } from "@/lib/ui";
 import { Plot } from "@/lib/types";
 
@@ -266,16 +266,19 @@ export function MapExplorer() {
           {!loading && !plots.length ? <div className="empty-state map-empty">{t.noPlots}</div> : null}
 
           {!loading
-            ? plots.map((plot) => (
+            ? plots.map((plot) => {
+              const displayPlot = localizePlot(lang, plot);
+              return (
               <button
                 key={plot.id}
                 type="button"
                 className={`map-marker ${selected?.id === plot.id ? "is-active" : ""}`}
                 style={{ left: `${plot.x}%`, top: `${plot.y}%`, background: statusColor[plot.status] }}
-                title={plot.title}
+                title={displayPlot.title}
                 onClick={() => setSelected(plot)}
               />
-            ))
+              );
+            })
             : null}
         </div>
 
@@ -292,32 +295,35 @@ export function MapExplorer() {
           {!plots.length ? (
             <div className="empty-state">{t.noPlots}</div>
           ) : (
-            plots.map((plot) => (
-              <div
-                key={plot.id}
-                className={`list-item ${selected?.id === plot.id ? "is-active" : ""}`}
-                role="button"
-                tabIndex={0}
-                onClick={() => setSelected(plot)}
-                onKeyDown={(event) => {
-                  if (event.key === "Enter" || event.key === " ") {
-                    event.preventDefault();
-                    setSelected(plot);
-                  }
-                }}
-              >
-                <strong>
-                  {plot.id} · {plot.title}
-                </strong>
-                <span className="muted">
-                  {currency(plot.price)} · {plot.area} ha · ROI {plot.roi}%
-                </span>
-                <span className="badge">
-                  <span className="dot" style={{ background: statusColor[plot.status] }} />
-                  {statusLabels[plot.status]}
-                </span>
-              </div>
-            ))
+            plots.map((plot) => {
+              const displayPlot = localizePlot(lang, plot);
+              return (
+                <div
+                  key={plot.id}
+                  className={`list-item ${selected?.id === plot.id ? "is-active" : ""}`}
+                  role="button"
+                  tabIndex={0}
+                  onClick={() => setSelected(plot)}
+                  onKeyDown={(event) => {
+                    if (event.key === "Enter" || event.key === " ") {
+                      event.preventDefault();
+                      setSelected(plot);
+                    }
+                  }}
+                >
+                  <strong>
+                    {plot.id} · {displayPlot.title}
+                  </strong>
+                  <span className="muted">
+                    {currency(plot.price)} · {plot.area} ha · ROI {plot.roi}%
+                  </span>
+                  <span className="badge">
+                    <span className="dot" style={{ background: statusColor[plot.status] }} />
+                    {statusLabels[plot.status]}
+                  </span>
+                </div>
+              );
+            })
           )}
         </div>
       </section>
@@ -326,9 +332,10 @@ export function MapExplorer() {
       <section className="card map-selection-card">
         {selected ? (
           <>
-            <h3 className="card-title">{selected.title}</h3>
+            <h3 className="card-title">{localizePlot(lang, selected).title}</h3>
             <p className="muted">
-              {selected.id} · {selected.district} · {translatePurpose(lang, selected.purpose)}
+              {selected.id} · {localizePlot(lang, selected).district} ·{" "}
+              {translatePurpose(lang, selected.purpose)}
             </p>
             <div className="metric-line">
               <span className="muted">{t.priceLabel}</span>

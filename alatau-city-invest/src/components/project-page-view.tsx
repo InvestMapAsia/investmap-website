@@ -6,6 +6,7 @@ import { pickLang } from "@/lib/i18n";
 import { useCurrentLanguage } from "@/lib/i18n-client";
 import { currency } from "@/lib/ui";
 import { BusinessProject, BusinessProjectStatus } from "@/lib/types";
+import { hasBusinessProjectTranslation, localizeBusinessProject } from "@/lib/i18n-content";
 
 const statusStyles: Record<BusinessProjectStatus, { bg: string; color: string }> = {
   submitted: { bg: "#E9F2FF", color: "#0A58B5" },
@@ -133,6 +134,14 @@ export function ProjectPageView({ project }: { project: BusinessProject }) {
     rejected: t.rejected,
   };
 
+  const displayProject = localizeBusinessProject(lang, project);
+  const translated = lang !== "EN" && hasBusinessProjectTranslation(lang, project);
+  const originalLabel = pickLang(lang, {
+    EN: "Original data",
+    RU: "Оригинальные данные",
+    KZ: "Бастапқы дерек",
+    CN: "原始数据",
+  });
   const projectUrl = `/projects/${project.id}`;
   const contactHref = `/contacts?project=${encodeURIComponent(project.id)}#contact-form`;
 
@@ -141,8 +150,8 @@ export function ProjectPageView({ project }: { project: BusinessProject }) {
     try {
       if (navigator.share) {
         await navigator.share({
-          title: project.companyName,
-          text: project.businessOverview,
+          title: displayProject.companyName,
+          text: displayProject.businessOverview,
           url: shareUrl,
         });
         return;
@@ -164,7 +173,7 @@ export function ProjectPageView({ project }: { project: BusinessProject }) {
           <div className="plot-top">
             <div>
               <div className="plot-id">{project.id}</div>
-              <h1 style={{ margin: "6px 0 10px" }}>{project.companyName}</h1>
+              <h1 style={{ margin: "6px 0 10px" }}>{displayProject.companyName}</h1>
               <span
                 className="badge"
                 style={{ background: tone.bg, color: tone.color, border: "1px solid transparent" }}
@@ -177,7 +186,13 @@ export function ProjectPageView({ project }: { project: BusinessProject }) {
             </div>
           </div>
 
-          <p className="project-lead">{project.businessOverview}</p>
+          <p className="project-lead">{displayProject.businessOverview}</p>
+
+          {translated ? (
+            <p className="project-original-note">
+              <strong>{originalLabel}:</strong> {project.businessOverview}
+            </p>
+          ) : null}
 
           <div className="grid grid-3 project-metrics">
             <div className="kpi">
@@ -190,29 +205,29 @@ export function ProjectPageView({ project }: { project: BusinessProject }) {
             </div>
             <div className="kpi">
               <span className="muted">{t.market}</span>
-              <strong>{project.market}</strong>
+              <strong>{displayProject.market}</strong>
             </div>
           </div>
 
           <div className="project-detail-section">
             <h2>{t.model}</h2>
-            <p>{project.businessModel}</p>
+            <p>{displayProject.businessModel}</p>
           </div>
           <div className="project-detail-section">
             <h2>{t.traction}</h2>
-            <p>{project.traction}</p>
+            <p>{displayProject.traction}</p>
           </div>
           <div className="project-detail-section">
             <h2>{t.legal}</h2>
-            <p>{project.legalReadiness}</p>
+            <p>{displayProject.legalReadiness}</p>
           </div>
           <div className="project-detail-section">
             <h2>{t.forecast}</h2>
-            <p>{project.financialForecasts}</p>
+            <p>{displayProject.financialForecasts}</p>
           </div>
           <div className="project-detail-section">
             <h2>{t.terms}</h2>
-            <p>{project.investmentTerms}</p>
+            <p>{displayProject.investmentTerms}</p>
           </div>
 
           {project.mediaUrls?.length ? (
@@ -236,7 +251,7 @@ export function ProjectPageView({ project }: { project: BusinessProject }) {
           </div>
           <div className="metric-line">
             <span className="muted">{t.city}</span>
-            <strong>{project.city || "-"}</strong>
+            <strong>{displayProject.city || "-"}</strong>
           </div>
           <div className="metric-line">
             <span className="muted">{t.website}</span>
@@ -261,7 +276,7 @@ export function ProjectPageView({ project }: { project: BusinessProject }) {
             </Link>
           </div>
 
-          <ListingQrCode title={project.companyName} path={projectUrl} kind="project" />
+          <ListingQrCode title={displayProject.companyName} path={projectUrl} kind="project" />
         </aside>
       </section>
     </div>

@@ -20,6 +20,28 @@ type ApiPayload = {
 
 const COMPARE_KEY = "aci_compare";
 
+function CatalogSkeletonGrid() {
+  return (
+    <div className="grid grid-3">
+      {Array.from({ length: 6 }).map((_, index) => (
+        <article className="card skeleton-card" key={`catalog-skeleton-${index}`}>
+          <div className="skeleton-cover" />
+          <div className="skeleton-body">
+            <div className="skeleton-line short" />
+            <div className="skeleton-line medium" />
+            <div className="project-card-metrics">
+              <div className="skeleton-kpi" />
+              <div className="skeleton-kpi" />
+            </div>
+            <div className="skeleton-line" />
+            <div className="skeleton-line medium" />
+          </div>
+        </article>
+      ))}
+    </div>
+  );
+}
+
 export function CatalogExplorer() {
   const { lang } = useCurrentLanguage();
   const { status: sessionStatus } = useSession();
@@ -35,6 +57,7 @@ export function CatalogExplorer() {
   const [pricePresets, setPricePresets] = useState<{ key: string; label: string }[]>([]);
   const [compareIds, setCompareIds] = useState<string[]>([]);
   const [showCompare, setShowCompare] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   const t = pickLang(lang, {
     EN: {
@@ -192,15 +215,30 @@ export function CatalogExplorer() {
   }, []);
 
   useEffect(() => {
+    let ignore = false;
+
     async function load() {
-      const res = await fetch(`/api/plots?${query}`);
-      const payload = (await res.json()) as ApiPayload;
-      setPlots(payload.data);
-      setPurposes(payload.meta.purposes);
-      setPricePresets(payload.meta.pricePresets);
+      setLoading(true);
+      try {
+        const res = await fetch(`/api/plots?${query}`);
+        const payload = (await res.json()) as ApiPayload;
+        if (!ignore) {
+          setPlots(payload.data);
+          setPurposes(payload.meta.purposes);
+          setPricePresets(payload.meta.pricePresets);
+        }
+      } finally {
+        if (!ignore) {
+          setLoading(false);
+        }
+      }
     }
 
     void load();
+
+    return () => {
+      ignore = true;
+    };
   }, [query]);
 
   useEffect(() => {
@@ -317,13 +355,17 @@ export function CatalogExplorer() {
       </section>
 
       <section className="section">
-        <div className="grid grid-3">
-          {plots.length ? (
-            plots.map((plot) => <PlotCard key={plot.id} plot={plot} />)
-          ) : (
-            <div className="empty-state">{t.noPlots}</div>
-          )}
-        </div>
+        {loading ? (
+          <CatalogSkeletonGrid />
+        ) : (
+          <div className="grid grid-3">
+            {plots.length ? (
+              plots.map((plot) => <PlotCard key={plot.id} plot={plot} />)
+            ) : (
+              <div className="empty-state">{t.noPlots}</div>
+            )}
+          </div>
+        )}
       </section>
 
       {compareIds.length ? (
