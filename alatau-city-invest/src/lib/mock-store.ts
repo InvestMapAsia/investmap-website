@@ -11,6 +11,7 @@ import {
   listApplications,
   listBusinessProjects,
   listPlots,
+  updateBusinessProject,
   updateBusinessProjectStatus,
   updateOwnerPlot,
   updatePlotStatus,
@@ -425,6 +426,37 @@ export function updateMockBusinessProjectStatus(payload: {
     id: payload.id,
     status: payload.status,
     moderationNote: payload.moderationNote ?? null,
+  });
+}
+
+export function updateMockBusinessProject(
+  payload: Omit<
+    BusinessProject,
+    "id" | "createdAt" | "updatedAt" | "status" | "moderationNote"
+  > & {
+    id: string;
+  }
+) {
+  return updateBusinessProject(payload.id, {
+    companyName: payload.companyName,
+    businessOverview: payload.businessOverview,
+    market: payload.market,
+    businessModel: payload.businessModel,
+    traction: payload.traction,
+    legalReadiness: payload.legalReadiness,
+    financialForecasts: payload.financialForecasts,
+    investmentTerms: payload.investmentTerms,
+    founderName: payload.founderName,
+    founderEmail: payload.founderEmail,
+    founderPhone: payload.founderPhone,
+    city: payload.city,
+    website: payload.website,
+    requestedAmount: payload.requestedAmount,
+    minimumTicket: payload.minimumTicket,
+    mediaUrls: payload.mediaUrls,
+    mapAddress: payload.mapAddress,
+    mapLat: payload.mapLat,
+    mapLng: payload.mapLng,
   });
 }
 

@@ -552,6 +552,30 @@ export function updateBusinessProjectStatus(payload: {
   };
 }
 
+export function updateBusinessProject(
+  id: string,
+  payload: Omit<
+    BusinessProject,
+    "id" | "createdAt" | "updatedAt" | "status" | "moderationNote"
+  >
+) {
+  const current = businessProjects.find((item) => item.id === id);
+  if (!current) {
+    return null;
+  }
+
+  const updated: BusinessProject = {
+    ...current,
+    ...payload,
+    status: "submitted",
+    moderationNote: null,
+    updatedAt: new Date().toISOString(),
+  };
+
+  businessProjects = businessProjects.map((item) => (item.id === id ? updated : item));
+  return updated;
+}
+
 export function createApplication(
   payload: Omit<Application, "id" | "createdAt" | "status">
 ): Application {

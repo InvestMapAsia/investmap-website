@@ -22,6 +22,25 @@ function normalizeOptionalText(value: unknown) {
   return next.length ? next : undefined;
 }
 
+function normalizeStringArray(value: unknown) {
+  if (Array.isArray(value)) {
+    const result = value
+      .map((item) => (typeof item === "string" ? item.trim() : ""))
+      .filter((item) => item.length > 0);
+    return result.length ? result : [];
+  }
+
+  if (typeof value === "string") {
+    const result = value
+      .split(/\r?\n|,/g)
+      .map((item) => item.trim())
+      .filter((item) => item.length > 0);
+    return result.length ? result : [];
+  }
+
+  return undefined;
+}
+
 function scoreOwnerListing(payload: {
   title: string;
   cadastral: string;
@@ -71,6 +90,7 @@ export async function PATCH(request: NextRequest, context: { params: Promise<{ i
     legalOwnerType?: string;
     hasUtilities?: boolean;
     description?: string;
+    mediaUrls?: string[] | string;
     mapAddress?: string;
     mapLat?: number | string;
     mapLng?: number | string;
@@ -83,6 +103,7 @@ export async function PATCH(request: NextRequest, context: { params: Promise<{ i
   const distanceCenterKm = normalizeOptionalNumber(body.distanceCenterKm);
   const mapLat = normalizeOptionalNumber(body.mapLat);
   const mapLng = normalizeOptionalNumber(body.mapLng);
+  const mediaUrls = normalizeStringArray(body.mediaUrls);
   const hasMapLat = mapLat !== undefined;
   const hasMapLng = mapLng !== undefined;
   const mapPoint = latLngToMapPoint(mapLat, mapLng);
@@ -152,7 +173,7 @@ export async function PATCH(request: NextRequest, context: { params: Promise<{ i
         legalOwnerType: body.legalOwnerType,
         hasUtilities: Boolean(body.hasUtilities),
         description: body.description,
-        mediaUrls: current.mediaUrls,
+        mediaUrls: mediaUrls ?? current.mediaUrls,
         mapAddress: normalizeOptionalText(body.mapAddress),
         mapLat,
         mapLng,
@@ -192,6 +213,10 @@ export async function PATCH(request: NextRequest, context: { params: Promise<{ i
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
+  const existingMediaUrls = Array.isArray(current.mediaUrls)
+    ? current.mediaUrls.map((item) => String(item))
+    : undefined;
+
   const updated = await prisma.plot.update({
     where: { id },
     data: {
@@ -211,6 +236,7 @@ export async function PATCH(request: NextRequest, context: { params: Promise<{ i
       utilities: body.hasUtilities ? ["Electricity", "Water"] : ["Not verified"],
       ownerType: body.legalOwnerType,
       timeline: ["Owner edits submitted for moderation"],
+      mediaUrls: mediaUrls ?? existingMediaUrls,
       mapAddress: normalizeOptionalText(body.mapAddress),
       mapLat,
       mapLng,

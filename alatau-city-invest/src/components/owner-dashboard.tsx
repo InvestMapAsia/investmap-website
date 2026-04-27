@@ -1,7 +1,7 @@
 ﻿"use client";
 
 import Link from "next/link";
-import { useEffect, useMemo, useState } from "react";
+import { ChangeEvent, useEffect, useMemo, useState } from "react";
 import { useCurrentLanguage } from "@/lib/i18n-client";
 import { pickLang } from "@/lib/i18n";
 import { currency } from "@/lib/ui";
@@ -10,6 +10,52 @@ import { StatusBadge } from "@/components/status-badge";
 
 function toFormNumber(value: number | undefined) {
   return value === undefined ? "" : String(value);
+}
+
+type UploadedMedia = {
+  url: string;
+  pathname?: string;
+  size?: number;
+  contentType?: string;
+  originalName?: string;
+};
+
+type UploadMediaResponse = {
+  data?: UploadedMedia;
+  error?: string;
+  detail?: string;
+};
+
+const MAX_MEDIA_UPLOAD_BYTES = 4 * 1024 * 1024;
+const PANORAMA_MARKER = "#panorama360";
+const COVER_MARKER = "#cover16x9";
+
+function markPanoramaUrl(url: string) {
+  return url.includes(PANORAMA_MARKER) ? url : `${url}${PANORAMA_MARKER}`;
+}
+
+function markCoverUrl(url: string) {
+  return url.includes(COVER_MARKER) ? url : `${url}${COVER_MARKER}`;
+}
+
+function cleanMediaUrl(url: string) {
+  return url.replace(PANORAMA_MARKER, "").replace(COVER_MARKER, "");
+}
+
+function isCoverUrl(url: string) {
+  return url.includes(COVER_MARKER);
+}
+
+function isPanoramaUrl(url: string) {
+  return url.includes(PANORAMA_MARKER);
+}
+
+function isVideoUrl(url: string) {
+  return /\.(mp4|webm|ogg|mov|m4v)(\?.*)?$/i.test(cleanMediaUrl(url));
+}
+
+function isAllowedMediaType(file: File) {
+  return file.type.startsWith("image/") || file.type.startsWith("video/");
 }
 
 export function OwnerDashboard() {
@@ -33,6 +79,8 @@ export function OwnerDashboard() {
     mapLng: "",
   });
   const [savingEdit, setSavingEdit] = useState(false);
+  const [editMediaUrls, setEditMediaUrls] = useState<string[]>([]);
+  const [uploadingEditMedia, setUploadingEditMedia] = useState(false);
 
   const t = pickLang(lang, {
     EN: {
@@ -76,6 +124,20 @@ export function OwnerDashboard() {
       mapAddress: "Map address",
       mapLat: "Latitude",
       mapLng: "Longitude",
+      coverSection: "Cover photo 16:9",
+      coverHint: "Replace or remove the land listing cover. Recommended ratio: 16:9.",
+      mediaSection: "Land photos and videos",
+      mediaHint: "Add new photos or videos. Remove old items before submitting if they should disappear.",
+      panoramaSection: "360 panorama photos",
+      panoramaHint: "Add equirectangular 360 photos for the land detail page.",
+      mediaUploading: "Uploading media...",
+      uploadedMedia: "Current media",
+      openMedia: "Open",
+      removeMedia: "Remove",
+      uploadFailed: "Some media could not be uploaded.",
+      uploadTooLarge: "File is too large for current upload mode (max 4 MB per file).",
+      uploadInvalidType: "Only image/video files are allowed.",
+      waitMediaUpload: "Please wait until media upload is complete.",
       yes: "Yes",
       no: "No",
       noPlots: "No owner plots yet.",
@@ -121,6 +183,20 @@ export function OwnerDashboard() {
       mapAddress: "Адрес на карте",
       mapLat: "Широта",
       mapLng: "Долгота",
+      coverSection: "Фото обложки 16:9",
+      coverHint: "Замените или удалите обложку земли. Рекомендуемое соотношение: 16:9.",
+      mediaSection: "Фото и видео земли",
+      mediaHint: "Добавьте новые фото или видео. Старые файлы можно удалить перед отправкой.",
+      panoramaSection: "360-панорамы земли",
+      panoramaHint: "Добавьте equirectangular 360 фото для страницы участка.",
+      mediaUploading: "Загрузка медиа...",
+      uploadedMedia: "Текущие медиа",
+      openMedia: "Открыть",
+      removeMedia: "Удалить",
+      uploadFailed: "Часть медиа не удалось загрузить.",
+      uploadTooLarge: "Файл слишком большой для текущей загрузки (максимум 4 МБ на файл).",
+      uploadInvalidType: "Разрешены только файлы изображений и видео.",
+      waitMediaUpload: "Дождитесь завершения загрузки медиа.",
       yes: "Да",
       no: "Нет",
       noPlots: "Пока нет участков собственника.",
@@ -166,6 +242,20 @@ export function OwnerDashboard() {
       mapAddress: "Карта мекенжайы",
       mapLat: "Ендік",
       mapLng: "Бойлық",
+      coverSection: "16:9 мұқаба фотосы",
+      coverHint: "Жер листингінің мұқабасын ауыстырыңыз немесе өшіріңіз. Ұсынылатын қатынас: 16:9.",
+      mediaSection: "Жер фото және видеолары",
+      mediaHint: "Жаңа фото немесе видео қосыңыз. Жібермес бұрын ескі файлдарды өшіруге болады.",
+      panoramaSection: "Жердің 360 панорамалары",
+      panoramaHint: "Учаске беті үшін equirectangular 360 фото қосыңыз.",
+      mediaUploading: "Медиа жүктелуде...",
+      uploadedMedia: "Қазіргі медиа",
+      openMedia: "Ашу",
+      removeMedia: "Өшіру",
+      uploadFailed: "Кейбір медианы жүктеу мүмкін болмады.",
+      uploadTooLarge: "Файл ағымдағы жүктеу режимі үшін тым үлкен (әр файлға максимум 4 МБ).",
+      uploadInvalidType: "Тек сурет/видео файлдарына рұқсат етіледі.",
+      waitMediaUpload: "Медиа жүктеу аяқталғанша күтіңіз.",
       yes: "Иә",
       no: "Жоқ",
       noPlots: "Әзірге жер иесі учаскелері жоқ.",
@@ -200,16 +290,119 @@ export function OwnerDashboard() {
       mapLat: toFormNumber(plot.mapLat),
       mapLng: toFormNumber(plot.mapLng),
     });
+    setEditMediaUrls(plot.mediaUrls ?? []);
+  };
+
+  const cancelPlotEdit = () => {
+    setEditingPlot(null);
+    setEditMediaUrls([]);
+  };
+
+  const uploadMediaFile = async (file: File) => {
+    const payload = new FormData();
+    payload.append("file", file);
+
+    const response = await fetch("/api/uploads/plot-media", {
+      method: "POST",
+      body: payload,
+    });
+
+    const body = (await response.json()) as UploadMediaResponse;
+    if (!response.ok || !body.data?.url) {
+      const reason = [body.error, body.detail].filter(Boolean).join(" | ");
+      throw new Error(reason || `HTTP ${response.status}`);
+    }
+
+    return body.data.url;
+  };
+
+  const handleEditCoverUpload = async (event: ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    if (!file.type.startsWith("image/")) {
+      window.alert(t.uploadInvalidType);
+      event.target.value = "";
+      return;
+    }
+
+    if (file.size > MAX_MEDIA_UPLOAD_BYTES) {
+      window.alert(t.uploadTooLarge);
+      event.target.value = "";
+      return;
+    }
+
+    setUploadingEditMedia(true);
+    try {
+      const url = await uploadMediaFile(file);
+      setEditMediaUrls((prev) => [markCoverUrl(url), ...prev.filter((item) => !isCoverUrl(item))]);
+    } catch (error) {
+      window.alert(`${t.uploadFailed}\n${error instanceof Error ? error.message : "Upload failed"}`);
+    } finally {
+      setUploadingEditMedia(false);
+      event.target.value = "";
+    }
+  };
+
+  const handleEditMediaUpload = async (event: ChangeEvent<HTMLInputElement>, panorama = false) => {
+    const files = Array.from(event.target.files ?? []);
+    if (!files.length) return;
+
+    setUploadingEditMedia(true);
+    const uploaded: string[] = [];
+    const failed: string[] = [];
+
+    for (const file of files) {
+      if (panorama && !file.type.startsWith("image/")) {
+        failed.push(`${file.name}: ${t.uploadInvalidType}`);
+        continue;
+      }
+
+      if (!panorama && !isAllowedMediaType(file)) {
+        failed.push(`${file.name}: ${t.uploadInvalidType}`);
+        continue;
+      }
+
+      if (file.size > MAX_MEDIA_UPLOAD_BYTES) {
+        failed.push(`${file.name}: ${t.uploadTooLarge}`);
+        continue;
+      }
+
+      try {
+        const url = await uploadMediaFile(file);
+        uploaded.push(panorama ? markPanoramaUrl(url) : url);
+      } catch (error) {
+        failed.push(`${file.name}: ${error instanceof Error ? error.message : "Upload failed"}`);
+      }
+    }
+
+    if (uploaded.length) {
+      setEditMediaUrls((prev) => [...prev, ...uploaded]);
+    }
+
+    setUploadingEditMedia(false);
+    event.target.value = "";
+
+    if (failed.length) {
+      window.alert(`${t.uploadFailed}\n${failed.join("\n")}`);
+    }
   };
 
   const submitEdit = async () => {
     if (!editingPlot) return;
+    if (uploadingEditMedia) {
+      window.alert(t.waitMediaUpload);
+      return;
+    }
 
     setSavingEdit(true);
     const response = await fetch(`/api/owner/plots/${editingPlot.id}`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(editForm),
+      body: JSON.stringify({
+        ...editForm,
+        mediaUrls: editMediaUrls,
+      }),
     });
     setSavingEdit(false);
 
@@ -219,7 +412,7 @@ export function OwnerDashboard() {
     }
 
     window.alert(t.changesSubmitted);
-    setEditingPlot(null);
+    cancelPlotEdit();
     await loadOwnerPlots();
   };
 
@@ -231,6 +424,15 @@ export function OwnerDashboard() {
   const leads = useMemo(
     () => ownerPlots.reduce((sum, plot) => sum + Math.max(1, Math.round(plot.roi / 4)), 0),
     [ownerPlots]
+  );
+
+  const editCoverUrl = useMemo(
+    () => editMediaUrls.find((url) => isCoverUrl(url)) ?? null,
+    [editMediaUrls]
+  );
+  const editGalleryUrls = useMemo(
+    () => editMediaUrls.filter((url) => !isCoverUrl(url)),
+    [editMediaUrls]
   );
 
   return (
@@ -394,6 +596,108 @@ export function OwnerDashboard() {
               />
             </div>
             <div className="form-field" style={{ gridColumn: "1 / -1" }}>
+              <label>{t.coverSection}</label>
+              <input
+                type="file"
+                accept="image/*"
+                disabled={uploadingEditMedia}
+                onChange={handleEditCoverUpload}
+              />
+              <p className="muted">{t.coverHint}</p>
+              {editCoverUrl ? (
+                <div className="uploaded-media-grid uploaded-cover-grid">
+                  <div className="uploaded-media-item">
+                    <div className="uploaded-media-preview uploaded-cover-preview">
+                      <img src={cleanMediaUrl(editCoverUrl)} alt={t.coverSection} />
+                    </div>
+                    <div className="uploaded-media-actions">
+                      <a
+                        href={cleanMediaUrl(editCoverUrl)}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="btn btn-ghost"
+                      >
+                        {t.openMedia}
+                      </a>
+                      <button
+                        className="btn btn-ghost"
+                        type="button"
+                        onClick={() =>
+                          setEditMediaUrls((prev) => prev.filter((item) => !isCoverUrl(item)))
+                        }
+                      >
+                        {t.removeMedia}
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              ) : null}
+
+              <label style={{ marginTop: 10 }}>{t.mediaSection}</label>
+              <input
+                type="file"
+                accept="image/*,video/*"
+                multiple
+                disabled={uploadingEditMedia}
+                onChange={handleEditMediaUpload}
+              />
+              <p className="muted">{t.mediaHint}</p>
+
+              <label style={{ marginTop: 10 }}>{t.panoramaSection}</label>
+              <input
+                type="file"
+                accept="image/*"
+                multiple
+                disabled={uploadingEditMedia}
+                onChange={(event) => handleEditMediaUpload(event, true)}
+              />
+              <p className="muted">{t.panoramaHint}</p>
+              {uploadingEditMedia ? <p className="muted">{t.mediaUploading}</p> : null}
+
+              {editGalleryUrls.length ? (
+                <>
+                  <p className="muted">
+                    {t.uploadedMedia}: {editGalleryUrls.length}
+                  </p>
+                  <div className="uploaded-media-grid">
+                    {editGalleryUrls.map((url, index) => {
+                      const cleanUrl = cleanMediaUrl(url);
+                      const isPanorama = isPanoramaUrl(url);
+                      return (
+                        <div className="uploaded-media-item" key={`${url}-${index}`}>
+                          <div className="uploaded-media-preview">
+                            {isVideoUrl(url) ? (
+                              <video src={cleanUrl} controls preload="metadata" />
+                            ) : (
+                              <img
+                                src={cleanUrl}
+                                alt={`${t.mediaSection} ${index + 1}`}
+                                className={isPanorama ? "panorama-thumb" : undefined}
+                              />
+                            )}
+                          </div>
+                          <div className="uploaded-media-actions">
+                            <a href={cleanUrl} target="_blank" rel="noreferrer" className="btn btn-ghost">
+                              {t.openMedia}
+                            </a>
+                            <button
+                              className="btn btn-ghost"
+                              type="button"
+                              onClick={() =>
+                                setEditMediaUrls((prev) => prev.filter((item) => item !== url))
+                              }
+                            >
+                              {t.removeMedia}
+                            </button>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </>
+              ) : null}
+            </div>
+            <div className="form-field" style={{ gridColumn: "1 / -1" }}>
               <label>{t.mapAddress}</label>
               <input
                 value={editForm.mapAddress}
@@ -423,10 +727,15 @@ export function OwnerDashboard() {
           </div>
 
           <div className="plot-actions" style={{ marginTop: 12 }}>
-            <button className="btn btn-primary" type="button" disabled={savingEdit} onClick={submitEdit}>
+            <button
+              className="btn btn-primary"
+              type="button"
+              disabled={savingEdit || uploadingEditMedia}
+              onClick={submitEdit}
+            >
               {t.saveChanges}
             </button>
-            <button className="btn btn-ghost" type="button" onClick={() => setEditingPlot(null)}>
+            <button className="btn btn-ghost" type="button" onClick={cancelPlotEdit}>
               {t.cancel}
             </button>
           </div>

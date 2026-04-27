@@ -1,7 +1,7 @@
 ﻿"use client";
 
 import Link from "next/link";
-import { useEffect, useMemo, useState } from "react";
+import { FormEvent, useEffect, useMemo, useState } from "react";
 import { useSession } from "next-auth/react";
 import { pickLang } from "@/lib/i18n";
 import { useCurrentLanguage } from "@/lib/i18n-client";
@@ -18,6 +18,17 @@ const statusStyles: Record<BusinessProjectStatus, { bg: string; color: string }>
   rejected: { bg: "#FDEBEC", color: "#B4232C" },
 };
 
+function toFormNumber(value: number | null | undefined) {
+  return value === null || value === undefined ? "" : String(value);
+}
+
+function parseMediaLinks(input: string) {
+  return input
+    .split(/\r?\n|,/g)
+    .map((item) => item.trim())
+    .filter((item) => item.length > 0);
+}
+
 export function ProjectsCabinet() {
   const { lang } = useCurrentLanguage();
   const { status } = useSession();
@@ -27,6 +38,30 @@ export function ProjectsCabinet() {
   const [statusFilter, setStatusFilter] = useState<ProjectStatusFilter>("all");
   const [searchInput, setSearchInput] = useState("");
   const [search, setSearch] = useState("");
+  const [reloadKey, setReloadKey] = useState(0);
+  const [editingProject, setEditingProject] = useState<BusinessProject | null>(null);
+  const [savingProjectEdit, setSavingProjectEdit] = useState(false);
+  const [projectEditForm, setProjectEditForm] = useState({
+    companyName: "",
+    businessOverview: "",
+    market: "",
+    businessModel: "",
+    traction: "",
+    legalReadiness: "",
+    financialForecasts: "",
+    investmentTerms: "",
+    founderName: "",
+    founderEmail: "",
+    founderPhone: "",
+    city: "",
+    website: "",
+    requestedAmount: "",
+    minimumTicket: "",
+    mediaLinks: "",
+    mapAddress: "",
+    mapLat: "",
+    mapLng: "",
+  });
 
   const t = pickLang(lang, {
     EN: {
@@ -75,6 +110,17 @@ export function ProjectsCabinet() {
       emptyRight: "Select a project from the list.",
       viewProjectsBoard: "View projects board",
       openProjectPage: "Open project page",
+      edit: "Edit",
+      editTitle: "Edit project",
+      editSub: "Changes are sent to moderation again and become visible after admin approval.",
+      saveChanges: "Submit changes",
+      cancel: "Cancel",
+      changesSubmitted: "Project changes were sent to moderation.",
+      editError: "Failed to submit project changes.",
+      mediaLinks: "Photo/video links",
+      mapAddress: "Map address",
+      mapLat: "Latitude",
+      mapLng: "Longitude",
     },
     RU: {
       unauthorized: "Войдите, чтобы увидеть кабинет проектов.",
@@ -122,6 +168,17 @@ export function ProjectsCabinet() {
       emptyRight: "Выберите проект из списка.",
       viewProjectsBoard: "Смотреть витрину проектов",
       openProjectPage: "Открыть страницу проекта",
+      edit: "Изменить",
+      editTitle: "Редактирование проекта",
+      editSub: "Изменения снова отправляются на модерацию и станут видимыми после принятия админом.",
+      saveChanges: "Отправить изменения",
+      cancel: "Отмена",
+      changesSubmitted: "Изменения проекта отправлены на модерацию.",
+      editError: "Не удалось отправить изменения проекта.",
+      mediaLinks: "Ссылки на фото/видео",
+      mapAddress: "Адрес на карте",
+      mapLat: "Широта",
+      mapLng: "Долгота",
     },
     KZ: {
       unauthorized: "Жоба кабинетін көру үшін жүйеге кіріңіз.",
@@ -169,6 +226,17 @@ export function ProjectsCabinet() {
       emptyRight: "Тізімнен жобаны таңдаңыз.",
       viewProjectsBoard: "Жобалар витринасын қарау",
       openProjectPage: "Жоба парағын ашу",
+      edit: "Өзгерту",
+      editTitle: "Жобаны өзгерту",
+      editSub: "Өзгерістер қайта модерацияға жіберіледі және әкім мақұлдағаннан кейін көрінеді.",
+      saveChanges: "Өзгерістерді жіберу",
+      cancel: "Болдырмау",
+      changesSubmitted: "Жоба өзгерістері модерацияға жіберілді.",
+      editError: "Жоба өзгерістерін жіберу сәтсіз.",
+      mediaLinks: "Фото/видео сілтемелері",
+      mapAddress: "Карта мекенжайы",
+      mapLat: "Ендік",
+      mapLng: "Бойлық",
     },
   });
 
@@ -230,7 +298,7 @@ export function ProjectsCabinet() {
     return () => {
       ignore = true;
     };
-  }, [search, status, statusFilter]);
+  }, [reloadKey, search, status, statusFilter]);
 
   const metrics = useMemo(() => {
     return {
@@ -247,6 +315,78 @@ export function ProjectsCabinet() {
     () => rows.find((item) => item.id === selectedId) ?? null,
     [rows, selectedId]
   );
+
+  const startProjectEdit = (project: BusinessProject) => {
+    setSelectedId(project.id);
+    setEditingProject(project);
+    setProjectEditForm({
+      companyName: project.companyName,
+      businessOverview: project.businessOverview,
+      market: project.market,
+      businessModel: project.businessModel,
+      traction: project.traction,
+      legalReadiness: project.legalReadiness,
+      financialForecasts: project.financialForecasts,
+      investmentTerms: project.investmentTerms,
+      founderName: project.founderName,
+      founderEmail: project.founderEmail,
+      founderPhone: project.founderPhone,
+      city: project.city ?? "",
+      website: project.website ?? "",
+      requestedAmount: toFormNumber(project.requestedAmount),
+      minimumTicket: toFormNumber(project.minimumTicket),
+      mediaLinks: (project.mediaUrls ?? []).join("\n"),
+      mapAddress: project.mapAddress ?? "",
+      mapLat: toFormNumber(project.mapLat),
+      mapLng: toFormNumber(project.mapLng),
+    });
+  };
+
+  const submitProjectEdit = async (event: FormEvent) => {
+    event.preventDefault();
+    if (!editingProject) return;
+
+    setSavingProjectEdit(true);
+    const response = await fetch(`/api/projects/${editingProject.id}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        companyName: projectEditForm.companyName,
+        businessOverview: projectEditForm.businessOverview,
+        market: projectEditForm.market,
+        businessModel: projectEditForm.businessModel,
+        traction: projectEditForm.traction,
+        legalReadiness: projectEditForm.legalReadiness,
+        financialForecasts: projectEditForm.financialForecasts,
+        investmentTerms: projectEditForm.investmentTerms,
+        founderName: projectEditForm.founderName,
+        founderEmail: projectEditForm.founderEmail,
+        founderPhone: projectEditForm.founderPhone,
+        city: projectEditForm.city || undefined,
+        website: projectEditForm.website || undefined,
+        requestedAmount: projectEditForm.requestedAmount
+          ? Number(projectEditForm.requestedAmount)
+          : undefined,
+        minimumTicket: projectEditForm.minimumTicket
+          ? Number(projectEditForm.minimumTicket)
+          : undefined,
+        mediaUrls: parseMediaLinks(projectEditForm.mediaLinks),
+        mapAddress: projectEditForm.mapAddress || undefined,
+        mapLat: projectEditForm.mapLat ? Number(projectEditForm.mapLat) : undefined,
+        mapLng: projectEditForm.mapLng ? Number(projectEditForm.mapLng) : undefined,
+      }),
+    });
+    setSavingProjectEdit(false);
+
+    if (!response.ok) {
+      window.alert(t.editError);
+      return;
+    }
+
+    window.alert(t.changesSubmitted);
+    setEditingProject(null);
+    setReloadKey((prev) => prev + 1);
+  };
 
   if (status !== "authenticated") {
     return <section className="card empty-state">{t.unauthorized}</section>;
@@ -331,6 +471,245 @@ export function ProjectsCabinet() {
           </button>
         </div>
       </section>
+
+      {editingProject ? (
+        <section className="section card">
+          <div className="section-title">
+            <div>
+              <h2>{t.editTitle}</h2>
+              <p>{t.editSub}</p>
+            </div>
+            <span className="badge">{editingProject.id}</span>
+          </div>
+
+          <form onSubmit={submitProjectEdit}>
+            <div className="form-grid">
+              <div className="form-field">
+                <label>{t.company}</label>
+                <input
+                  value={projectEditForm.companyName}
+                  onChange={(event) =>
+                    setProjectEditForm((prev) => ({ ...prev, companyName: event.target.value }))
+                  }
+                  required
+                />
+              </div>
+              <div className="form-field">
+                <label>{t.market}</label>
+                <input
+                  value={projectEditForm.market}
+                  onChange={(event) =>
+                    setProjectEditForm((prev) => ({ ...prev, market: event.target.value }))
+                  }
+                  required
+                />
+              </div>
+              <div className="form-field" style={{ gridColumn: "1 / -1" }}>
+                <label>{t.businessOverview}</label>
+                <textarea
+                  value={projectEditForm.businessOverview}
+                  onChange={(event) =>
+                    setProjectEditForm((prev) => ({
+                      ...prev,
+                      businessOverview: event.target.value,
+                    }))
+                  }
+                  required
+                />
+              </div>
+              <div className="form-field" style={{ gridColumn: "1 / -1" }}>
+                <label>{t.businessModel}</label>
+                <textarea
+                  value={projectEditForm.businessModel}
+                  onChange={(event) =>
+                    setProjectEditForm((prev) => ({ ...prev, businessModel: event.target.value }))
+                  }
+                  required
+                />
+              </div>
+              <div className="form-field" style={{ gridColumn: "1 / -1" }}>
+                <label>{t.traction}</label>
+                <textarea
+                  value={projectEditForm.traction}
+                  onChange={(event) =>
+                    setProjectEditForm((prev) => ({ ...prev, traction: event.target.value }))
+                  }
+                  required
+                />
+              </div>
+              <div className="form-field" style={{ gridColumn: "1 / -1" }}>
+                <label>{t.legalReadiness}</label>
+                <textarea
+                  value={projectEditForm.legalReadiness}
+                  onChange={(event) =>
+                    setProjectEditForm((prev) => ({
+                      ...prev,
+                      legalReadiness: event.target.value,
+                    }))
+                  }
+                  required
+                />
+              </div>
+              <div className="form-field" style={{ gridColumn: "1 / -1" }}>
+                <label>{t.financialForecasts}</label>
+                <textarea
+                  value={projectEditForm.financialForecasts}
+                  onChange={(event) =>
+                    setProjectEditForm((prev) => ({
+                      ...prev,
+                      financialForecasts: event.target.value,
+                    }))
+                  }
+                  required
+                />
+              </div>
+              <div className="form-field" style={{ gridColumn: "1 / -1" }}>
+                <label>{t.investmentTerms}</label>
+                <textarea
+                  value={projectEditForm.investmentTerms}
+                  onChange={(event) =>
+                    setProjectEditForm((prev) => ({
+                      ...prev,
+                      investmentTerms: event.target.value,
+                    }))
+                  }
+                  required
+                />
+              </div>
+              <div className="form-field">
+                <label>{t.founder}</label>
+                <input
+                  value={projectEditForm.founderName}
+                  onChange={(event) =>
+                    setProjectEditForm((prev) => ({ ...prev, founderName: event.target.value }))
+                  }
+                  required
+                />
+              </div>
+              <div className="form-field">
+                <label>Email</label>
+                <input
+                  type="email"
+                  value={projectEditForm.founderEmail}
+                  onChange={(event) =>
+                    setProjectEditForm((prev) => ({ ...prev, founderEmail: event.target.value }))
+                  }
+                  required
+                />
+              </div>
+              <div className="form-field">
+                <label>Phone</label>
+                <input
+                  value={projectEditForm.founderPhone}
+                  onChange={(event) =>
+                    setProjectEditForm((prev) => ({ ...prev, founderPhone: event.target.value }))
+                  }
+                  required
+                />
+              </div>
+              <div className="form-field">
+                <label>{t.city}</label>
+                <input
+                  value={projectEditForm.city}
+                  onChange={(event) =>
+                    setProjectEditForm((prev) => ({ ...prev, city: event.target.value }))
+                  }
+                />
+              </div>
+              <div className="form-field">
+                <label>{t.website}</label>
+                <input
+                  value={projectEditForm.website}
+                  onChange={(event) =>
+                    setProjectEditForm((prev) => ({ ...prev, website: event.target.value }))
+                  }
+                  placeholder="https://..."
+                />
+              </div>
+              <div className="form-field">
+                <label>{t.amount}</label>
+                <input
+                  type="number"
+                  value={projectEditForm.requestedAmount}
+                  onChange={(event) =>
+                    setProjectEditForm((prev) => ({
+                      ...prev,
+                      requestedAmount: event.target.value,
+                    }))
+                  }
+                />
+              </div>
+              <div className="form-field">
+                <label>{t.minTicket}</label>
+                <input
+                  type="number"
+                  value={projectEditForm.minimumTicket}
+                  onChange={(event) =>
+                    setProjectEditForm((prev) => ({
+                      ...prev,
+                      minimumTicket: event.target.value,
+                    }))
+                  }
+                />
+              </div>
+              <div className="form-field" style={{ gridColumn: "1 / -1" }}>
+                <label>{t.mediaLinks}</label>
+                <textarea
+                  value={projectEditForm.mediaLinks}
+                  onChange={(event) =>
+                    setProjectEditForm((prev) => ({ ...prev, mediaLinks: event.target.value }))
+                  }
+                  placeholder="https://..."
+                />
+              </div>
+              <div className="form-field" style={{ gridColumn: "1 / -1" }}>
+                <label>{t.mapAddress}</label>
+                <input
+                  value={projectEditForm.mapAddress}
+                  onChange={(event) =>
+                    setProjectEditForm((prev) => ({ ...prev, mapAddress: event.target.value }))
+                  }
+                />
+              </div>
+              <div className="form-field">
+                <label>{t.mapLat}</label>
+                <input
+                  type="number"
+                  step="0.000001"
+                  value={projectEditForm.mapLat}
+                  onChange={(event) =>
+                    setProjectEditForm((prev) => ({ ...prev, mapLat: event.target.value }))
+                  }
+                />
+              </div>
+              <div className="form-field">
+                <label>{t.mapLng}</label>
+                <input
+                  type="number"
+                  step="0.000001"
+                  value={projectEditForm.mapLng}
+                  onChange={(event) =>
+                    setProjectEditForm((prev) => ({ ...prev, mapLng: event.target.value }))
+                  }
+                />
+              </div>
+            </div>
+
+            <div className="plot-actions" style={{ marginTop: 12 }}>
+              <button className="btn btn-primary" type="submit" disabled={savingProjectEdit}>
+                {t.saveChanges}
+              </button>
+              <button
+                className="btn btn-ghost"
+                type="button"
+                onClick={() => setEditingProject(null)}
+              >
+                {t.cancel}
+              </button>
+            </div>
+          </form>
+        </section>
+      ) : null}
 
       <section className="section split" style={{ alignItems: "start" }}>
         <article className="card">
@@ -463,9 +842,14 @@ export function ProjectsCabinet() {
 
           <div className="plot-actions" style={{ marginTop: 12 }}>
             {selected ? (
-              <Link className="btn btn-primary" href={`/projects/${selected.id}`}>
-                {t.openProjectPage}
-              </Link>
+              <>
+                <Link className="btn btn-primary" href={`/projects/${selected.id}`}>
+                  {t.openProjectPage}
+                </Link>
+                <button className="btn btn-ghost" type="button" onClick={() => startProjectEdit(selected)}>
+                  {t.edit}
+                </button>
+              </>
             ) : null}
             <Link className="btn btn-ghost" href="/projects">
               {t.viewProjectsBoard}
