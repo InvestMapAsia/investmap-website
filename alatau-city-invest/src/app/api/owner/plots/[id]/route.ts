@@ -6,6 +6,12 @@ import { checkRateLimit, enforceSameOrigin, getClientIp } from "@/lib/api-securi
 import { authOptions } from "@/lib/auth";
 import { isMockMode } from "@/lib/data-mode";
 import { normalizePlot } from "@/lib/db-mappers";
+import {
+  sanitizeMediaUrl,
+  sanitizeOptionalText,
+  sanitizeStringArray,
+  sanitizeText,
+} from "@/lib/input-security";
 import { ALATAU_BOUNDS, isInsideAlatauBounds, latLngToMapPoint } from "@/lib/map-geo";
 import { getMockPlotById, updateMockOwnerPlot } from "@/lib/mock-store";
 import { createInAppNotification } from "@/lib/notifications";
@@ -15,31 +21,6 @@ function normalizeOptionalNumber(value: unknown) {
   if (value === null || value === undefined || value === "") return undefined;
   const next = Number(value);
   return Number.isFinite(next) ? next : undefined;
-}
-
-function normalizeOptionalText(value: unknown) {
-  if (typeof value !== "string") return undefined;
-  const next = value.trim();
-  return next.length ? next : undefined;
-}
-
-function normalizeStringArray(value: unknown) {
-  if (Array.isArray(value)) {
-    const result = value
-      .map((item) => (typeof item === "string" ? item.trim() : ""))
-      .filter((item) => item.length > 0);
-    return result.length ? result : [];
-  }
-
-  if (typeof value === "string") {
-    const result = value
-      .split(/\r?\n|,/g)
-      .map((item) => item.trim())
-      .filter((item) => item.length > 0);
-    return result.length ? result : [];
-  }
-
-  return undefined;
 }
 
 function scoreOwnerListing(payload: {
@@ -81,7 +62,7 @@ export async function PATCH(request: NextRequest, context: { params: Promise<{ i
   }
 
   const { id } = await context.params;
-  const body = (await request.json()) as {
+  const body = (await request.json().catch(() => null)) as {
     title?: string;
     cadastral?: string;
     district?: string;
@@ -98,16 +79,22 @@ export async function PATCH(request: NextRequest, context: { params: Promise<{ i
     mapAddress?: string;
     mapLat?: number | string;
     mapLng?: number | string;
-  };
+  } | null;
 
-  const area = normalizeOptionalNumber(body.area);
-  const price = normalizeOptionalNumber(body.price);
-  const roi = normalizeOptionalNumber(body.roi);
-  const irr = normalizeOptionalNumber(body.irr);
-  const distanceCenterKm = normalizeOptionalNumber(body.distanceCenterKm);
-  const mapLat = normalizeOptionalNumber(body.mapLat);
-  const mapLng = normalizeOptionalNumber(body.mapLng);
-  const mediaUrls = normalizeStringArray(body.mediaUrls);
+  const area = normalizeOptionalNumber(body?.area);
+  const price = normalizeOptionalNumber(body?.price);
+  const roi = normalizeOptionalNumber(body?.roi);
+  const irr = normalizeOptionalNumber(body?.irr);
+  const distanceCenterKm = normalizeOptionalNumber(body?.distanceCenterKm);
+  const mapLat = normalizeOptionalNumber(body?.mapLat);
+  const mapLng = normalizeOptionalNumber(body?.mapLng);
+  const title = sanitizeText(body?.title, 140);
+  const cadastral = sanitizeText(body?.cadastral ?? id, 120);
+  const district = sanitizeText(body?.district, 120);
+  const purpose = sanitizeText(body?.purpose, 120);
+  const legalOwnerType = sanitizeText(body?.legalOwnerType, 120);
+  const description = sanitizeText(body?.description, 2_000);
+  const mediaUrls = sanitizeStringArray(body?.mediaUrls, sanitizeMediaUrl);
   const hasMapLat = mapLat !== undefined;
   const hasMapLng = mapLng !== undefined;
   const mapPoint = latLngToMapPoint(mapLat, mapLng);
@@ -128,27 +115,27 @@ export async function PATCH(request: NextRequest, context: { params: Promise<{ i
   }
 
   if (
-    !body.title ||
-    !body.district ||
-    !body.purpose ||
+    !title ||
+    !district ||
+    !purpose ||
     area === undefined ||
     price === undefined ||
-    !body.legalOwnerType ||
-    !body.description
+    !legalOwnerType ||
+    !description
   ) {
     return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
   }
 
   const qualityScore = scoreOwnerListing({
-    title: body.title,
-    cadastral: body.cadastral ?? id,
-    district: body.district,
-    purpose: body.purpose,
+    title,
+    cadastral,
+    district,
+    purpose,
     area,
     price,
-    legalOwnerType: body.legalOwnerType,
-    hasUtilities: Boolean(body.hasUtilities),
-    description: body.description,
+    legalOwnerType,
+    hasUtilities: Boolean(body?.hasUtilities),
+    description,
   });
 
   if (isMockMode()) {
@@ -165,20 +152,20 @@ export async function PATCH(request: NextRequest, context: { params: Promise<{ i
       id,
       ownerId: role === "ADMIN" ? undefined : session.user.id,
       data: {
-        title: body.title,
-        cadastral: body.cadastral ?? id,
-        district: body.district,
-        purpose: body.purpose,
+        title,
+        cadastral,
+        district,
+        purpose,
         area,
         price,
         roi,
         irr,
         distanceCenterKm,
-        legalOwnerType: body.legalOwnerType,
-        hasUtilities: Boolean(body.hasUtilities),
-        description: body.description,
+        legalOwnerType,
+        hasUtilities: Boolean(body?.hasUtilities),
+        description,
         mediaUrls: mediaUrls ?? current.mediaUrls,
-        mapAddress: normalizeOptionalText(body.mapAddress),
+        mapAddress: sanitizeOptionalText(body?.mapAddress, 240),
         mapLat,
         mapLng,
       },
@@ -224,9 +211,9 @@ export async function PATCH(request: NextRequest, context: { params: Promise<{ i
   const updated = await prisma.plot.update({
     where: { id },
     data: {
-      title: body.title,
-      district: body.district,
-      purpose: body.purpose,
+      title,
+      district,
+      purpose,
       area,
       price,
       roi: roi ?? current.roi,
@@ -237,11 +224,11 @@ export async function PATCH(request: NextRequest, context: { params: Promise<{ i
       x: mapPoint?.x ?? current.x,
       y: mapPoint?.y ?? current.y,
       distanceCenterKm: distanceCenterKm ?? current.distanceCenterKm,
-      utilities: body.hasUtilities ? ["Electricity", "Water"] : ["Not verified"],
-      ownerType: body.legalOwnerType,
+      utilities: body?.hasUtilities ? ["Electricity", "Water"] : ["Not verified"],
+      ownerType: legalOwnerType,
       timeline: ["Owner edits submitted for moderation"],
       mediaUrls: mediaUrls ?? existingMediaUrls,
-      mapAddress: normalizeOptionalText(body.mapAddress),
+      mapAddress: sanitizeOptionalText(body?.mapAddress, 240),
       mapLat,
       mapLng,
     },

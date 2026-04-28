@@ -7,6 +7,7 @@ import { checkRateLimit, enforceSameOrigin, getClientIp } from "@/lib/api-securi
 import { authOptions } from "@/lib/auth";
 import { isMockMode } from "@/lib/data-mode";
 import { normalizeApplication } from "@/lib/db-mappers";
+import { sanitizeText } from "@/lib/input-security";
 import {
   createMockApplication,
   getMockPlotById,
@@ -17,13 +18,13 @@ import { prisma } from "@/lib/prisma";
 
 const publicInvestmentStatuses = ["available", "reserved", "deal"];
 const applicationSchema = z.object({
-  plotId: z.string().min(1).max(120),
-  investorName: z.string().min(2).max(120),
+  plotId: z.string().min(1).max(120).transform((value) => sanitizeText(value, 120)),
+  investorName: z.string().min(2).max(120).transform((value) => sanitizeText(value, 120)),
   investorType: z.enum(["individual", "company", "fund"]),
   amount: z.coerce.number().int().min(10_000).max(100_000_000),
-  phone: z.string().min(6).max(40),
-  email: z.string().email().max(120),
-  sourceOfFunds: z.string().min(2).max(1_000),
+  phone: z.string().min(6).max(40).transform((value) => sanitizeText(value, 40)),
+  email: z.string().email().max(120).transform((value) => sanitizeText(value, 120).toLowerCase()),
+  sourceOfFunds: z.string().min(2).max(1_000).transform((value) => sanitizeText(value, 1_000)),
 });
 
 export async function GET() {

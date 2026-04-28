@@ -18,7 +18,7 @@ export async function POST(request: NextRequest) {
     enforceSameOrigin(request) ?? checkRateLimit(`auth:resend:${getClientIp(request)}`, 5);
   if (blocked) return blocked;
 
-  const body = (await request.json()) as unknown;
+  const body = await request.json().catch(() => null);
   const parsed = resendSchema.safeParse(body);
 
   if (!parsed.success) {

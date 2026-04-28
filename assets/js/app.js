@@ -25,8 +25,7 @@
     { href: 'pricing.html', key: 'nav_pricing' },
     { href: 'news.html', key: 'nav_news' },
     { href: 'faq.html', key: 'nav_faq' },
-    { href: 'contacts.html', key: 'nav_contacts' },
-    { href: 'admin.html', key: 'nav_admin' }
+    { href: 'contacts.html', key: 'nav_contacts' }
   ];
 
   function readStorage(key, fallback) {
@@ -191,7 +190,6 @@
         '      <a href="legal.html">Юридическая информация</a>' +
         '      <a href="faq.html">Помощь</a>' +
         '      <a href="contacts.html">Поддержка</a>' +
-        '      <a href="admin.html">Панель управления</a>' +
         '    </div>' +
         '  </div>' +
         '</footer>';

@@ -4,6 +4,7 @@ import Link from "next/link";
 import { ListingQrCode } from "@/components/listing-qr-code";
 import { pickLang } from "@/lib/i18n";
 import { useCurrentLanguage } from "@/lib/i18n-client";
+import { sanitizeMediaUrl } from "@/lib/input-security";
 import { currency } from "@/lib/ui";
 import { BusinessProject, BusinessProjectStatus } from "@/lib/types";
 import { hasBusinessProjectTranslation, localizeBusinessProject } from "@/lib/i18n-content";
@@ -143,6 +144,9 @@ export function ProjectPageView({ project }: { project: BusinessProject }) {
     CN: "原始数据",
   });
   const hasFounderContacts = Boolean(project.founderEmail || project.founderPhone);
+  const safeMediaUrls = (project.mediaUrls ?? [])
+    .map((url) => sanitizeMediaUrl(url))
+    .filter((url): url is string => Boolean(url));
   const projectUrl = `/projects/${project.id}`;
   const contactHref = `/contacts?project=${encodeURIComponent(project.id)}#contact-form`;
 
@@ -231,11 +235,11 @@ export function ProjectPageView({ project }: { project: BusinessProject }) {
             <p>{displayProject.investmentTerms}</p>
           </div>
 
-          {project.mediaUrls?.length ? (
+          {safeMediaUrls.length ? (
             <div className="project-detail-section">
               <h2>{t.media}</h2>
               <div className="project-media-list">
-                {project.mediaUrls.map((url) => (
+                {safeMediaUrls.map((url) => (
                   <a key={url} href={url} target="_blank" rel="noreferrer">
                     {url}
                   </a>

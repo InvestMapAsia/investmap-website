@@ -78,6 +78,10 @@ async function loadPlotPageData(id: string): Promise<{ plot: Plot; similar: Plot
         ),
       };
     }
+
+    if (process.env.NODE_ENV === "production") {
+      return null;
+    }
   } catch {
     if (process.env.NODE_ENV === "production") {
       return null;

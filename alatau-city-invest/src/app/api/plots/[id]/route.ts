@@ -43,6 +43,10 @@ export async function GET(_request: NextRequest, context: { params: Promise<{ id
     const plot = await prisma.plot.findUnique({ where: { id } });
 
     if (!plot) {
+      if (process.env.NODE_ENV === "production") {
+        return NextResponse.json({ error: "Plot not found" }, { status: 404 });
+      }
+
       const fallback = getMockPlotById(id);
       if (!fallback) {
         return NextResponse.json({ error: "Plot not found" }, { status: 404 });
@@ -88,8 +92,8 @@ export async function PATCH(request: NextRequest, context: { params: Promise<{ i
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
-  const body = (await request.json()) as { status?: PlotStatus };
-  if (!body.status) {
+  const body = (await request.json().catch(() => null)) as { status?: PlotStatus } | null;
+  if (!body?.status) {
     return NextResponse.json({ error: "status is required" }, { status: 400 });
   }
   if (!plotStatuses.has(body.status)) {

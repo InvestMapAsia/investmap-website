@@ -49,6 +49,9 @@ export function enforceSameOrigin(request: NextRequest | Request) {
 
   const origin = request.headers.get("origin");
   if (!origin) {
+    if (process.env.NODE_ENV === "production") {
+      return NextResponse.json({ error: "Missing request origin" }, { status: 403 });
+    }
     return null;
   }
 

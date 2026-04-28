@@ -20,17 +20,22 @@ function resolveOrigin(origin?: string) {
   return base.replace(/\/+$/, "");
 }
 
+function hashToken(token: string) {
+  return crypto.createHash("sha256").update(token).digest("hex");
+}
+
 export async function issueEmailVerificationToken(payload: {
   email: string;
   origin?: string;
 }) {
   const token = crypto.randomBytes(32).toString("hex");
+  const tokenHash = hashToken(token);
   const expiresAt = new Date(Date.now() + getTtlHours() * 60 * 60 * 1000);
 
   if (isMockMode()) {
     createMockEmailVerificationToken({
       email: payload.email,
-      token,
+      token: tokenHash,
       expiresAt,
     });
   } else {
@@ -40,7 +45,7 @@ export async function issueEmailVerificationToken(payload: {
     await prisma.verificationToken.create({
       data: {
         identifier: payload.email,
-        token,
+        token: tokenHash,
         expires: expiresAt,
       },
     });
@@ -60,8 +65,10 @@ export async function consumeEmailVerificationToken(token: string) {
     return { ok: false as const, reason: "missing" as const };
   }
 
+  const tokenHash = hashToken(token);
+
   if (isMockMode()) {
-    const result = consumeMockEmailVerificationToken(token);
+    const result = consumeMockEmailVerificationToken(tokenHash);
     if (result.status !== "verified" || !result.user) {
       return { ok: false as const, reason: result.status };
     }
@@ -75,7 +82,7 @@ export async function consumeEmailVerificationToken(token: string) {
   }
 
   const tokenRow = await prisma.verificationToken.findUnique({
-    where: { token },
+    where: { token: tokenHash },
   });
 
   if (!tokenRow) {
@@ -84,7 +91,7 @@ export async function consumeEmailVerificationToken(token: string) {
 
   if (tokenRow.expires < new Date()) {
     await prisma.verificationToken.deleteMany({
-      where: { token },
+      where: { token: tokenHash },
     });
     return { ok: false as const, reason: "expired" as const };
   }

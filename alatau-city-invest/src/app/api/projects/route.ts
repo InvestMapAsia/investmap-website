@@ -6,6 +6,13 @@ import { checkRateLimit, enforceSameOrigin, getClientIp } from "@/lib/api-securi
 import { authOptions } from "@/lib/auth";
 import { isMockMode } from "@/lib/data-mode";
 import { normalizeBusinessProject, toPublicBusinessProject } from "@/lib/db-mappers";
+import {
+  sanitizeHttpUrl,
+  sanitizeMediaUrl,
+  sanitizeOptionalText,
+  sanitizeStringArray,
+  sanitizeText,
+} from "@/lib/input-security";
 import { createMockBusinessProject, listMockBusinessProjects } from "@/lib/mock-store";
 import { createInAppNotification } from "@/lib/notifications";
 import { prisma } from "@/lib/prisma";
@@ -17,35 +24,6 @@ const businessProjectStatuses = new Set<BusinessProjectStatus>([
   "approved",
   "rejected",
 ]);
-
-function normalizeText(value: unknown) {
-  if (typeof value !== "string") return "";
-  return value.trim();
-}
-
-function normalizeOptionalText(value: unknown) {
-  const next = normalizeText(value);
-  return next.length ? next : undefined;
-}
-
-function normalizeStringArray(value: unknown) {
-  if (Array.isArray(value)) {
-    const result = value
-      .map((item) => (typeof item === "string" ? item.trim() : ""))
-      .filter((item) => item.length > 0);
-    return result.length ? result : undefined;
-  }
-
-  if (typeof value === "string") {
-    const result = value
-      .split(/\r?\n|,/g)
-      .map((item) => item.trim())
-      .filter((item) => item.length > 0);
-    return result.length ? result : undefined;
-  }
-
-  return undefined;
-}
 
 function normalizeOptionalNumber(value: unknown) {
   if (value === null || value === undefined || value === "") return undefined;
@@ -86,7 +64,7 @@ function calculateReadinessScore(payload: {
 export async function GET(request: NextRequest) {
   const searchParams = request.nextUrl.searchParams;
   const requestedStatus = searchParams.get("status") ?? "all";
-  const search = searchParams.get("search") ?? undefined;
+  const search = sanitizeOptionalText(searchParams.get("search"), 120);
   const scope = (searchParams.get("scope") as "market" | "mine" | null) ?? "market";
 
   if (
@@ -213,7 +191,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const body = (await request.json()) as {
+  const body = (await request.json().catch(() => null)) as {
     companyName?: string;
     businessOverview?: string;
     market?: string;
@@ -233,28 +211,28 @@ export async function POST(request: NextRequest) {
     mapAddress?: string;
     mapLat?: number | string;
     mapLng?: number | string;
-  };
+  } | null;
 
   const payload = {
-    companyName: normalizeText(body.companyName),
-    businessOverview: normalizeText(body.businessOverview),
-    market: normalizeText(body.market),
-    businessModel: normalizeText(body.businessModel),
-    traction: normalizeText(body.traction),
-    legalReadiness: normalizeText(body.legalReadiness),
-    financialForecasts: normalizeText(body.financialForecasts),
-    investmentTerms: normalizeText(body.investmentTerms),
-    founderName: normalizeText(body.founderName),
-    founderEmail: normalizeText(body.founderEmail),
-    founderPhone: normalizeText(body.founderPhone),
-    city: normalizeOptionalText(body.city),
-    website: normalizeOptionalText(body.website),
-    requestedAmount: body.requestedAmount ? Number(body.requestedAmount) : undefined,
-    minimumTicket: body.minimumTicket ? Number(body.minimumTicket) : undefined,
-    mediaUrls: normalizeStringArray(body.mediaUrls),
-    mapAddress: normalizeOptionalText(body.mapAddress),
-    mapLat: normalizeOptionalNumber(body.mapLat),
-    mapLng: normalizeOptionalNumber(body.mapLng),
+    companyName: sanitizeText(body?.companyName, 120),
+    businessOverview: sanitizeText(body?.businessOverview, 2_000),
+    market: sanitizeText(body?.market, 240),
+    businessModel: sanitizeText(body?.businessModel, 1_200),
+    traction: sanitizeText(body?.traction, 1_200),
+    legalReadiness: sanitizeText(body?.legalReadiness, 1_200),
+    financialForecasts: sanitizeText(body?.financialForecasts, 1_200),
+    investmentTerms: sanitizeText(body?.investmentTerms, 1_200),
+    founderName: sanitizeText(body?.founderName, 120),
+    founderEmail: sanitizeText(body?.founderEmail, 160).toLowerCase(),
+    founderPhone: sanitizeText(body?.founderPhone, 60),
+    city: sanitizeOptionalText(body?.city, 120),
+    website: sanitizeHttpUrl(body?.website),
+    requestedAmount: body?.requestedAmount ? Number(body.requestedAmount) : undefined,
+    minimumTicket: body?.minimumTicket ? Number(body.minimumTicket) : undefined,
+    mediaUrls: sanitizeStringArray(body?.mediaUrls, sanitizeMediaUrl),
+    mapAddress: sanitizeOptionalText(body?.mapAddress, 240),
+    mapLat: normalizeOptionalNumber(body?.mapLat),
+    mapLng: normalizeOptionalNumber(body?.mapLng),
   };
 
   if (
@@ -268,9 +246,12 @@ export async function POST(request: NextRequest) {
     !payload.investmentTerms ||
     !payload.founderName ||
     !payload.founderEmail ||
-    !payload.founderPhone
+    !payload.founderPhone ||
+    !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(payload.founderEmail) ||
+    (payload.requestedAmount !== undefined && payload.requestedAmount < 1_000) ||
+    (payload.minimumTicket !== undefined && payload.minimumTicket < 100)
   ) {
-    return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
+    return NextResponse.json({ error: "Invalid input" }, { status: 400 });
   }
 
   const readinessScore = calculateReadinessScore(payload);

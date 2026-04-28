@@ -4,11 +4,12 @@ import { z } from "zod";
 import { writeAuditLog } from "@/lib/audit";
 import { checkRateLimit, enforceSameOrigin, getClientIp } from "@/lib/api-security";
 import { authOptions } from "@/lib/auth";
+import { sanitizeText } from "@/lib/input-security";
 import { createKycSession } from "@/lib/integrations/adapters";
 import { createInAppNotification } from "@/lib/notifications";
 
 const kycSchema = z.object({
-  fullName: z.string().min(2).max(120),
+  fullName: z.string().min(2).max(120).transform((value) => sanitizeText(value, 120)),
 });
 
 export async function POST(request: NextRequest) {

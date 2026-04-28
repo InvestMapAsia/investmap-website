@@ -1,101 +1,20 @@
-﻿"use client";
+import { Role } from "@prisma/client";
+import { getServerSession } from "next-auth";
+import { redirect } from "next/navigation";
+import { AdminPageClient } from "@/components/admin-page-client";
+import { authOptions } from "@/lib/auth";
 
-import { AdminQueuePanel } from "@/components/admin-queue-panel";
-import { useCurrentLanguage } from "@/lib/i18n-client";
-import { pickLang } from "@/lib/i18n";
+export default async function AdminPage() {
+  const session = await getServerSession(authOptions);
+  const role = session?.user?.role as Role | undefined;
 
-export default function AdminPage() {
-  const { lang } = useCurrentLanguage();
-  const t = pickLang(lang, {
-    EN: {
-      title: "Administrative panel",
-      sub: "Moderation, legal incidents, owner listings, projects and inventory control in one workspace.",
-      sla: "Operational SLA",
-      firstResponse: "Application first response",
-      in2h: "Within 2 hours",
-      kycReview: "KYC/AML review",
-      in24h: "Within 24 hours",
-      legalModeration: "Legal moderation",
-      in2472h: "24-72 hours",
-      controls: "Risk controls",
-      controlsText:
-        "Duplicate cadastral checks, price anomaly detection, suspicious application patterns and document inconsistency flags.",
-    },
-    RU: {
-      title: "Административная панель",
-      sub: "Модерация, юридические инциденты, листинги собственников, проекты и контроль инвентаря в одном окне.",
-      sla: "Операционный SLA",
-      firstResponse: "Первичный ответ по заявке",
-      in2h: "В течение 2 часов",
-      kycReview: "Проверка KYC/AML",
-      in24h: "В течение 24 часов",
-      legalModeration: "Юридическая модерация",
-      in2472h: "24-72 часа",
-      controls: "Контроль рисков",
-      controlsText:
-        "Проверка дублей кадастров, выявление ценовых аномалий, подозрительных паттернов заявок и несоответствий документов.",
-    },
-    KZ: {
-      title: "Әкімшілік панель",
-      sub: "Модерация, заңдық инциденттер, жер иелері листингтері, жобалар және инвентарь бақылауы бір кеңістікте.",
-      sla: "Операциялық SLA",
-      firstResponse: "Өтінімге алғашқы жауап",
-      in2h: "2 сағат ішінде",
-      kycReview: "KYC/AML тексерісі",
-      in24h: "24 сағат ішінде",
-      legalModeration: "Заңдық модерация",
-      in2472h: "24-72 сағат",
-      controls: "Тәуекел бақылауы",
-      controlsText:
-        "Кадастр қайталануын тексеру, баға аномалияларын анықтау, күмәнді өтінім үлгілері және құжат сәйкессіздіктері.",
-    },
-    CN: {
-      title: "管理面板",
-      sub: "在一个工作区中处理审核、法律事件、业主挂牌、项目和库存控制。",
-      sla: "运营 SLA",
-      firstResponse: "申请首次响应",
-      in2h: "2 小时内",
-      kycReview: "KYC/AML 审核",
-      in24h: "24 小时内",
-      legalModeration: "法律审核",
-      in2472h: "24-72 小时",
-      controls: "风险控制",
-      controlsText:
-        "地籍重复检查、价格异常检测、可疑申请模式和文件不一致标记。",
-    },
-  });
+  if (!session?.user?.id) {
+    redirect("/login?callbackUrl=/admin");
+  }
 
-  return (
-    <div className="container">
-      <div className="section-title">
-        <h2>{t.title}</h2>
-        <p>{t.sub}</p>
-      </div>
-      <AdminQueuePanel />
+  if (role !== "ADMIN" && role !== "MODERATOR") {
+    redirect("/");
+  }
 
-      <section className="section split">
-        <article className="card">
-          <h3 className="card-title">{t.sla}</h3>
-          <div className="metric-line">
-            <span className="muted">{t.firstResponse}</span>
-            <strong>{t.in2h}</strong>
-          </div>
-          <div className="metric-line">
-            <span className="muted">{t.kycReview}</span>
-            <strong>{t.in24h}</strong>
-          </div>
-          <div className="metric-line">
-            <span className="muted">{t.legalModeration}</span>
-            <strong>{t.in2472h}</strong>
-          </div>
-        </article>
-
-        <article className="card">
-          <h3 className="card-title">{t.controls}</h3>
-          <p className="muted">{t.controlsText}</p>
-        </article>
-      </section>
-    </div>
-  );
+  return <AdminPageClient />;
 }
-

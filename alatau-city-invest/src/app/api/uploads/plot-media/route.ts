@@ -90,7 +90,11 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
-  const formData = await request.formData();
+  const formData = await request.formData().catch(() => null);
+  if (!formData) {
+    return NextResponse.json({ error: "Invalid upload request" }, { status: 400 });
+  }
+
   const file = formData.get("file");
 
   if (!(file instanceof File)) {

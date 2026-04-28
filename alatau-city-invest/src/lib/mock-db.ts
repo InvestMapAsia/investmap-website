@@ -708,6 +708,7 @@ export function calculateOwnerPlotQualityScore(payload: OwnerDraftPlotInput) {
 
 export function aiAnalyze(prompt: string) {
   const question = prompt.toLowerCase();
+  const publicStatuses: PlotStatus[] = ["available", "reserved", "deal"];
 
   if (question.includes("roi") || question.includes("income") || question.includes("\u0434\u043e\u0445\u043e\u0434")) {
     const top = [...plots]
@@ -736,7 +737,10 @@ export function aiAnalyze(prompt: string) {
 
   if (question.includes("logistics") || question.includes("\u043b\u043e\u0433\u0438\u0441\u0442")) {
     const logistics = plots
-      .filter((plot) => plot.purpose.toLowerCase().includes("logistics"))
+      .filter(
+        (plot) =>
+          publicStatuses.includes(plot.status) && plot.purpose.toLowerCase().includes("logistics")
+      )
       .map((plot) => `${plot.id} (${plot.price} USD)`)
       .join(", ");
 

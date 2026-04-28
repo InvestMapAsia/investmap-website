@@ -12,6 +12,34 @@ const credentialsSchema = z.object({
   password: z.string().min(8),
 });
 
+const LOGIN_WINDOW_MS = 15 * 60_000;
+const LOGIN_LIMIT = 8;
+const loginBuckets = new Map<string, { count: number; resetAt: number }>();
+
+function getHeader(
+  headers: Headers | Record<string, string | string[] | undefined> | undefined,
+  name: string
+) {
+  if (!headers) return undefined;
+  if (headers instanceof Headers) return headers.get(name) ?? undefined;
+
+  const value = headers[name] ?? headers[name.toLowerCase()];
+  return Array.isArray(value) ? value[0] : value;
+}
+
+function isLoginLimited(key: string) {
+  const now = Date.now();
+  const current = loginBuckets.get(key);
+
+  if (!current || current.resetAt <= now) {
+    loginBuckets.set(key, { count: 1, resetAt: now + LOGIN_WINDOW_MS });
+    return false;
+  }
+
+  current.count += 1;
+  return current.count > LOGIN_LIMIT;
+}
+
 function getAuthSecret() {
   const secret = process.env.NEXTAUTH_SECRET;
   const unsafe =
@@ -44,21 +72,29 @@ export const authOptions: NextAuthOptions = {
         email: { label: "Email", type: "text" },
         password: { label: "Password", type: "password" },
       },
-      authorize: async (credentials) => {
+      authorize: async (credentials, request) => {
         const parsed = credentialsSchema.safeParse(credentials);
         if (!parsed.success) {
           return null;
         }
 
         const { email, password } = parsed.data;
+        const normalizedEmail = email.trim().toLowerCase();
+        const forwardedFor = getHeader(request?.headers, "x-forwarded-for");
+        const clientIp = forwardedFor?.split(",")[0]?.trim() || "unknown";
+        const loginKey = `${clientIp}:${normalizedEmail}`;
+
+        if (isLoginLimited(loginKey)) {
+          return null;
+        }
 
         if (isMockMode()) {
-          const mockUser = validateMockCredentials(email, password);
+          const mockUser = validateMockCredentials(normalizedEmail, password);
           if (!mockUser) {
             return null;
           }
 
-          const verification = getMockEmailVerificationStatus(email);
+          const verification = getMockEmailVerificationStatus(normalizedEmail);
           if (!verification.verified) {
             throw new Error("EMAIL_NOT_VERIFIED");
           }
@@ -67,7 +103,7 @@ export const authOptions: NextAuthOptions = {
         }
 
         const user = await prisma.user.findUnique({
-          where: { email },
+          where: { email: normalizedEmail },
         });
 
         if (!user?.passwordHash) {

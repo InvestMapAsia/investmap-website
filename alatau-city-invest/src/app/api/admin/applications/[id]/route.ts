@@ -1,10 +1,13 @@
 ﻿import { ApplicationStatus, Role } from "@prisma/client";
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
+import { z } from "zod";
 import { writeAuditLog } from "@/lib/audit";
+import { checkRateLimit, enforceSameOrigin, getClientIp } from "@/lib/api-security";
 import { authOptions } from "@/lib/auth";
 import { isMockMode } from "@/lib/data-mode";
 import { normalizeApplication } from "@/lib/db-mappers";
+import { sanitizeOptionalText } from "@/lib/input-security";
 import {
   getMockApplicationById,
   getMockApplicationUser,
@@ -13,7 +16,16 @@ import {
 import { createApplicationStatusNotifications } from "@/lib/notifications";
 import { prisma } from "@/lib/prisma";
 
+const statusSchema = z.object({
+  status: z.enum(["draft", "submitted", "kyc_aml", "legal_review", "approved", "rejected"]),
+  reviewNote: z.string().max(1_000).optional().nullable().transform((value) => sanitizeOptionalText(value, 1_000) ?? null),
+});
+
 export async function PATCH(request: NextRequest, context: { params: Promise<{ id: string }> }) {
+  const blocked =
+    enforceSameOrigin(request) ?? checkRateLimit(`admin:applications:update:${getClientIp(request)}`, 60);
+  if (blocked) return blocked;
+
   const session = await getServerSession(authOptions);
   if (!session?.user?.id || !session.user.role) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -24,14 +36,11 @@ export async function PATCH(request: NextRequest, context: { params: Promise<{ i
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
-  const body = (await request.json()) as {
-    status?: ApplicationStatus;
-    reviewNote?: string;
-  };
-
-  if (!body.status) {
-    return NextResponse.json({ error: "status is required" }, { status: 400 });
+  const parsed = statusSchema.safeParse(await request.json().catch(() => null));
+  if (!parsed.success) {
+    return NextResponse.json({ error: "Invalid input" }, { status: 400 });
   }
+  const body = parsed.data as { status: ApplicationStatus; reviewNote: string | null };
 
   const { id } = await context.params;
 

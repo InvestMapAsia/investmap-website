@@ -1,6 +1,7 @@
 ﻿import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { writeAuditLog } from "@/lib/audit";
+import { checkRateLimit, enforceSameOrigin, getClientIp } from "@/lib/api-security";
 import { authOptions } from "@/lib/auth";
 import { isMockMode } from "@/lib/data-mode";
 import { addMockFavorite, listMockFavoriteIds } from "@/lib/mock-store";
@@ -26,14 +27,20 @@ export async function GET() {
 }
 
 export async function POST(request: NextRequest) {
+  const blocked = enforceSameOrigin(request) ?? checkRateLimit(`favorites:add:${getClientIp(request)}`, 120);
+  if (blocked) return blocked;
+
   const session = await getServerSession(authOptions);
   if (!session?.user?.id) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const body = (await request.json()) as { plotId?: string };
-  if (!body.plotId) {
+  const body = (await request.json().catch(() => null)) as { plotId?: string } | null;
+  if (!body?.plotId) {
     return NextResponse.json({ error: "plotId is required" }, { status: 400 });
+  }
+  if (typeof body.plotId !== "string" || body.plotId.length > 120) {
+    return NextResponse.json({ error: "Invalid plotId" }, { status: 400 });
   }
 
   if (isMockMode()) {

@@ -8,12 +8,13 @@ import { isMockMode } from "@/lib/data-mode";
 import { sendEmail } from "@/lib/email/sender";
 import { buildEmailVerificationTemplate } from "@/lib/email/templates";
 import { issueEmailVerificationToken } from "@/lib/email/verification";
+import { sanitizeText } from "@/lib/input-security";
 import { registerMockUser } from "@/lib/mock-store";
 import { prisma } from "@/lib/prisma";
 
 const registerSchema = z.object({
-  name: z.string().min(2).max(80),
-  email: z.string().email(),
+  name: z.string().min(2).max(80).transform((value) => sanitizeText(value, 80)),
+  email: z.string().email().transform((value) => sanitizeText(value, 160).toLowerCase()),
   password: z
     .string()
     .min(12)
@@ -30,7 +31,7 @@ export async function POST(request: NextRequest) {
   const blocked = enforceSameOrigin(request) ?? checkRateLimit(`auth:register:${getClientIp(request)}`, 10);
   if (blocked) return blocked;
 
-  const body = (await request.json()) as unknown;
+  const body = await request.json().catch(() => null);
   const parsed = registerSchema.safeParse(body);
 
   if (!parsed.success) {

@@ -6,6 +6,12 @@ import { checkRateLimit, enforceSameOrigin, getClientIp } from "@/lib/api-securi
 import { authOptions } from "@/lib/auth";
 import { isMockMode } from "@/lib/data-mode";
 import { normalizePlot } from "@/lib/db-mappers";
+import {
+  sanitizeMediaUrl,
+  sanitizeOptionalText,
+  sanitizeStringArray,
+  sanitizeText,
+} from "@/lib/input-security";
 import { ALATAU_BOUNDS, isInsideAlatauBounds, latLngToMapPoint } from "@/lib/map-geo";
 import { createMockOwnerPlot, listMockOwnerPlots } from "@/lib/mock-store";
 import { createInAppNotification } from "@/lib/notifications";
@@ -15,28 +21,6 @@ function normalizeOptionalNumber(value: unknown) {
   if (value === null || value === undefined || value === "") return undefined;
   const next = Number(value);
   return Number.isFinite(next) ? next : undefined;
-}
-
-function normalizeOptionalText(value: unknown) {
-  if (typeof value !== "string") return undefined;
-  const next = value.trim();
-  return next.length ? next : undefined;
-}
-
-function normalizeStringArray(value: unknown) {
-  if (!value) return [] as string[];
-  if (Array.isArray(value)) {
-    return value
-      .map((item) => (typeof item === "string" ? item.trim() : String(item).trim()))
-      .filter(Boolean);
-  }
-  if (typeof value === "string") {
-    return value
-      .split(/[\n,]/g)
-      .map((item) => item.trim())
-      .filter(Boolean);
-  }
-  return [] as string[];
 }
 
 function scoreOwnerListing(payload: {
@@ -112,7 +96,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
-  const body = (await request.json()) as {
+  const body = (await request.json().catch(() => null)) as {
     title?: string;
     cadastral?: string;
     district?: string;
@@ -129,16 +113,22 @@ export async function POST(request: NextRequest) {
     mapAddress?: string;
     mapLat?: number | string;
     mapLng?: number | string;
-  };
+  } | null;
 
-  const area = normalizeOptionalNumber(body.area);
-  const price = normalizeOptionalNumber(body.price);
-  const roi = normalizeOptionalNumber(body.roi);
-  const irr = normalizeOptionalNumber(body.irr);
-  const distanceCenterKm = normalizeOptionalNumber(body.distanceCenterKm);
-  const mapLat = normalizeOptionalNumber(body.mapLat);
-  const mapLng = normalizeOptionalNumber(body.mapLng);
-  const mediaUrls = normalizeStringArray(body.mediaUrls);
+  const area = normalizeOptionalNumber(body?.area);
+  const price = normalizeOptionalNumber(body?.price);
+  const roi = normalizeOptionalNumber(body?.roi);
+  const irr = normalizeOptionalNumber(body?.irr);
+  const distanceCenterKm = normalizeOptionalNumber(body?.distanceCenterKm);
+  const mapLat = normalizeOptionalNumber(body?.mapLat);
+  const mapLng = normalizeOptionalNumber(body?.mapLng);
+  const title = sanitizeText(body?.title, 140);
+  const cadastral = sanitizeText(body?.cadastral, 120);
+  const district = sanitizeText(body?.district, 120);
+  const purpose = sanitizeText(body?.purpose, 120);
+  const legalOwnerType = sanitizeText(body?.legalOwnerType, 120);
+  const description = sanitizeText(body?.description, 2_000);
+  const mediaUrls = sanitizeStringArray(body?.mediaUrls, sanitizeMediaUrl) ?? [];
   const hasMapLat = mapLat !== undefined;
   const hasMapLng = mapLng !== undefined;
   const mapPoint = latLngToMapPoint(mapLat, mapLng);
@@ -162,47 +152,47 @@ export async function POST(request: NextRequest) {
   }
 
   if (
-    !body.title ||
-    !body.cadastral ||
-    !body.district ||
-    !body.purpose ||
+    !title ||
+    !cadastral ||
+    !district ||
+    !purpose ||
     area === undefined ||
     price === undefined ||
-    !body.legalOwnerType ||
-    !body.description
+    !legalOwnerType ||
+    !description
   ) {
     return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
   }
 
   const qualityScore = scoreOwnerListing({
-    title: body.title,
-    cadastral: body.cadastral,
-    district: body.district,
-    purpose: body.purpose,
+    title,
+    cadastral,
+    district,
+    purpose,
     area,
     price,
-    legalOwnerType: body.legalOwnerType,
-    hasUtilities: Boolean(body.hasUtilities),
-    description: body.description,
+    legalOwnerType,
+    hasUtilities: Boolean(body?.hasUtilities),
+    description,
   });
 
   if (isMockMode()) {
     const created = createMockOwnerPlot(
       {
-        title: body.title,
-        cadastral: body.cadastral,
-        district: body.district,
-        purpose: body.purpose,
+        title,
+        cadastral,
+        district,
+        purpose,
         area,
         price,
         roi,
         irr,
         distanceCenterKm,
-        legalOwnerType: body.legalOwnerType,
-        hasUtilities: Boolean(body.hasUtilities),
-        description: body.description,
+        legalOwnerType,
+        hasUtilities: Boolean(body?.hasUtilities),
+        description,
         mediaUrls,
-        mapAddress: normalizeOptionalText(body.mapAddress),
+        mapAddress: sanitizeOptionalText(body?.mapAddress, 240),
         mapLat,
         mapLng,
       },
@@ -252,9 +242,9 @@ export async function POST(request: NextRequest) {
       data: {
         id,
         slug: id.toLowerCase(),
-        title: body.title,
-        district: body.district,
-        purpose: body.purpose,
+        title,
+        district,
+        purpose,
         area,
         price,
         currency: "USD",
@@ -266,13 +256,13 @@ export async function POST(request: NextRequest) {
         x: mapPoint?.x ?? randomX,
         y: mapPoint?.y ?? randomY,
         distanceCenterKm: distanceCenterKm ?? 9,
-        utilities: body.hasUtilities ? ["Electricity", "Water"] : ["Not verified"],
+        utilities: body?.hasUtilities ? ["Electricity", "Water"] : ["Not verified"],
         tags: ["Self-service"],
-        ownerType: body.legalOwnerType,
+        ownerType: legalOwnerType,
         docs: ["Owner provided package"],
         timeline: ["Moderation pending"],
         mediaUrls: mediaUrls.length ? mediaUrls : undefined,
-        mapAddress: normalizeOptionalText(body.mapAddress),
+        mapAddress: sanitizeOptionalText(body?.mapAddress, 240),
         mapLat,
         mapLng,
         source: PlotSource.owner,

@@ -23,11 +23,14 @@ const plotStatuses = new Set<PlotStatus>([
   "legal_issue",
 ]);
 const publicPlotStatuses: PlotStatus[] = ["available", "reserved", "deal"];
+const riskFilters = new Set(["all", "low", "medium", "high"]);
+const priceFilters = new Set(pricePresets.map((item) => item.key));
+const sortOptions = new Set(["roi_desc", "price_asc", "price_desc", "risk_asc"]);
 
 export async function GET(request: NextRequest) {
   const searchParams = request.nextUrl.searchParams;
 
-  const purpose = searchParams.get("purpose") ?? "all";
+  const purpose = (searchParams.get("purpose") ?? "all").slice(0, 120);
   const requestedStatus = searchParams.get("status") ?? "all";
   const risk = (searchParams.get("risk") as "all" | "low" | "medium" | "high" | null) ?? "all";
   const price =
@@ -38,6 +41,9 @@ export async function GET(request: NextRequest) {
 
   if (requestedStatus !== "all" && !plotStatuses.has(requestedStatus as PlotStatus)) {
     return NextResponse.json({ error: "Invalid status" }, { status: 400 });
+  }
+  if (!riskFilters.has(risk) || !priceFilters.has(price) || !sortOptions.has(sort)) {
+    return NextResponse.json({ error: "Invalid filter" }, { status: 400 });
   }
 
   const session = await getServerSession(authOptions);

@@ -54,6 +54,10 @@ async function loadProject(id: string): Promise<BusinessProject | null> {
         ? toPublicBusinessProject(project)
         : project;
     }
+
+    if (process.env.NODE_ENV === "production") {
+      return null;
+    }
   } catch {
     if (process.env.NODE_ENV === "production") {
       return null;
