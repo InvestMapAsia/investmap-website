@@ -14,6 +14,7 @@ const AI_HISTORY = "aci_ai_history";
 
 export function AIAssistantPanel() {
   const { lang } = useCurrentLanguage();
+  const historyKey = `${AI_HISTORY}_${lang}`;
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
@@ -90,20 +91,20 @@ export function AIAssistantPanel() {
   });
 
   useEffect(() => {
-    const saved = JSON.parse(localStorage.getItem(AI_HISTORY) ?? "[]") as Message[];
+    const saved = JSON.parse(localStorage.getItem(historyKey) ?? "[]") as Message[];
     if (saved.length) {
       setMessages(saved);
     } else {
       setMessages([{ role: "ai", text: t.greeting }]);
     }
-  }, [t.greeting]);
+  }, [historyKey, t.greeting]);
 
   useEffect(() => {
-    localStorage.setItem(AI_HISTORY, JSON.stringify(messages));
+    localStorage.setItem(historyKey, JSON.stringify(messages));
     if (chatRef.current) {
       chatRef.current.scrollTop = chatRef.current.scrollHeight;
     }
-  }, [messages]);
+  }, [historyKey, messages]);
 
   const sendPrompt = async (prompt: string) => {
     const clean = prompt.trim();
@@ -115,7 +116,7 @@ export function AIAssistantPanel() {
     const res = await fetch("/api/ai", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ prompt: clean }),
+      body: JSON.stringify({ prompt: clean, lang }),
     });
 
     setLoading(false);

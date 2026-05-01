@@ -93,6 +93,8 @@ export function ProjectsCabinet() {
       created: "Created",
       details: "Project details",
       founder: "Founder",
+      email: "Email",
+      phone: "Phone",
       minTicket: "Minimum ticket",
       website: "Website",
       city: "City",
@@ -151,6 +153,8 @@ export function ProjectsCabinet() {
       created: "Создан",
       details: "Детали проекта",
       founder: "Основатель",
+      email: "Email",
+      phone: "Телефон",
       minTicket: "Минимальный билет",
       website: "Сайт",
       city: "Город",
@@ -209,6 +213,8 @@ export function ProjectsCabinet() {
       created: "Құрылған",
       details: "Жоба деректері",
       founder: "Құрушы",
+      email: "Email",
+      phone: "Телефон",
       minTicket: "Минималды билет",
       website: "Сайт",
       city: "Қала",
@@ -267,6 +273,8 @@ export function ProjectsCabinet() {
       created: "创建时间",
       details: "项目详情",
       founder: "创始人",
+      email: "邮箱",
+      phone: "电话",
       minTicket: "最低投资额",
       website: "网站",
       city: "城市",
@@ -645,7 +653,7 @@ export function ProjectsCabinet() {
                 />
               </div>
               <div className="form-field">
-                <label>Email</label>
+                <label>{t.email}</label>
                 <input
                   type="email"
                   value={projectEditForm.founderEmail}
@@ -656,7 +664,7 @@ export function ProjectsCabinet() {
                 />
               </div>
               <div className="form-field">
-                <label>Phone</label>
+                <label>{t.phone}</label>
                 <input
                   value={projectEditForm.founderPhone}
                   onChange={(event) =>

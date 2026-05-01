@@ -9,6 +9,7 @@ import {
   PlotStatus,
   PricingPlan,
 } from "@/lib/types";
+import { Lang, pickLang } from "@/lib/i18n";
 import { latLngToMapPoint } from "@/lib/map-geo";
 
 const todayIso = new Date().toISOString().slice(0, 10);
@@ -706,11 +707,76 @@ export function calculateOwnerPlotQualityScore(payload: OwnerDraftPlotInput) {
   return Math.min(100, score);
 }
 
-export function aiAnalyze(prompt: string) {
+export function aiAnalyze(prompt: string, lang: Lang = "EN") {
   const question = prompt.toLowerCase();
   const publicStatuses: PlotStatus[] = ["available", "reserved", "deal"];
+  const copy = pickLang(lang, {
+    EN: {
+      topRoi: (top: string) =>
+        `Top ROI plots currently: ${top}. Compare legal grade and risk before final decision.`,
+      noTopRoi: "No available plots now for ROI ranking.",
+      lowRisk: (plotsList: string) =>
+        `Lower-risk options: ${plotsList}. Recommend verifying A/A+ legal profile and document update date.`,
+      noLowRisk:
+        "Lower-risk options are temporarily limited. Consider medium risk with enhanced due diligence.",
+      logistics: (plotsList: string) => `Logistics-oriented plots: ${plotsList}`,
+      noLogistics: "No logistics plots currently matched your request.",
+      ownerFlow:
+        "Owner flow: sign up -> add cadastral and commercial data -> upload documents -> choose pricing plan -> moderation -> publication.",
+      fallback:
+        "Please share your budget, risk tolerance, and time horizon. I can return a tailored shortlist with legal and ROI filters.",
+    },
+    RU: {
+      topRoi: (top: string) =>
+        `Сейчас лучшие участки по ROI: ${top}. Перед решением сравните юридический класс и риск.`,
+      noTopRoi: "Сейчас нет доступных участков для рейтинга по ROI.",
+      lowRisk: (plotsList: string) =>
+        `Варианты с меньшим риском: ${plotsList}. Рекомендую проверить юридический профиль A/A+ и дату обновления документов.`,
+      noLowRisk:
+        "Варианты с низким риском временно ограничены. Можно рассмотреть средний риск с усиленной проверкой.",
+      logistics: (plotsList: string) => `Участки под логистику: ${plotsList}`,
+      noLogistics: "Сейчас под ваш запрос не найдено участков для логистики.",
+      ownerFlow:
+        "Путь владельца: регистрация -> кадастровые и коммерческие данные -> документы -> оплата размещения -> модерация -> публикация.",
+      fallback:
+        "Напишите бюджет, допустимый риск и горизонт инвестирования. Я подготовлю короткий список с фильтрами по юридическому статусу и ROI.",
+    },
+    KZ: {
+      topRoi: (top: string) =>
+        `Қазір ROI бойынша үздік учаскелер: ${top}. Шешім алдында заңдық класс пен тәуекелді салыстырыңыз.`,
+      noTopRoi: "Қазір ROI рейтингі үшін қолжетімді учаскелер жоқ.",
+      lowRisk: (plotsList: string) =>
+        `Тәуекелі төмен нұсқалар: ${plotsList}. A/A+ заңдық профилін және құжат жаңарту күнін тексеруді ұсынамын.`,
+      noLowRisk:
+        "Тәуекелі төмен нұсқалар уақытша шектеулі. Қосымша тексеріспен орташа тәуекелді қарастыруға болады.",
+      logistics: (plotsList: string) => `Логистикаға бағытталған учаскелер: ${plotsList}`,
+      noLogistics: "Қазір сұрауыңызға сай логистикалық учаскелер табылмады.",
+      ownerFlow:
+        "Ие жолы: тіркелу -> кадастрлық және коммерциялық деректер -> құжаттарды жүктеу -> орналастыру ақысын таңдау -> модерация -> жариялау.",
+      fallback:
+        "Бюджетіңізді, тәуекел деңгейін және инвестиция мерзімін жазыңыз. Мен заңдық статус пен ROI бойынша қысқа тізім дайындаймын.",
+    },
+    CN: {
+      topRoi: (top: string) =>
+        `当前 ROI 最高的地块：${top}。最终决策前请比较法律等级和风险。`,
+      noTopRoi: "目前没有可按 ROI 排名的可投资地块。",
+      lowRisk: (plotsList: string) =>
+        `风险较低的选项：${plotsList}。建议核验 A/A+ 法律档案和文件更新日期。`,
+      noLowRisk: "低风险选项暂时有限。可以考虑中等风险，并加强尽职调查。",
+      logistics: (plotsList: string) => `适合物流方向的地块：${plotsList}`,
+      noLogistics: "目前没有匹配您请求的物流地块。",
+      ownerFlow:
+        "业主流程：注册 -> 添加地籍和商业数据 -> 上传文件 -> 选择发布付费 -> 审核 -> 发布。",
+      fallback:
+        "请提供预算、风险偏好和投资周期。我可以按法律状态和 ROI 为您筛选短名单。",
+    },
+  });
 
-  if (question.includes("roi") || question.includes("income") || question.includes("\u0434\u043e\u0445\u043e\u0434")) {
+  if (
+    question.includes("roi") ||
+    question.includes("income") ||
+    question.includes("\u0434\u043e\u0445\u043e\u0434")
+  ) {
     const top = [...plots]
       .filter((plot) => plot.status === "available")
       .sort((a, b) => b.roi - a.roi)
@@ -718,24 +784,29 @@ export function aiAnalyze(prompt: string) {
       .map((plot) => `${plot.id} (${plot.roi}%)`)
       .join(", ");
 
-    return top
-      ? `Top ROI plots currently: ${top}. Compare legal grade and risk before final decision.`
-      : "No available plots now for ROI ranking.";
+    return top ? copy.topRoi(top) : copy.noTopRoi;
   }
 
-  if (question.includes("risk") || question.includes("\u0440\u0438\u0441\u043a")) {
+  if (
+    question.includes("risk") ||
+    question.includes("\u0440\u0438\u0441\u043a") ||
+    question.includes("тәуек") ||
+    question.includes("风险")
+  ) {
     const lowRisk = plots
       .filter((plot) => plot.status === "available" && plot.riskScore <= 30)
       .slice(0, 3)
       .map((plot) => plot.id)
       .join(", ");
 
-    return lowRisk
-      ? `Lower-risk options: ${lowRisk}. Recommend verifying A/A+ legal profile and document update date.`
-      : "Lower-risk options are temporarily limited. Consider medium risk with enhanced due diligence.";
+    return lowRisk ? copy.lowRisk(lowRisk) : copy.noLowRisk;
   }
 
-  if (question.includes("logistics") || question.includes("\u043b\u043e\u0433\u0438\u0441\u0442")) {
+  if (
+    question.includes("logistics") ||
+    question.includes("\u043b\u043e\u0433\u0438\u0441\u0442") ||
+    question.includes("物流")
+  ) {
     const logistics = plots
       .filter(
         (plot) =>
@@ -744,14 +815,20 @@ export function aiAnalyze(prompt: string) {
       .map((plot) => `${plot.id} (${plot.price} USD)`)
       .join(", ");
 
-    return logistics
-      ? `Logistics-oriented plots: ${logistics}`
-      : "No logistics plots currently matched your request.";
+    return logistics ? copy.logistics(logistics) : copy.noLogistics;
   }
 
-  if (question.includes("owner") || question.includes("\u0434\u043e\u0431\u0430\u0432") || question.includes("\u0440\u0430\u0437\u043c\u0435\u0441\u0442")) {
-    return "Owner flow: sign up -> add cadastral and commercial data -> upload documents -> choose pricing plan -> moderation -> publication.";
+  if (
+    question.includes("owner") ||
+    question.includes("\u0434\u043e\u0431\u0430\u0432") ||
+    question.includes("\u0440\u0430\u0437\u043c\u0435\u0441\u0442") ||
+    question.includes("иесі") ||
+    question.includes("қоса") ||
+    question.includes("业主") ||
+    question.includes("添加")
+  ) {
+    return copy.ownerFlow;
   }
 
-  return "Please share your budget, risk tolerance, and time horizon. I can return a tailored shortlist with legal and ROI filters.";
+  return copy.fallback;
 }

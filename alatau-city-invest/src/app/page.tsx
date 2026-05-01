@@ -5,6 +5,7 @@ import { useSession } from "next-auth/react";
 import { useCurrentLanguage } from "@/lib/i18n-client";
 import { pickLang } from "@/lib/i18n";
 import { listPlots } from "@/lib/mock-db";
+import { localizePlot } from "@/lib/i18n-content";
 import { currency } from "@/lib/ui";
 
 type RailItem = {
@@ -292,6 +293,107 @@ export default function HomePage() {
     },
   });
 
+  const showcaseMeta = pickLang(lang, {
+    EN: {
+      land: `${availablePlots.length} available land opportunities`,
+      greenbox: "Retail growth round, founder profile, monthly reporting",
+      quickfix: "Service marketplace, traction, SAFE-style raise",
+      ai: "Risk notes, ROI prompts, owner readiness review",
+    },
+    RU: {
+      land: `${availablePlots.length} доступных земельных возможностей`,
+      greenbox: "Раунд роста retail, профиль основателя, ежемесячная отчетность",
+      quickfix: "Сервисный маркетплейс, traction, SAFE-формат раунда",
+      ai: "Заметки по рискам, ROI-запросы, проверка готовности владельца",
+    },
+    KZ: {
+      land: `${availablePlots.length} қолжетімді жер мүмкіндігі`,
+      greenbox: "Retail өсу раунды, құрылтайшы профилі, ай сайынғы есеп",
+      quickfix: "Сервистік маркетплейс, алғашқы traction, SAFE форматындағы раунд",
+      ai: "Тәуекел ескертпелері, ROI сұрақтары, иенің дайындық тексерісі",
+    },
+    CN: {
+      land: `${availablePlots.length} 个可投资土地机会`,
+      greenbox: "零售增长轮、创始人资料、月度报告",
+      quickfix: "服务型平台、业务牵引、SAFE 式融资",
+      ai: "风险提示、ROI 提问、业主准备度检查",
+    },
+  });
+
+  const partner = pickLang(lang, {
+    EN: {
+      kicker: "Platform network",
+      title: "Our Partners",
+      subtitle: "Trusted by professionals worldwide",
+      mediaBadge: "Strategic Partner",
+      eyebrow: "Investment network",
+      companyName: "Global Venture Partners",
+      description:
+        "A cross-border investment group helping founders structure capital rounds and connect with verified private investors.",
+      statsLabel: "Partner statistics",
+      credibilityLabel: "Partner credibility badges",
+      portfolio: "Portfolio",
+      activeCountries: "Active countries",
+      investments: "Successful investments",
+      dueDiligence: "Due diligence",
+      investorNetwork: "Investor network",
+      marketAccess: "Market access",
+    },
+    RU: {
+      kicker: "Партнерская сеть",
+      title: "Наши партнеры",
+      subtitle: "Нам доверяют профессионалы по всему миру",
+      mediaBadge: "Стратегический партнер",
+      eyebrow: "Инвестиционная сеть",
+      companyName: "Global Venture Partners",
+      description:
+        "Международная инвестиционная группа помогает основателям структурировать раунды капитала и выходить на проверенных частных инвесторов.",
+      statsLabel: "Статистика партнера",
+      credibilityLabel: "Преимущества партнера",
+      portfolio: "Портфель",
+      activeCountries: "Активные страны",
+      investments: "Успешных инвестиций",
+      dueDiligence: "Проверка сделки",
+      investorNetwork: "Сеть инвесторов",
+      marketAccess: "Доступ к рынкам",
+    },
+    KZ: {
+      kicker: "Серіктестік желі",
+      title: "Біздің серіктестер",
+      subtitle: "Әлем бойынша кәсіби мамандар сенеді",
+      mediaBadge: "Стратегиялық серіктес",
+      eyebrow: "Инвестициялық желі",
+      companyName: "Global Venture Partners",
+      description:
+        "Халықаралық инвестициялық топ құрылтайшыларға капитал раундтарын құрылымдап, тексерілген жеке инвесторлармен байланысуға көмектеседі.",
+      statsLabel: "Серіктес статистикасы",
+      credibilityLabel: "Серіктес артықшылықтары",
+      portfolio: "Портфель",
+      activeCountries: "Белсенді елдер",
+      investments: "Сәтті инвестициялар",
+      dueDiligence: "Мәмілені тексеру",
+      investorNetwork: "Инвесторлар желісі",
+      marketAccess: "Нарыққа шығу",
+    },
+    CN: {
+      kicker: "合作网络",
+      title: "我们的合作伙伴",
+      subtitle: "受到全球专业人士信任",
+      mediaBadge: "战略合作伙伴",
+      eyebrow: "投资网络",
+      companyName: "Global Venture Partners",
+      description: "跨境投资集团帮助创始人设计融资轮次，并连接经过验证的私人投资者。",
+      statsLabel: "合作伙伴数据",
+      credibilityLabel: "合作伙伴优势",
+      portfolio: "投资组合",
+      activeCountries: "活跃国家",
+      investments: "成功投资",
+      dueDiligence: "尽职调查",
+      investorNetwork: "投资者网络",
+      marketAccess: "市场准入",
+    },
+  });
+
   const projectSubmitHref =
     sessionStatus === "authenticated" ? "/projects/submit" : "/login?callbackUrl=/projects/submit";
   const landSubmitHref =
@@ -303,25 +405,25 @@ export default function HomePage() {
       title: "Alatau City",
       label: t.verifiedPipeline,
       href: "/alatau-city",
-      meta: `${availablePlots.length} available land opportunities`,
+      meta: showcaseMeta.land,
     },
     {
       title: "GreenBox Local Foods",
       label: t.ownerReady,
       href: "/projects",
-      meta: "Retail growth round, founder profile, monthly reporting",
+      meta: showcaseMeta.greenbox,
     },
     {
       title: "QuickFix Home Service",
       label: t.activeProjects,
       href: "/projects",
-      meta: "Service marketplace, traction, SAFE-style raise",
+      meta: showcaseMeta.quickfix,
     },
     {
       title: "InvestMap AI",
       label: t.aiSupport,
       href: "/ai-assistant",
-      meta: "Risk notes, ROI prompts, owner readiness review",
+      meta: showcaseMeta.ai,
     },
   ];
 
@@ -423,15 +525,19 @@ export default function HomePage() {
           </div>
           <div className="land-list">
             <span className="landing-kicker">{land.featured}</span>
-            {topLand.map((plot) => (
-              <Link className="land-mini-card" href={`/plots/${plot.id}`} key={plot.id}>
-                <span>{plot.id}</span>
-                <strong>{plot.title}</strong>
-                <small>
-                  {currency(plot.price, plot.currency)} / ROI {plot.roi}%
-                </small>
-              </Link>
-            ))}
+            {topLand.map((plot) => {
+              const localizedPlot = localizePlot(lang, plot);
+
+              return (
+                <Link className="land-mini-card" href={`/plots/${plot.id}`} key={plot.id}>
+                  <span>{plot.id}</span>
+                  <strong>{localizedPlot.title}</strong>
+                  <small>
+                    {currency(plot.price, plot.currency)} / ROI {plot.roi}%
+                  </small>
+                </Link>
+              );
+            })}
           </div>
         </div>
       </section>
@@ -475,45 +581,42 @@ export default function HomePage() {
 
         <section className="partners-section" aria-labelledby="partners-title">
           <div className="partners-heading">
-            <span className="landing-kicker">Platform network</span>
-            <h2 id="partners-title">Our Partners</h2>
-            <p>Trusted by professionals worldwide</p>
+            <span className="landing-kicker">{partner.kicker}</span>
+            <h2 id="partners-title">{partner.title}</h2>
+            <p>{partner.subtitle}</p>
           </div>
 
           <div className="partners-grid">
             <article className="partner-card">
               <div className="partner-card-media">
-                <span>Strategic Partner</span>
+                <span>{partner.mediaBadge}</span>
               </div>
               <div className="partner-card-body">
                 <div>
-                  <span className="partner-eyebrow">Investment network</span>
-                  <h3>Global Venture Partners</h3>
-                  <p>
-                    A cross-border investment group helping founders structure capital rounds and
-                    connect with verified private investors.
-                  </p>
+                  <span className="partner-eyebrow">{partner.eyebrow}</span>
+                  <h3>{partner.companyName}</h3>
+                  <p>{partner.description}</p>
                 </div>
 
-                <div className="partner-stats" aria-label="Partner statistics">
+                <div className="partner-stats" aria-label={partner.statsLabel}>
                   <div>
                     <strong>$10M+</strong>
-                    <span>Portfolio</span>
+                    <span>{partner.portfolio}</span>
                   </div>
                   <div>
                     <strong>10+</strong>
-                    <span>Active countries</span>
+                    <span>{partner.activeCountries}</span>
                   </div>
                   <div>
                     <strong>50+</strong>
-                    <span>Successful investments</span>
+                    <span>{partner.investments}</span>
                   </div>
                 </div>
 
-                <div className="partner-badges" aria-label="Partner credibility badges">
-                  <span>Due diligence</span>
-                  <span>Investor network</span>
-                  <span>Market access</span>
+                <div className="partner-badges" aria-label={partner.credibilityLabel}>
+                  <span>{partner.dueDiligence}</span>
+                  <span>{partner.investorNetwork}</span>
+                  <span>{partner.marketAccess}</span>
                 </div>
               </div>
             </article>
