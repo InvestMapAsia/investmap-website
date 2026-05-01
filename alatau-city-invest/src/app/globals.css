@@ -1744,7 +1744,8 @@ table th {
 .image-statement,
 .owner-door,
 .why-band,
-.partners-overview,
+.partners-section,
+.partner-card,
 .journey-panel,
 .importance-band,
 .final-cta {
@@ -2074,37 +2075,156 @@ table th {
   background: #002B5D;
 }
 
-.partners-overview {
+.partners-section {
   display: grid;
-  align-content: center;
-  gap: 14px;
-  padding: 24px;
-  border: 1px solid #C7D8E6;
-  background: #fff;
+  gap: 18px;
+  padding: 22px;
+  border: 1px solid rgba(15, 44, 72, 0.1);
+  background:
+    radial-gradient(circle at 12% 0%, rgba(176, 218, 42, 0.13), transparent 34%),
+    linear-gradient(180deg, #ffffff 0%, #f7fbfc 100%);
   box-shadow: var(--shadow-soft);
 }
 
-.partners-overview .landing-kicker {
+.partners-heading {
+  display: grid;
+  gap: 6px;
+  text-align: center;
+}
+
+.partners-heading .landing-kicker {
   color: #0360A4;
 }
 
-.partners-overview p {
-  color: #243f58;
+.partners-heading h2 {
+  margin: 0;
+  color: #081F32;
+  font-size: clamp(1.45rem, 2.4vw, 2.2rem);
 }
 
-.partner-tags {
+.partners-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 18px;
+}
+
+.partner-card {
+  display: grid;
+  grid-template-columns: minmax(220px, 0.9fr) minmax(0, 1.1fr);
+  min-height: 330px;
+  overflow: hidden;
+  border: 1px solid rgba(15, 44, 72, 0.12);
+  background: rgba(255, 255, 255, 0.92);
+  box-shadow: 0 22px 60px rgba(15, 44, 72, 0.13);
+  transition:
+    transform 180ms ease,
+    box-shadow 180ms ease,
+    border-color 180ms ease;
+}
+
+.partner-card:hover {
+  transform: translateY(-5px);
+  border-color: rgba(176, 218, 42, 0.58);
+  box-shadow: 0 28px 80px rgba(15, 44, 72, 0.18);
+}
+
+.partner-card-media {
+  position: relative;
+  min-height: 260px;
+  background:
+    linear-gradient(180deg, rgba(5, 21, 36, 0.04), rgba(5, 21, 36, 0.72)),
+    url("https://images.unsplash.com/photo-1551836022-d5d88e9218df?auto=format&fit=crop&w=1200&q=80") center / cover;
+}
+
+.partner-card-media span {
+  position: absolute;
+  left: 18px;
+  bottom: 18px;
+  padding: 8px 11px;
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  border-radius: 999px;
+  color: #fff;
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(10px);
+  font-size: 0.78rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.partner-card-body {
+  display: grid;
+  align-content: space-between;
+  gap: 20px;
+  padding: 26px;
+}
+
+.partner-eyebrow {
+  display: inline-flex;
+  width: fit-content;
+  margin-bottom: 10px;
+  padding: 7px 10px;
+  border-radius: 999px;
+  color: #0F5A73;
+  background: #E7F2FA;
+  font-size: 0.78rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.partner-card h3 {
+  margin: 0;
+  color: #07182d;
+  font-size: clamp(1.45rem, 2.4vw, 2.35rem);
+}
+
+.partner-card p {
+  margin-top: 10px;
+  max-width: 58ch;
+  color: #38506A;
+  font-size: 0.98rem;
+}
+
+.partner-stats {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.partner-stats div {
+  display: grid;
+  gap: 4px;
+  min-height: 90px;
+  padding: 14px;
+  border: 1px solid rgba(15, 44, 72, 0.1);
+  border-radius: 8px;
+  background: #F7FAFC;
+}
+
+.partner-stats strong {
+  color: #06182A;
+  font-size: clamp(1.3rem, 2.2vw, 2rem);
+  line-height: 1;
+}
+
+.partner-stats span {
+  color: #5E7188;
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+.partner-badges {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
 }
 
-.partner-tags span {
+.partner-badges span {
   padding: 8px 10px;
   border-radius: 999px;
-  background: #E7F2FA;
   color: #123650;
-  font-size: 0.84rem;
-  font-weight: 700;
+  background: #EEF5E8;
+  font-size: 0.82rem;
+  font-weight: 800;
 }
 
 .tutorial-section {
@@ -2263,6 +2383,10 @@ table th {
 
   .uploaded-media-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .partner-card {
+    grid-template-columns: 1fr;
   }
 
   .project-detail-aside {
@@ -2521,7 +2645,8 @@ table th {
   .land-signal,
   .why-band,
   .ai-strip,
-  .partners-overview,
+  .partners-section,
+  .partner-card-body,
   .journey-panel,
   .importance-band,
   .final-cta {
@@ -2538,7 +2663,8 @@ table th {
 
   .why-list,
   .journey-steps,
-  .land-metrics {
+  .land-metrics,
+  .partner-stats {
     grid-template-columns: 1fr;
   }
 

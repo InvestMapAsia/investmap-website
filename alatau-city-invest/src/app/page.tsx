@@ -473,15 +473,51 @@ export default function HomePage() {
           <strong>{t.aiCta}</strong>
         </Link>
 
-        <div className="partners-overview">
-          <span className="landing-kicker">{t.partnersTitle}</span>
-          <p>{t.partnersText}</p>
-          <div className="partner-tags">
-            {t.partnerItems.map((item) => (
-              <span key={item}>{item}</span>
-            ))}
+        <section className="partners-section" aria-labelledby="partners-title">
+          <div className="partners-heading">
+            <span className="landing-kicker">Our Partners</span>
+            <h2 id="partners-title">Trusted by professionals worldwide</h2>
           </div>
-        </div>
+
+          <div className="partners-grid">
+            <article className="partner-card">
+              <div className="partner-card-media">
+                <span>Strategic Partner</span>
+              </div>
+              <div className="partner-card-body">
+                <div>
+                  <span className="partner-eyebrow">Investment network</span>
+                  <h3>Global Venture Partners</h3>
+                  <p>
+                    A cross-border investment group helping founders structure capital rounds and
+                    connect with verified private investors.
+                  </p>
+                </div>
+
+                <div className="partner-stats" aria-label="Partner statistics">
+                  <div>
+                    <strong>$10M+</strong>
+                    <span>Portfolio</span>
+                  </div>
+                  <div>
+                    <strong>10+</strong>
+                    <span>Active countries</span>
+                  </div>
+                  <div>
+                    <strong>50+</strong>
+                    <span>Successful investments</span>
+                  </div>
+                </div>
+
+                <div className="partner-badges" aria-label="Partner credibility badges">
+                  <span>Due diligence</span>
+                  <span>Investor network</span>
+                  <span>Market access</span>
+                </div>
+              </div>
+            </article>
+          </div>
+        </section>
       </section>
 
       <section className="container tutorial-section">
