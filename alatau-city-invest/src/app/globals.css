@@ -2040,7 +2040,7 @@ table th {
 
 .ai-partner-grid {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: 1fr;
   gap: 18px;
 }
 
@@ -2102,6 +2102,12 @@ table th {
   font-size: clamp(1.45rem, 2.4vw, 2.2rem);
 }
 
+.partners-heading p {
+  margin: 0;
+  color: #5E7188;
+  font-weight: 700;
+}
+
 .partners-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
@@ -2109,12 +2115,13 @@ table th {
 }
 
 .partner-card {
-  display: grid;
-  grid-template-columns: minmax(220px, 0.9fr) minmax(0, 1.1fr);
-  min-height: 330px;
+  position: relative;
+  isolation: isolate;
+  display: block;
+  min-height: 420px;
   overflow: hidden;
   border: 1px solid rgba(15, 44, 72, 0.12);
-  background: rgba(255, 255, 255, 0.92);
+  background: #07182d;
   box-shadow: 0 22px 60px rgba(15, 44, 72, 0.13);
   transition:
     transform 180ms ease,
@@ -2129,17 +2136,18 @@ table th {
 }
 
 .partner-card-media {
-  position: relative;
-  min-height: 260px;
+  position: absolute;
+  inset: 0;
+  z-index: -1;
   background:
-    linear-gradient(180deg, rgba(5, 21, 36, 0.04), rgba(5, 21, 36, 0.72)),
-    url("https://images.unsplash.com/photo-1551836022-d5d88e9218df?auto=format&fit=crop&w=1200&q=80") center / cover;
+    linear-gradient(90deg, rgba(5, 21, 36, 0.94) 0%, rgba(5, 21, 36, 0.7) 42%, rgba(5, 21, 36, 0.16) 100%),
+    url("https://images.unsplash.com/photo-1560250097-0b93528c311a?auto=format&fit=crop&w=1800&q=82") center right / cover;
 }
 
 .partner-card-media span {
   position: absolute;
-  left: 18px;
-  bottom: 18px;
+  top: 22px;
+  right: 22px;
   padding: 8px 11px;
   border: 1px solid rgba(255, 255, 255, 0.5);
   border-radius: 999px;
@@ -2155,7 +2163,10 @@ table th {
   display: grid;
   align-content: space-between;
   gap: 20px;
-  padding: 26px;
+  min-height: 420px;
+  max-width: 980px;
+  padding: 34px;
+  color: #fff;
 }
 
 .partner-eyebrow {
@@ -2164,8 +2175,9 @@ table th {
   margin-bottom: 10px;
   padding: 7px 10px;
   border-radius: 999px;
-  color: #0F5A73;
-  background: #E7F2FA;
+  color: #DDF65F;
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.22);
   font-size: 0.78rem;
   font-weight: 800;
   text-transform: uppercase;
@@ -2173,15 +2185,15 @@ table th {
 
 .partner-card h3 {
   margin: 0;
-  color: #07182d;
-  font-size: clamp(1.45rem, 2.4vw, 2.35rem);
+  color: #fff;
+  font-size: clamp(1.8rem, 3.4vw, 3.4rem);
 }
 
 .partner-card p {
   margin-top: 10px;
   max-width: 58ch;
-  color: #38506A;
-  font-size: 0.98rem;
+  color: rgba(255, 255, 255, 0.82);
+  font-size: 1.02rem;
 }
 
 .partner-stats {
@@ -2195,19 +2207,20 @@ table th {
   gap: 4px;
   min-height: 90px;
   padding: 14px;
-  border: 1px solid rgba(15, 44, 72, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.22);
   border-radius: 8px;
-  background: #F7FAFC;
+  background: rgba(255, 255, 255, 0.12);
+  backdrop-filter: blur(12px);
 }
 
 .partner-stats strong {
-  color: #06182A;
+  color: #fff;
   font-size: clamp(1.3rem, 2.2vw, 2rem);
   line-height: 1;
 }
 
 .partner-stats span {
-  color: #5E7188;
+  color: rgba(255, 255, 255, 0.72);
   font-size: 0.78rem;
   font-weight: 700;
 }
@@ -2221,8 +2234,9 @@ table th {
 .partner-badges span {
   padding: 8px 10px;
   border-radius: 999px;
-  color: #123650;
-  background: #EEF5E8;
+  color: #DDF65F;
+  background: rgba(221, 246, 95, 0.12);
+  border: 1px solid rgba(221, 246, 95, 0.34);
   font-size: 0.82rem;
   font-weight: 800;
 }
@@ -2383,10 +2397,6 @@ table th {
 
   .uploaded-media-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
-  .partner-card {
-    grid-template-columns: 1fr;
   }
 
   .project-detail-aside {
@@ -2569,6 +2579,8 @@ table th {
 
   .brand {
     gap: 7px;
+    flex: 1 1 auto;
+    min-width: 0;
   }
 
   .brand-logo {
@@ -2577,6 +2589,11 @@ table th {
   }
 
   .brand-title {
+    display: block;
+    max-width: 120px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
     font-size: 0.78rem;
     letter-spacing: 0.035em;
   }
@@ -2586,13 +2603,21 @@ table th {
   }
 
   .header-actions {
+    flex: 0 0 auto;
     gap: 6px;
   }
 
   .header-actions .btn {
     min-height: 38px;
+    max-width: 88px;
     padding: 9px 12px;
+    overflow: hidden;
+    text-overflow: ellipsis;
     font-size: 0.78rem;
+  }
+
+  .account-summary {
+    max-width: 92px;
   }
 
   .notification-button {
@@ -2602,13 +2627,20 @@ table th {
   }
 
   .lang-switch {
-    max-width: 142px;
+    max-width: 44px;
+    overflow: hidden;
   }
 
   .lang-btn {
-    min-width: 30px;
+    display: none;
+    min-width: 34px;
     padding: 5px 6px;
     font-size: 0.68rem;
+  }
+
+  .lang-btn.active {
+    display: inline-flex;
+    justify-content: center;
   }
 
   .mobile-menu-button {

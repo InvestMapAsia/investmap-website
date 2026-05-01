@@ -475,8 +475,9 @@ export default function HomePage() {
 
         <section className="partners-section" aria-labelledby="partners-title">
           <div className="partners-heading">
-            <span className="landing-kicker">Our Partners</span>
-            <h2 id="partners-title">Trusted by professionals worldwide</h2>
+            <span className="landing-kicker">Platform network</span>
+            <h2 id="partners-title">Our Partners</h2>
+            <p>Trusted by professionals worldwide</p>
           </div>
 
           <div className="partners-grid">
